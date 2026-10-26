@@ -1,0 +1,340 @@
+58-
+59-> Task :core:compileJava
+60:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:60: error: cannot find symbol
+61-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion;
+62-                                                  ^
+63-  symbol:   class WandOfCombustion
+64-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+65:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:61: error: cannot find symbol
+66-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze;
+67-                                                  ^
+68-  symbol:   class WandOfFreeze
+69-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+70:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:62: error: cannot find symbol
+71-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon;
+72-                                                  ^
+73-  symbol:   class WandOfSiphon
+74-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+75:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:38: error: cannot find symbol
+76-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion;
+77-                                                  ^
+78-  symbol:   class WandOfCombustion
+79-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+80:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:39: error: cannot find symbol
+81-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze;
+82-                                                  ^
+83-  symbol:   class WandOfFreeze
+84-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+85:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:40: error: cannot find symbol
+86-import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon;
+87-                                                  ^
+88-  symbol:   class WandOfSiphon
+89-  location: package xyz.gabriwar.warpedpixeldungeon.items.wands
+90:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:41: error: cannot find symbol
+91-import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff;
+92-                                                         ^
+93-  symbol:   class HollowwoodStaff
+94-  location: package xyz.gabriwar.warpedpixeldungeon.items.weapon.melee
+95:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:42: error: cannot find symbol
+96-import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.IronboundStaff;
+97-                                                         ^
+98-  symbol:   class IronboundStaff
+99-  location: package xyz.gabriwar.warpedpixeldungeon.items.weapon.melee
+100:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:43: error: cannot find symbol
+101-import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmboneStaff;
+102-                                                         ^
+103-  symbol:   class WyrmboneStaff
+104-  location: package xyz.gabriwar.warpedpixeldungeon.items.weapon.melee
+105:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:50: error: cannot find symbol
+106-public class WandOfCombustion extends DamageWand {
+107-                                      ^
+108-  symbol: class DamageWand
+109:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:89: error: cannot find symbol
+110-	public void onZap(Ballistica bolt) {
+111-	                  ^
+112-  symbol:   class Ballistica
+113-  location: class WandOfCombustion
+114:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:104: error: cannot find symbol
+115-	private void explodeAt(int center, int damage, Char target) {
+116-	                                               ^
+117-  symbol:   class Char
+118-  location: class WandOfCombustion
+119:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:147: error: cannot find symbol
+120-	public void fx(Ballistica bolt, Callback callback) {
+121-	               ^
+122-  symbol:   class Ballistica
+123-  location: class WandOfCombustion
+124:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:147: error: cannot find symbol
+125-	public void fx(Ballistica bolt, Callback callback) {
+126-	                                ^
+127-  symbol:   class Callback
+128-  location: class WandOfCombustion
+129:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:158: error: cannot find symbol
+130-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+131-	                  ^
+132-  symbol:   class MagesStaff
+133-  location: class WandOfCombustion
+134:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:158: error: cannot find symbol
+135-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+136-	                                    ^
+137-  symbol:   class Char
+138-  location: class WandOfCombustion
+139:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:158: error: cannot find symbol
+140-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+141-	                                                   ^
+142-  symbol:   class Char
+143-  location: class WandOfCombustion
+144:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:169: error: package MagesStaff does not exist
+145-	public void staffFx(MagesStaff.StaffParticle particle) {
+146-	                              ^
+147:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:40: error: cannot find symbol
+148-public class WandOfSiphon extends DamageWand {
+149-                                  ^
+150-  symbol: class DamageWand
+151:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:73: error: cannot find symbol
+152-	public void onZap(Ballistica bolt) {
+153-	                  ^
+154-  symbol:   class Ballistica
+155-  location: class WandOfSiphon
+156:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:95: error: cannot find symbol
+157-	public void fx(Ballistica bolt, Callback callback) {
+158-	               ^
+159-  symbol:   class Ballistica
+160-  location: class WandOfSiphon
+161:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:95: error: cannot find symbol
+162-	public void fx(Ballistica bolt, Callback callback) {
+163-	                                ^
+164-  symbol:   class Callback
+165-  location: class WandOfSiphon
+166:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:106: error: cannot find symbol
+167-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+168-	                  ^
+169-  symbol:   class MagesStaff
+170-  location: class WandOfSiphon
+171:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:106: error: cannot find symbol
+172-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+173-	                                    ^
+174-  symbol:   class Char
+175-  location: class WandOfSiphon
+176:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:106: error: cannot find symbol
+177-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+178-	                                                   ^
+179-  symbol:   class Char
+180-  location: class WandOfSiphon
+181:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfSiphon.java:116: error: package MagesStaff does not exist
+182-	public void staffFx(MagesStaff.StaffParticle particle) {
+183-	                              ^
+184:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:43: error: cannot find symbol
+185-public class WandOfFreeze extends DamageWand {
+186-                                  ^
+187-  symbol: class DamageWand
+188:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:78: error: cannot find symbol
+189-	public void onZap(Ballistica bolt) {
+190-	                  ^
+191-  symbol:   class Ballistica
+192-  location: class WandOfFreeze
+193:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:106: error: cannot find symbol
+194-	public void fx(Ballistica bolt, Callback callback) {
+195-	               ^
+196-  symbol:   class Ballistica
+197-  location: class WandOfFreeze
+198:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:106: error: cannot find symbol
+199-	public void fx(Ballistica bolt, Callback callback) {
+200-	                                ^
+201-  symbol:   class Callback
+202-  location: class WandOfFreeze
+203:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:117: error: cannot find symbol
+204-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+205-	                  ^
+206-  symbol:   class MagesStaff
+207-  location: class WandOfFreeze
+208:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:117: error: cannot find symbol
+209-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+210-	                                    ^
+211-  symbol:   class Char
+212-  location: class WandOfFreeze
+213:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:117: error: cannot find symbol
+214-	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
+215-	                                                   ^
+216-  symbol:   class Char
+217-  location: class WandOfFreeze
+218:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfFreeze.java:139: error: package MagesStaff does not exist
+219-	public void staffFx(MagesStaff.StaffParticle particle) {
+220-	                              ^
+221:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/IronboundStaff.java:31: error: cannot find symbol
+222-public class IronboundStaff extends MagesStaff {
+223-                                    ^
+224-  symbol: class MagesStaff
+225:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/IronboundStaff.java:43: error: cannot find symbol
+226-	public IronboundStaff(Wand wand) {
+227-	                      ^
+228-  symbol:   class Wand
+229-  location: class IronboundStaff
+230:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/HollowwoodStaff.java:30: error: cannot find symbol
+231-public class HollowwoodStaff extends MagesStaff {
+232-                                     ^
+233-  symbol: class MagesStaff
+234:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/HollowwoodStaff.java:42: error: cannot find symbol
+235-	public HollowwoodStaff(Wand wand) {
+236-	                       ^
+237-  symbol:   class Wand
+238-  location: class HollowwoodStaff
+239:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/WyrmboneStaff.java:30: error: cannot find symbol
+240-public class WyrmboneStaff extends MagesStaff {
+241-                                   ^
+242-  symbol: class MagesStaff
+243:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/WyrmboneStaff.java:42: error: cannot find symbol
+244-	public WyrmboneStaff(Wand wand) {
+245-	                     ^
+246-  symbol:   class Wand
+247-  location: class WyrmboneStaff
+248:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/weapon/melee/WyrmboneStaff.java:58: error: cannot find symbol
+249-	public void applyWandChargeBuff(Char owner) {
+250-	                                ^
+251-  symbol:   class Char
+252-  location: class WyrmboneStaff
+253-
+254-> Task :android:l8DexDesugarLibGithubDebug
+255-
+256-> Task :core:compileJava
+257:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:110: error: cannot find symbol
+258-		effectTypes.put(WandOfCombustion.class,     MagicMissile.FIRE_CONE);
+259-		                ^
+260-  symbol:   class WandOfCombustion
+261-  location: class ElementalBlast
+262:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:111: error: cannot find symbol
+263-		effectTypes.put(WandOfFreeze.class,         MagicMissile.FROST_CONE);
+264-		                ^
+265-  symbol:   class WandOfFreeze
+266-  location: class ElementalBlast
+267:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:112: error: cannot find symbol
+268-		effectTypes.put(WandOfSiphon.class,         MagicMissile.BLOOD_CONE);
+269-		                ^
+270-  symbol:   class WandOfSiphon
+271-  location: class ElementalBlast
+272:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:130: error: cannot find symbol
+273-		damageFactors.put(WandOfCombustion.class,       1.2f);
+274-		                  ^
+275-  symbol:   class WandOfCombustion
+276-  location: class ElementalBlast
+277:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:131: error: cannot find symbol
+278-		damageFactors.put(WandOfFreeze.class,           1f);
+279-		                  ^
+280-  symbol:   class WandOfFreeze
+281-  location: class ElementalBlast
+282:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:132: error: cannot find symbol
+283-		damageFactors.put(WandOfSiphon.class,           0.67f);
+284-		                  ^
+285-  symbol:   class WandOfSiphon
+286-  location: class ElementalBlast
+287:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:239: error: cannot find symbol
+288-							} else if (finalWandCls == WandOfCombustion.class){
+289-							                           ^
+290-  symbol: class WandOfCombustion
+291:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:245: error: cannot find symbol
+292-							} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
+293-							                                                                ^
+294-  symbol: class WandOfFreeze
+295:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:331: error: cannot find symbol
+296-								} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
+297-								                                                                ^
+298-  symbol: class WandOfFreeze
+299:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:337: error: cannot find symbol
+300-								} else if (finalWandCls == WandOfCombustion.class){
+301-								                           ^
+302-  symbol: class WandOfCombustion
+303:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/actors/hero/abilities/mage/ElementalBlast.java:343: error: cannot find symbol
+304-								} else if (finalWandCls == WandOfSiphon.class){
+305-								                           ^
+306-  symbol: class WandOfSiphon
+307:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:307: error: cannot find symbol
+308-				case 0:  drop(new WandOfCombustion().random(), randomDestination(null)); break;
+309-				                  ^
+310-  symbol:   class WandOfCombustion
+311-  location: class MineLevel
+312:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:308: error: cannot find symbol
+313-				case 1:  drop(new WandOfFreeze().random(), randomDestination(null)); break;
+314-				                  ^
+315-  symbol:   class WandOfFreeze
+316-  location: class MineLevel
+317:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:309: error: cannot find symbol
+318-				default: drop(new WandOfSiphon().random(), randomDestination(null)); break;
+319-				                  ^
+320-  symbol:   class WandOfSiphon
+321-  location: class MineLevel
+322:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:314: error: cannot find symbol
+323-				case 0:  drop(new HollowwoodStaff(), randomDestination(null)); break;
+324-				                  ^
+325-  symbol:   class HollowwoodStaff
+326-  location: class MineLevel
+327:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:315: error: cannot find symbol
+328-				case 1:  drop(new IronboundStaff(), randomDestination(null)); break;
+329-				                  ^
+330-  symbol:   class IronboundStaff
+331-  location: class MineLevel
+332:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/levels/MineLevel.java:316: error: cannot find symbol
+333-				default: drop(new WyrmboneStaff(), randomDestination(null)); break;
+334-				                  ^
+335-  symbol:   class WyrmboneStaff
+336-  location: class MineLevel
+337:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:53: error: cannot find symbol
+338-		image = ItemSpriteSheet.WAND_FIREBOLT;
+339-		^
+340-  symbol:   variable image
+341-  location: class WandOfCombustion
+342:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:53: error: cannot find symbol
+343-		image = ItemSpriteSheet.WAND_FIREBOLT;
+344-		        ^
+345-  symbol:   variable ItemSpriteSheet
+346-  location: class WandOfCombustion
+347:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:55: error: cannot find symbol
+348-		collisionProperties = Ballistica.MAGIC_BOLT;
+349-		^
+350-  symbol:   variable collisionProperties
+351-  location: class WandOfCombustion
+352:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:55: error: cannot find symbol
+353-		collisionProperties = Ballistica.MAGIC_BOLT;
+354-		                      ^
+355-  symbol:   variable Ballistica
+356-  location: class WandOfCombustion
+357:/home/runner/work/warpedpd/warpedpd/core/src/main/java/xyz/gabriwar/warpedpixeldungeon/items/wands/WandOfCombustion.java:59: error: method does not override or implement a method from a supertype
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 30s
+37 actionable tasks: 37 executed
