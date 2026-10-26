@@ -865,6 +865,23 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.plants.Witherfennel.Seed.class,
         xyz.gabriwar.warpedpixeldungeon.sprites.CamelSprite.Spit.class,
         xyz.gabriwar.warpedpixeldungeon.sprites.TenguSprite.TenguShuriken.class,
+        xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion.class,
+        xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze.class,
+        xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.IronboundStaff.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmboneStaff.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.BleedingArmor.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfShattering.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Voidreaver.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.BloodmoonAxe.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Stormbreaker.class,
+        xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism.class,
+        xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfRetribution.class,
+        xyz.gabriwar.warpedpixeldungeon.items.AmuletOfRenewal.class,
+        xyz.gabriwar.warpedpixeldungeon.items.AmuletOfAegis.class,
     };
     private DebugItems() {}
 }
