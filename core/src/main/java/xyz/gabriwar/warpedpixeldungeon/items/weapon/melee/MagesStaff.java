@@ -63,6 +63,11 @@ public class MagesStaff extends MeleeWeapon {
 
 	private Wand wand;
 
+	/** lets staff subclasses (the Mines staffs) see the imbued wand */
+	protected Wand staffWand() {
+		return wand;
+	}
+
 	public static final String AC_IMBUE = "IMBUE";
 	public static final String AC_ZAP	= "ZAP";
 

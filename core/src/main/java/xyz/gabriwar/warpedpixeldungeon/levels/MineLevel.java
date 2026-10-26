@@ -35,6 +35,12 @@ import xyz.gabriwar.warpedpixeldungeon.items.Heap;
 import xyz.gabriwar.warpedpixeldungeon.items.Item;
 import xyz.gabriwar.warpedpixeldungeon.items.StoneOre;
 import xyz.gabriwar.warpedpixeldungeon.items.bombs.Bomb;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.IronboundStaff;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmboneStaff;
 import xyz.gabriwar.warpedpixeldungeon.levels.features.LevelTransition;
 import xyz.gabriwar.warpedpixeldungeon.levels.painters.Painter;
 import com.watabou.noosa.Group;
@@ -292,6 +298,23 @@ public class MineLevel extends Level {
 		//Sprouted gave the Rogue a free bomb here
 		if (Dungeon.hero.heroClass == HeroClass.ROGUE && Random.Int(3) == 0) {
 			drop(new Bomb(), randomDestination(null));
+		}
+
+		//the dark mines are the only place the new arcana turns up: a wand now and then,
+		//and a staff a little more rarely. Each floor rolls on its own.
+		if (Random.Float() < 0.30f) {
+			switch (Random.Int(3)) {
+				case 0:  drop(new WandOfCombustion().random(), randomDestination(null)); break;
+				case 1:  drop(new WandOfFreeze().random(), randomDestination(null)); break;
+				default: drop(new WandOfSiphon().random(), randomDestination(null)); break;
+			}
+		}
+		if (Random.Float() < 0.12f) {
+			switch (Random.Int(3)) {
+				case 0:  drop(new HollowwoodStaff(), randomDestination(null)); break;
+				case 1:  drop(new IronboundStaff(), randomDestination(null)); break;
+				default: drop(new WyrmboneStaff(), randomDestination(null)); break;
+			}
 		}
 
 		//the mines are lined with ore - it is the act's whole gold economy

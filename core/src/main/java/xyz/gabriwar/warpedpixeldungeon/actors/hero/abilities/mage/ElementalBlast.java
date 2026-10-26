@@ -57,6 +57,9 @@ import xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor;
 import xyz.gabriwar.warpedpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.Wand;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfBlastWave;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCorrosion;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCorruption;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfDisintegration;
@@ -104,6 +107,9 @@ public class ElementalBlast extends ArmorAbility {
 		effectTypes.put(WandOfTransfusion.class,    MagicMissile.BLOOD_CONE);
 		effectTypes.put(WandOfCorruption.class,     MagicMissile.SHADOW_CONE);
 		effectTypes.put(WandOfRegrowth.class,       MagicMissile.FOLIAGE_CONE);
+		effectTypes.put(WandOfCombustion.class,     MagicMissile.FIRE_CONE);
+		effectTypes.put(WandOfFreeze.class,         MagicMissile.FROST_CONE);
+		effectTypes.put(WandOfSiphon.class,         MagicMissile.BLOOD_CONE);
 	}
 
 	private static final HashMap<Class<?extends Wand>, Float> damageFactors = new HashMap<>();
@@ -121,6 +127,9 @@ public class ElementalBlast extends ArmorAbility {
 		damageFactors.put(WandOfTransfusion.class,      0f);
 		damageFactors.put(WandOfCorruption.class,       0f);
 		damageFactors.put(WandOfRegrowth.class,         0f);
+		damageFactors.put(WandOfCombustion.class,       1.2f);
+		damageFactors.put(WandOfFreeze.class,           1f);
+		damageFactors.put(WandOfSiphon.class,           0.67f);
 	}
 
 	{
@@ -226,8 +235,14 @@ public class ElementalBlast extends ArmorAbility {
 									GameScene.add( Blob.seed( cell, 4, Fire.class ) );
 								}
 
+							//*** Wand of Combustion ***
+							} else if (finalWandCls == WandOfCombustion.class){
+								if (Dungeon.level.flamable[cell]){
+									GameScene.add( Blob.seed( cell, 4, Fire.class ) );
+								}
+
 							//*** Wand of Frost ***
-							} else if (finalWandCls == WandOfFrost.class){
+							} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
 								if (fire != null){
 									fire.clear(cell);
 								}
@@ -312,10 +327,22 @@ public class ElementalBlast extends ArmorAbility {
 												ElementalBlast.this);
 									}
 
-								//*** Wand of Frost ***
-								} else if (finalWandCls == WandOfFrost.class){
+								//*** Wand of Frost / Freeze ***
+								} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
 									if (mob.isAlive() && mob.alignment != Char.Alignment.ALLY) {
 										Buff.affect( mob, Frost.class, effectMulti*Frost.DURATION );
+									}
+
+								//*** Wand of Combustion ***
+								} else if (finalWandCls == WandOfCombustion.class){
+									if (mob.isAlive() && mob.alignment != Char.Alignment.ALLY) {
+										Buff.affect( mob, Burning.class ).reignite( mob );
+									}
+
+								//*** Wand of Siphon ***
+								} else if (finalWandCls == WandOfSiphon.class){
+									if (mob.alignment != Char.Alignment.ALLY && damage > 0) {
+										hero.heal(Math.max(1, Math.round(damage * 0.25f)));
 									}
 
 								//*** Wand of Prismatic Light ***
