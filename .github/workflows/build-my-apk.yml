@@ -34,8 +34,19 @@ jobs:
 
       - name: Build the APK
         run: |
+          set -o pipefail
           chmod +x gradlew
-          ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace
+          ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace 2>&1 | tee build.log
+
+      - name: Save the build errors to the repo so they can be read
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          grep -nE -B2 -A8 "error:|What went wrong|FAILURE" build.log | head -300 > errors.txt || true
+          tail -40 build.log >> errors.txt
+          gh api --method PUT "repos/${{ github.repository }}/contents/build-logs/errors-${{ github.run_number }}.txt" \
+            -f message="build errors for run ${{ github.run_number }}" -f content="$(base64 -w0 errors.txt)" -f branch=main
 
       - name: Publish the APK as a release
         env:
