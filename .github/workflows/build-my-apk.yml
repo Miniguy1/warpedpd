@@ -1,0 +1,42 @@
+name: Build my APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Create a debug signing key
+        run: |
+          mkdir -p ~/.android
+          keytool -genkeypair -keystore ~/.android/debug.keystore -storepass android -keypass android \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Stop the app nagging about the original author's releases
+        run: sed -i "s#githubDebugImplementation project(':services:updates:githubUpdates')#githubDebugImplementation project(':services:updates:debugUpdates')#" android/build.gradle
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build the APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: warped-pixel-dungeon-apk
+          path: android/build/outputs/apk/github/debug/*.apk
+          if-no-files-found: error
