@@ -741,6 +741,10 @@ public class InterlevelScene extends PixelScene {
 		Dungeon.depth = curTransition.destDepth;
 		Dungeon.branch = curTransition.destBranch;
 
+		//climbing with the cursed amulet tears the floor above down and builds it again
+		boolean rebuilt = Dungeon.shouldRebuildOnAscent( Dungeon.depth, Dungeon.branch );
+		if (rebuilt) Dungeon.rebuildForAscent( Dungeon.depth );
+
 		if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
 			level = Dungeon.loadLevel( GamesInProgress.curSlot );
 		} else {
@@ -750,6 +754,9 @@ public class InterlevelScene extends PixelScene {
 		LevelTransition destTransition = level.getTransition(curTransition.destType, fromDepth, fromBranch);
 		curTransition = null;
 		Dungeon.switchLevel( level, destTransition.cell() );
+		if (rebuilt) {
+			xyz.gabriwar.warpedpixeldungeon.utils.GLog.w( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( xyz.gabriwar.warpedpixeldungeon.items.Amulet.class, "ascent_rebuilt" ) );
+		}
 	}
 	
 	private void returnTo() throws IOException {

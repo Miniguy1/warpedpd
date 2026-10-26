@@ -2901,6 +2901,14 @@ public class Hero extends Char {
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 
+		//Ring of Vampirism: a share of every blow comes back as health
+		{
+			int vamp = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism.Vampirism.class );
+			if (vamp > 0 && damage > 0 && isAlive()) {
+				heal( Math.max( 1, Math.round( damage * 0.04f * vamp ) ) );
+			}
+		}
+
 		// Establish the paid link before talents or weapon effects can deal damage.
 		// The opening hit and its procs share immediately, even if a proc kills.
 		DoubleStab shadowLink = heroSkills.get(DoubleStab.class);
@@ -3266,6 +3274,15 @@ public class Hero extends Char {
 		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
 		float tenacity = RingOfTenacity.damageMultiplier( this );
 		dmg = DamageLedger.mulRound( this, Step.DEFENDER, RingOfTenacity.class, dmg, tenacity, (int)Math.ceil(dmg * tenacity) );
+
+		//Ring of Retribution: whoever struck you takes a share of it back
+		if (src instanceof Char && src != this && dmg > 0) {
+			int ret = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfRetribution.Retribution.class );
+			Char striker = (Char)src;
+			if (ret > 0 && striker.isAlive() && striker.alignment != Char.Alignment.ALLY) {
+				striker.damage( Math.max( 1, Math.round( dmg * 0.15f * ret ) ), this );
+			}
+		}
 
 		int preHP = HP + shielding();
 		if (src instanceof Hunger) preHP -= shielding();

@@ -275,6 +275,45 @@ public class Dungeon {
 	//keeps track of what levels the game should try to load instead of creating fresh
 	public static ArrayList<Integer> generatedLevels = new ArrayList<>();
 
+	/** floors rebuilt on the climb with the cursed amulet: depth -> how many times. The count is
+	 *  mixed into the floor's seed, so each rebuild is a different floor. */
+	public static java.util.HashMap<Integer, Integer> ascentRebuilds = new java.util.HashMap<>();
+	/** the floors already rebuilt during this carry, so pacing a staircase back and forth can't farm loot */
+	public static java.util.HashSet<Integer> ascentSession = new java.util.HashSet<>();
+
+	public static int rebuildCount( int depth ){
+		Integer g = ascentRebuilds.get( depth );
+		return g == null ? 0 : g;
+	}
+
+	/** is the hero climbing with the cursed amulet */
+	public static boolean ascendingWithCharm(){
+		return hero != null
+				&& hero.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.class ) != null
+				&& hero.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.Amulet.class ) != null;
+	}
+
+	/** only the plain floors of the main dungeon are rebuilt: not the bosses, the last floor, the
+	 *  town, the mines, the barrows or any branch */
+	public static boolean ascentRebuildable( int depth, int branch ){
+		return branch == 0 && depth >= 1 && depth <= 24 && depth % 5 != 0;
+	}
+
+	public static boolean shouldRebuildOnAscent( int depth, int branch ){
+		if (!ascendingWithCharm()){
+			ascentSession.clear();
+			return false;
+		}
+		return ascentRebuildable( depth, branch ) && !ascentSession.contains( depth );
+	}
+
+	/** call before the floor is loaded: it will be built fresh instead */
+	public static void rebuildForAscent( int depth ){
+		ascentRebuilds.put( depth, rebuildCount( depth ) + 1 );
+		ascentSession.add( depth );
+		generatedLevels.remove( Integer.valueOf( depth ) );
+	}
+
 	public static int gold;
 	public static int bullet;
 	public static boolean templeCompleted;
@@ -399,6 +438,8 @@ public class Dungeon {
 		depth = xyz.gabriwar.warpedpixeldungeon.levels.overworld.OverworldLevel.DEPTH;
 		branch = 0;
 		generatedLevels.clear();
+		ascentRebuilds.clear();
+		ascentSession.clear();
 
 		gold = 0;
 		bullet = 0;
@@ -744,6 +785,10 @@ public class Dungeon {
 		nextLevelFirstVisit = false;
 
 		level.create();
+		//a floor rebuilt around the cursed amulet carries the end-game loot
+		if (branch == 0 && rebuildCount( depth ) > 0){
+			xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level );
+		}
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.afterCreate( level );
@@ -868,6 +913,11 @@ public class Dungeon {
 			long result = Random.Long();
 
 		Random.popGenerator();
+		//a floor rebuilt on the climb is a different floor each time
+		int rebuilt = branch == 0 ? rebuildCount( depth ) : 0;
+		if (rebuilt > 0){
+			result ^= rebuilt * 0x9E3779B97F4A7C15L;
+		}
 		return result;
 	}
 	
@@ -1169,6 +1219,8 @@ public class Dungeon {
 	private static final String DEPTH		= "depth";
 	private static final String BRANCH		= "branch";
 	private static final String GENERATED_LEVELS    = "generated_levels";
+	private static final String ASCENT_REBUILDS     = "ascent_rebuilds";
+	private static final String ASCENT_SESSION      = "ascent_session";
 	private static final String GOLD		= "gold";
 	private static final String BULLET		= "bullet";
 	private static final String TEMPLE_DONE	= "temple_completed";
@@ -1321,6 +1373,18 @@ public class Dungeon {
 				bundleArr[i] = generatedLevels.get(i);
 			}
 			bundle.put( GENERATED_LEVELS, bundleArr);
+
+			int[] rebuildArr = new int[ascentRebuilds.size() * 2];
+			int ri = 0;
+			for (java.util.Map.Entry<Integer, Integer> e : ascentRebuilds.entrySet()){
+				rebuildArr[ri++] = e.getKey();
+				rebuildArr[ri++] = e.getValue();
+			}
+			bundle.put( ASCENT_REBUILDS, rebuildArr );
+			int[] sessionArr = new int[ascentSession.size()];
+			int si = 0;
+			for (int d : ascentSession) sessionArr[si++] = d;
+			bundle.put( ASCENT_SESSION, sessionArr );
 			
 			Scroll.save( bundle );
 			Potion.save( bundle );
@@ -1432,6 +1496,15 @@ public class Dungeon {
 			generatedLevels.clear();
 			for (int i : bundle.getIntArray(GENERATED_LEVELS)){
 				generatedLevels.add(i);
+			}
+			ascentRebuilds.clear();
+			ascentSession.clear();
+			if (bundle.contains( ASCENT_REBUILDS )){
+				int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
+				for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
+			}
+			if (bundle.contains( ASCENT_SESSION )){
+				for (int d : bundle.getIntArray( ASCENT_SESSION )) ascentSession.add( d );
 			}
 
 			fallenMobs = xyz.gabriwar.warpedpixeldungeon.levels.features.FallenMob.restore( bundle );
