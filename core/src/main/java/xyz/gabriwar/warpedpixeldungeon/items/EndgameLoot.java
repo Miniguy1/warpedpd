@@ -22,52 +22,96 @@
 package xyz.gabriwar.warpedpixeldungeon.items;
 
 import xyz.gabriwar.warpedpixeldungeon.items.armor.BleedingArmor;
+import xyz.gabriwar.warpedpixeldungeon.items.armor.DragonscaleMail;
 import xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire;
 import xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfShattering;
 import xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfRetribution;
 import xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism;
+import xyz.gabriwar.warpedpixeldungeon.items.trinkets.SagesIdol;
+import xyz.gabriwar.warpedpixeldungeon.items.trinkets.StoneheartPendant;
+import xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfCombustion;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze;
+import xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfSiphon;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.BloodmoonAxe;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.IronboundStaff;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ObsidianGreataxe;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Stormbreaker;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Voidreaver;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmboneStaff;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmfangGlaive;
 import xyz.gabriwar.warpedpixeldungeon.levels.Level;
 import com.watabou.utils.Random;
 
-/** The end-game drops: only the floors rebuilt on the climb out of the dungeon (carrying the cursed
- *  amulet) hold them. Each rebuilt floor rolls a chance for one, a smaller chance for a second. */
+/** Every one of the new items, and the only places they turn up: the dark mine floors, and the
+ *  floors rebuilt on the climb out of the dungeon (carrying the cursed amulet). Nothing here is in
+ *  the normal loot tables. */
 public class EndgameLoot {
 
-	/** one random piece of end-game gear, already identified, at +1 to +3 (rings +0 to +2) */
+	private static final int KINDS = 25;
+
+	/** one random new item, already identified. Armor and weapons come at +1 to +3, rings and wands
+	 *  at their own random levels, the rest as they are. Never cursed. */
 	public static Item roll() {
 		Item item;
-		switch (Random.Int( 11 )) {
-			case 0:  item = new RobeOfFire();       break;
-			case 1:  item = new BleedingArmor();    break;
-			case 2:  item = new RobeOfShattering(); break;
-			case 3:  item = new Dawnbreaker();      break;
-			case 4:  item = new Voidreaver();       break;
-			case 5:  item = new BloodmoonAxe();     break;
-			case 6:  item = new Stormbreaker();     break;
-			case 7:  item = new RingOfVampirism();  break;
-			case 8:  item = new RingOfRetribution();break;
-			case 9:  item = new AmuletOfRenewal();  break;
-			default: item = new AmuletOfAegis();    break;
+		boolean leveled = false;
+		switch (Random.Int( KINDS )) {
+			//wands
+			case 0:  item = new WandOfCombustion().random(); break;
+			case 1:  item = new WandOfFreeze().random();     break;
+			case 2:  item = new WandOfSiphon().random();     break;
+			//staffs
+			case 3:  item = new HollowwoodStaff();           break;
+			case 4:  item = new IronboundStaff();            break;
+			case 5:  item = new WyrmboneStaff();             break;
+			//armor
+			case 6:  item = new RobeOfFire();       leveled = true; break;
+			case 7:  item = new BleedingArmor();    leveled = true; break;
+			case 8:  item = new RobeOfShattering(); leveled = true; break;
+			case 9:  item = new DragonscaleMail();  leveled = true; break;
+			//weapons
+			case 10: item = new Dawnbreaker();      leveled = true; break;
+			case 11: item = new Voidreaver();       leveled = true; break;
+			case 12: item = new BloodmoonAxe();     leveled = true; break;
+			case 13: item = new Stormbreaker();     leveled = true; break;
+			case 14: item = new ObsidianGreataxe(); leveled = true; break;
+			case 15: item = new WyrmfangGlaive();   leveled = true; break;
+			//rings
+			case 16: item = new RingOfVampirism();
+					item.level( Random.IntRange( 0, 2 ) ); break;
+			case 17: item = new RingOfRetribution();
+					item.level( Random.IntRange( 0, 2 ) ); break;
+			//amulets
+			case 18: item = new AmuletOfRenewal();  break;
+			case 19: item = new AmuletOfAegis();    break;
+			//trinkets
+			case 20: item = new WarlordsMedal();    break;
+			case 21: item = new SagesIdol();        break;
+			default: item = new StoneheartPendant();break;
 		}
-		if (item.isUpgradable()) {
-			boolean ring = item instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring;
-			item.level( ring ? Random.IntRange( 0, 2 ) : Random.IntRange( 1, 3 ) );
+		if (leveled) {
+			item.level( Random.IntRange( 1, 3 ) );
 		}
+		item.cursed = false;
 		item.identify();
 		return item;
 	}
 
-	public static void populate( Level level ) {
+	/** a chance of one item, and a smaller chance of a second */
+	public static void populate( Level level, float first, float second ) {
 		int count = 0;
-		if (Random.Float() < 0.60f) count++;
-		if (Random.Float() < 0.15f) count++;
+		if (Random.Float() < first) count++;
+		if (Random.Float() < second) count++;
 		for (int i = 0; i < count; i++) {
 			int cell = level.randomDestination( null );
 			if (cell != -1) level.drop( roll(), cell );
 		}
+	}
+
+	/** floors rebuilt on the climb */
+	public static void populate( Level level ) {
+		populate( level, 0.60f, 0.15f );
 	}
 }

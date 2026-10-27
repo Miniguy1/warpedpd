@@ -300,22 +300,8 @@ public class MineLevel extends Level {
 			drop(new Bomb(), randomDestination(null));
 		}
 
-		//the dark mines are the only place the new arcana turns up: a wand now and then,
-		//and a staff a little more rarely. Each floor rolls on its own.
-		if (Random.Float() < 0.30f) {
-			switch (Random.Int(3)) {
-				case 0:  drop(new WandOfCombustion().random(), randomDestination(null)); break;
-				case 1:  drop(new WandOfFreeze().random(), randomDestination(null)); break;
-				default: drop(new WandOfSiphon().random(), randomDestination(null)); break;
-			}
-		}
-		if (Random.Float() < 0.12f) {
-			switch (Random.Int(3)) {
-				case 0:  drop(new HollowwoodStaff(), randomDestination(null)); break;
-				case 1:  drop(new IronboundStaff(), randomDestination(null)); break;
-				default: drop(new WyrmboneStaff(), randomDestination(null)); break;
-			}
-		}
+		//the dark mines hold the new items (the climb out of the dungeon holds the rest of the same pool)
+		xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( this, 0.35f, 0.08f );
 
 		//the mines are lined with ore - it is the act's whole gold economy
 		for (int i = 0; i < 9; i++) {

@@ -882,6 +882,12 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfRetribution.class,
         xyz.gabriwar.warpedpixeldungeon.items.AmuletOfRenewal.class,
         xyz.gabriwar.warpedpixeldungeon.items.AmuletOfAegis.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.SagesIdol.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.StoneheartPendant.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.DragonscaleMail.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ObsidianGreataxe.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmfangGlaive.class,
     };
     private DebugItems() {}
 }

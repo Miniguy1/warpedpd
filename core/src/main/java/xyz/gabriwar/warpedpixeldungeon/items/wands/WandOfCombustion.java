@@ -57,11 +57,11 @@ public class WandOfCombustion extends DamageWand {
 	}
 
 	public int min(int lvl) {
-		return 4 + 2*lvl;
+		return 5 + 2*lvl;
 	}
 
 	public int max(int lvl) {
-		return 12 + 6*lvl;
+		return 14 + 6*lvl;
 	}
 
 	/** the blast spreads 1 tile, and 2 tiles from +6 */

@@ -2901,6 +2901,11 @@ public class Hero extends Char {
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 
+		//Warlord's Medal: everything you hit, you hit harder
+		if (damage > 0) {
+			damage = Math.round( damage * xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal.damageMultiplier() );
+		}
+
 		//Ring of Vampirism: a share of every blow comes back as health
 		{
 			int vamp = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism.Vampirism.class );
@@ -3274,6 +3279,11 @@ public class Hero extends Char {
 		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
 		float tenacity = RingOfTenacity.damageMultiplier( this );
 		dmg = DamageLedger.mulRound( this, Step.DEFENDER, RingOfTenacity.class, dmg, tenacity, (int)Math.ceil(dmg * tenacity) );
+
+		//Stoneheart Pendant: every blow you take is softened
+		if (dmg > 0) {
+			dmg = Math.max( 1, Math.round( dmg * xyz.gabriwar.warpedpixeldungeon.items.trinkets.StoneheartPendant.damageTakenMultiplier() ) );
+		}
 
 		//Ring of Retribution: whoever struck you takes a share of it back
 		if (src instanceof Char && src != this && dmg > 0) {
@@ -3772,6 +3782,11 @@ public class Hero extends Char {
 	}
 	
 	public void earnExp( int exp, Class source ) {
+
+		//Sage's Idol: you learn more from all you do
+		if (exp > 0 && source != AscensionChallenge.class) {
+			exp = Math.round( exp * xyz.gabriwar.warpedpixeldungeon.items.trinkets.SagesIdol.expMultiplier() );
+		}
 
 		//a well rested hero learns a little more from all he does (homestead/rooms/WellRested)
 		if (source != AscensionChallenge.class && source != PotionOfExperience.class){
