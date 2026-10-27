@@ -44,6 +44,15 @@ public class EndTalents {
 		return h == null ? 0 : h.pointsInTalent( t );
 	}
 
+	/** heal, tolerating a hero with no sprite (the headless tests have none) */
+	private static void heal( Char c, int amount ) {
+		if (c.sprite == null) {
+			c.HP = Math.min( c.HT, c.HP + amount );
+		} else {
+			c.heal( amount );
+		}
+	}
+
 	private static float hpFrac( Char c ) {
 		return c.HT <= 0 ? 1f : c.HP / (float)c.HT;
 	}
@@ -82,7 +91,7 @@ public class EndTalents {
 		int result = Math.max( 1, Math.round( damage * m ) );
 
 		if ((a = p( h, Talent.WARLORDS_FURY )) > 0 && hp <= 0.35f && h.isAlive()) {
-			h.heal( Math.max( 1, Math.round( result * 0.06f * a ) ) );
+			heal( h,  Math.max( 1, Math.round( result * 0.06f * a ) ) );
 		}
 		return result;
 	}
@@ -111,14 +120,14 @@ public class EndTalents {
 		//Last Rites: before a blow that would drop you under a quarter health, you recover
 		if ((a = p( h, Talent.LAST_RITES )) > 0 && h.buff( LastRitesCooldown.class ) == null
 				&& (h.HP + h.shielding() - dmg) < h.HT * 0.25f) {
-			h.heal( Math.round( h.HT * (0.10f + 0.10f * a) ) );
+			heal( h,  Math.round( h.HT * (0.10f + 0.10f * a) ) );
 			Buff.affect( h, LastRitesCooldown.class, 300f );
 		}
 
 		//Unbroken: a blow that would kill you leaves you at 1 health instead
 		if ((a = p( h, Talent.UNBROKEN )) > 0 && h.buff( UnbrokenCooldown.class ) == null
 				&& dmg >= h.HP + h.shielding()) {
-			h.heal( Math.round( h.HT * (0.10f + 0.10f * a) ) );
+			heal( h,  Math.round( h.HT * (0.10f + 0.10f * a) ) );
 			dmg = Math.max( 0, Math.min( dmg, h.HP + h.shielding() - 1 ) );
 			Buff.affect( h, UnbrokenCooldown.class, 200f );
 		}
@@ -175,7 +184,7 @@ public class EndTalents {
 		if ((a = p( h, Talent.MERCIFUL_LIGHT )) > 0) {
 			if (++mercy >= 20 - 4 * a) {
 				mercy = 0;
-				if (h.isAlive() && h.HP < h.HT) h.heal( 1 );
+				if (h.isAlive() && h.HP < h.HT) heal( h,  1 );
 			}
 		}
 		if ((a = p( h, Talent.WARDED_FAITH )) > 0) {
