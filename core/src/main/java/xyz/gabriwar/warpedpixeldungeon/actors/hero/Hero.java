@@ -823,6 +823,7 @@ public class Hero extends Char {
 		DamageLedger.statBase( this, null, attackSkill );
 		
 		float accuracy = 1;
+		accuracy *= EndTalents.accuracyMultiplier( this );
 		accuracy *= DamageLedger.statFactor( this, RingOfAccuracy.class, RingOfAccuracy.accuracyMultiplier( this ) );
 		accuracy *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.ACCURACY ) );
 
@@ -952,6 +953,7 @@ public class Hero extends Char {
 		}
 		
 		float evasion = defenseSkill;
+		evasion *= EndTalents.evasionMultiplier( this );
 		
 		evasion *= DamageLedger.statFactor( this, RingOfEvasion.class, RingOfEvasion.evasionMultiplier( this ) );
 		evasion *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.EVASION ) );
@@ -1169,6 +1171,7 @@ public class Hero extends Char {
 		}
 
 		speed *= RingOfHaste.speedMultiplier(this);
+		speed *= EndTalents.speedMultiplier(this);
 		speed *= 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus(this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.SPEED);
 		
 		if (belongings.armor() != null) {
@@ -1316,6 +1319,7 @@ public class Hero extends Char {
 	@Override
 	public boolean act() {
 
+		EndTalents.tick(this);
 		if (Dungeon.debugInfiniteMana) MP = MT;
 		//also catches a direct HP cost or a lethal write outside damage()
 		if (debugInfiniteHealth) HP = HT;
@@ -2906,6 +2910,9 @@ public class Hero extends Char {
 			damage = Math.round( damage * xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal.damageMultiplier() );
 		}
 
+		//level 40/60 talents: every attacking bonus, in one place
+		damage = EndTalents.melee( this, enemy, damage );
+
 		//Ring of Vampirism: a share of every blow comes back as health
 		{
 			int vamp = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism.Vampirism.class );
@@ -3279,6 +3286,9 @@ public class Hero extends Char {
 		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
 		float tenacity = RingOfTenacity.damageMultiplier( this );
 		dmg = DamageLedger.mulRound( this, Step.DEFENDER, RingOfTenacity.class, dmg, tenacity, (int)Math.ceil(dmg * tenacity) );
+
+		//level 40/60 talents: every defending bonus, and the saves
+		dmg = EndTalents.beforeDamage( this, dmg, src );
 
 		//Stoneheart Pendant: every blow you take is softened
 		if (dmg > 0) {

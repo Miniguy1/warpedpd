@@ -212,6 +212,23 @@ public class SkillTreePane extends ScrollPane {
 			}
 		}
 
+		// ---- the level 40 and level 60 talents: two columns of loose sockets (no wire, no parent)
+		// ---- at the very bottom, each under its own lane label
+		int endRow = -1;
+		if (hero.talents.size() > 5){
+			int low = 0;
+			for (Node n : nodes) low = Math.max( low, n.gy + 1 );
+			endRow = low + 1;
+			int y5 = endRow + 1;
+			for (Talent t : hero.talents.get(4).keySet()){
+				add( Node.talent( t, 5, COL_TALENT1, y5++, null ) );
+			}
+			int y6 = endRow + 1;
+			for (Talent t : hero.talents.get(5).keySet()){
+				add( Node.talent( t, 6, COL_TALENT2, y6++, null ) );
+			}
+		}
+
 		// ---- skills from other classes' trees (debug): under the tree, a label per class or
 		// ---- calling and its skills in rows, loose sockets with no wire and no lock ----
 		if (!hs.foreignSkills().isEmpty()){
@@ -253,6 +270,10 @@ public class SkillTreePane extends ScrollPane {
 		lane( 2, 0 );
 		lane( 3, deep );
 		lane( 4, deep );
+		if (endRow >= 0){
+			lane( 5, endRow );
+			lane( 6, endRow );
+		}
 
 		// ---- buttons ----
 		for (Node n : nodes){

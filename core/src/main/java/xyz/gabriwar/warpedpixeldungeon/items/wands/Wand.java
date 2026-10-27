@@ -199,6 +199,7 @@ public abstract class Wand extends Item {
 	}
 
 	public void charge( Char owner, float chargeScaleFactor ){
+		chargeScaleFactor *= xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.wandRechargeMultiplier( owner );
 		charge( owner );
 		charger.setScaleFactor( chargeScaleFactor );
 	}
@@ -532,7 +533,8 @@ public abstract class Wand extends Item {
 		
 		//Resonance: a typed wand may keep the charge
 		xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.wandZapped( this, curCharges >= maxCharges );
-		if (!xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.resonance( this )) curCharges -= cursed ? 1 : chargesPerCast();
+		if (!xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.resonance( this ) && !xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.freeZap()) curCharges -= cursed ? 1 : chargesPerCast();
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.afterZap();
 
 		//skill tree: Mage's Wizard - a spent charge may snap back into the hero's own wand
 		if (charger != null && charger.target == Dungeon.hero){

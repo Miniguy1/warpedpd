@@ -69,6 +69,8 @@ public abstract class DamageWand extends Wand{
 		xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.pendingStep( xyz.gabriwar.warpedpixeldungeon.actors.ledger.Step.MUL, xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.SKILLS, dmg, dmg * sorcery );
 		xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.pendingStep( xyz.gabriwar.warpedpixeldungeon.actors.ledger.Step.ROUND, xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.ROUNDED, dmg * sorcery, sorcered );
 		dmg = sorcered;
+		//level 40 Mage talent: Overcharge
+		dmg = Math.round( dmg * xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.wandDamageMultiplier() );
 		WandEmpower emp = Dungeon.hero.buff(WandEmpower.class);
 		if (emp != null){
 			xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.pendingStep( xyz.gabriwar.warpedpixeldungeon.actors.ledger.Step.ADD, emp, dmg, dmg + emp.dmgBoost );

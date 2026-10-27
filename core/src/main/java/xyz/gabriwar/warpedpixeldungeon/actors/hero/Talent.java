@@ -199,6 +199,19 @@ public enum Talent {
 	//Power of Many T4
 	BEAMING_RAY(183, 4), LIFE_LINK(184, 4), STASIS(185, 4),
 
+	//Warrior T5 (level 40) and T6 (level 60)
+	IRONCLAD(9, 3), BLOODIED_RESOLVE(10, 3), WARLORDS_FURY(11, 3), UNBROKEN(15, 3),
+	//Mage T5 (level 40) and T6 (level 60)
+	OVERCHARGE(41, 3), ARCANE_RESERVE(40, 3), ARCHMAGES_SURGE(50, 3), SPELLWEAVER(49, 3),
+	//Rogue T5 (level 40) and T6 (level 60)
+	SHADE_STRIDE(71, 3), KNIFE_IN_THE_DARK(66, 3), DEATHS_HAND(84, 3), VANISHING_ACT(83, 3),
+	//Huntress T5 (level 40) and T6 (level 60)
+	KEEN_EYE(103, 3), PATHFINDER(102, 3), APEX_PREDATOR(105, 3), BRIAR_HIDE(111, 3),
+	//Duelist T5 (level 40) and T6 (level 60)
+	RIPOSTE_MASTERY(137, 3), FOOTWORK(135, 3), BLADE_DANCER(139, 3), PERFECT_FORM(138, 3),
+	//Cleric T5 (level 40) and T6 (level 60)
+	WARDED_FAITH(163, 3), MERCIFUL_LIGHT(168, 3), AVATARS_GRACE(177, 3), LAST_RITES(178, 3),
+
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
 	//Ratmogrify T4
@@ -440,8 +453,8 @@ public enum Talent {
 	int icon;
 	int maxPoints;
 
-	// tiers 1/2/3/4 start at levels 2/7/13/21
-	public static int[] tierLevelThresholds = new int[]{0, 2, 7, 13, 21, 31};
+	// tiers 1/2/3/4 start at levels 2/7/13/21, tiers 5/6 at levels 40/60 (a tier asks for threshold - 1)
+	public static int[] tierLevelThresholds = new int[]{0, 2, 7, 13, 21, 41, 61, 81};
 
 	Talent( int icon ){
 		this(icon, 3);
@@ -1023,7 +1036,7 @@ public enum Talent {
 		}
 	};
 
-	public static final int MAX_TALENT_TIERS = 4;
+	public static final int MAX_TALENT_TIERS = 6;
 
 	public static void initClassTalents( Hero hero ){
 		initClassTalents( hero.heroClass, hero.talents, hero.metamorphedTalents );
@@ -1129,6 +1142,32 @@ public enum Talent {
 
 		//tier4
 		//TBD
+
+		//tiers 5 and 6: the level 40 and level 60 talents, the same for every calling of a class
+		switch (cls){
+			case WARRIOR: default:
+				Collections.addAll(tierTalents, IRONCLAD, BLOODIED_RESOLVE, WARLORDS_FURY, UNBROKEN);
+				break;
+			case MAGE:
+				Collections.addAll(tierTalents, OVERCHARGE, ARCANE_RESERVE, ARCHMAGES_SURGE, SPELLWEAVER);
+				break;
+			case ROGUE:
+				Collections.addAll(tierTalents, SHADE_STRIDE, KNIFE_IN_THE_DARK, DEATHS_HAND, VANISHING_ACT);
+				break;
+			case HUNTRESS:
+				Collections.addAll(tierTalents, KEEN_EYE, PATHFINDER, APEX_PREDATOR, BRIAR_HIDE);
+				break;
+			case DUELIST:
+				Collections.addAll(tierTalents, RIPOSTE_MASTERY, FOOTWORK, BLADE_DANCER, PERFECT_FORM);
+				break;
+			case CLERIC:
+				Collections.addAll(tierTalents, WARDED_FAITH, MERCIFUL_LIGHT, AVATARS_GRACE, LAST_RITES);
+				break;
+		}
+		for (int i = 0; i < tierTalents.size(); i++){
+			talents.get(i < 2 ? 4 : 5).put(tierTalents.get(i), 0);
+		}
+		tierTalents.clear();
 	}
 
 	public static void initSubclassTalents( Hero hero ){
