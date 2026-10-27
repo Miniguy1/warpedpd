@@ -1454,7 +1454,9 @@ public class OverworldLevel extends Level {
 					1, 0, LevelTransition.Type.SURFACE ) );
 		}
 		int stairs = localTownCell( WorldStructures.TOWN_MINE_GATE );
-		if (stairs != -1 && !xyz.gabriwar.warpedpixeldungeon.Badges.checkOtilukeRescued()){
+		//the plaza staircase always leads somewhere now: the mines (until they are done) and the
+		//three zones (see enterPlazaStairs)
+		if (stairs != -1){
 			transitions.add( new LevelTransition( this, stairs, LevelTransition.Type.BRANCH_EXIT,
 					56, 0, LevelTransition.Type.REGULAR_ENTRANCE ) );
 		}
@@ -1525,6 +1527,9 @@ public class OverworldLevel extends Level {
 	public boolean activateTransition( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero,
 			LevelTransition transition ){
 		int gx = worldX + transition.cell() % width(), gy = worldY + transition.cell() / width();
+		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_MINE_GATE )){
+			return enterPlazaStairs( hero, transition );
+		}
 		if (altitude == 0 && WorldStructures.delveGate( worldSeed, gx, gy )){
 			return enterDelve( hero, transition, gx, gy );
 		}
@@ -1539,6 +1544,52 @@ public class OverworldLevel extends Level {
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.enteredMainDungeonByTheGate();
 		}
 		return super.activateTransition( hero, transition );
+	}
+
+	//the plaza staircase: four ways down. The dark mines (while they are open) and the three zones
+	//(Delves.openZone), each with a line on how hard it is
+	private boolean enterPlazaStairs( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero,
+			LevelTransition transition ){
+		final boolean mines = !xyz.gabriwar.warpedpixeldungeon.Badges.checkOtilukeRescued();
+		final java.util.ArrayList<String> labels = new java.util.ArrayList<>();
+		final java.util.ArrayList<Integer> kinds = new java.util.ArrayList<>();   //-1 mines, 0..2 zones
+		StringBuilder desc = new StringBuilder( "Four ways lead down from the plaza.\n" );
+		for (int z = 0; z < xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES.length; z++){
+			labels.add( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z] );
+			kinds.add( z );
+			desc.append( "\n_" ).append( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z] ).append( "_: " )
+					.append( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_HINT[z] ).append( "\n" );
+		}
+		if (mines){
+			labels.add( "The Dark Mines" );
+			kinds.add( -1 );
+			desc.append( "\n_The Dark Mines_: very hard, far beyond the dungeon's bottom.\n" );
+		}
+		labels.add( "Not now" );
+		kinds.add( -2 );
+		final String[] opts = labels.toArray( new String[0] );
+		final String message = desc.toString();
+		com.watabou.noosa.Game.runOnRenderThread( () ->
+			xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+					new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+							new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+									xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.SUN_SCARAB ),
+							"The plaza staircase", message, opts ){
+				@Override
+				protected void onSelect( int index ){
+					int kind = kinds.get( index );
+					if (kind == -2) return;
+					if (kind >= 0){
+						xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry e
+								= xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( kind );
+						transition.destDepth = e.firstDepth();
+						transition.destBranch = e.branch;
+						transition.destType = LevelTransition.Type.REGULAR_ENTRANCE;
+					}
+					OverworldLevel.super.activateTransition( hero, transition );
+				}
+			} ) );
+		return false;
 	}
 
 	//a barrow's stairway: sealed without the amulet, otherwise a confirm with its name, level and

@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /** The custom content, exercised for real: every new item's text, the drop pool, every level 40/60
@@ -308,6 +309,70 @@ public class ModContentTest {
 		Dungeon.ascentRebuilds.clear();
 		Dungeon.generatedLevels.clear();
 		assertTrue( "no loot at all on " + floors + " rebuilt floors", total >= 3 );
+	}
+
+	@Test
+	public void thePlazaZonesBuildEndToEnd() {
+		int lootOnFloors = 0, lootInHoards = 0;
+		for (int z = 0; z < xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES.length; z++) {
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+			Dungeon.generatedLevels.clear();
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry e = xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( z );
+			String what = "zone " + z;
+			assertTrue( what, xyz.gabriwar.warpedpixeldungeon.levels.Delves.isZone( e ) );
+			assertEquals( what, xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z], xyz.gabriwar.warpedpixeldungeon.levels.Delves.name( e ) );
+			assertSame( "opening it twice is the same zone", e, xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( z ) );
+			assertTrue( what + ": branch", e.branch >= xyz.gabriwar.warpedpixeldungeon.levels.Delves.BRANCH_BASE );
+			assertEquals( what + ": floors", xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_FLOORS[z], e.floors );
+			int[] out = xyz.gabriwar.warpedpixeldungeon.levels.Delves.stairs( e );
+			int town = xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_MINE_GATE - 32;
+			assertEquals( what + ": leaves by the plaza", xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.townWorldX( town ), out[0] );
+			assertEquals( what, xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.townWorldY( town ), out[1] );
+
+			Dungeon.branch = e.branch;
+			for (int f = 0; f < e.floors; f++) {
+				Dungeon.depth = e.depthOf( f );
+				Level level = Dungeon.newLevel();
+				String fl = what + " floor " + f + " depth " + Dungeon.depth;
+				assertFalse( fl, level instanceof xyz.gabriwar.warpedpixeldungeon.levels.DeadEndLevel );
+				assertNotNull( fl + ": no way in", level.getTransition( xyz.gabriwar.warpedpixeldungeon.levels.features.LevelTransition.Type.REGULAR_ENTRANCE ) );
+				lootOnFloors += newItems( level );
+				int guardians = 0;
+				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m.buff( xyz.gabriwar.warpedpixeldungeon.levels.Delves.Guardian.class ) != null) guardians++;
+				assertEquals( fl + ": guardian", f == e.floors - 1 ? 1 : 0, guardians );
+				if (f == e.floors - 1) {
+					Dungeon.level = level;
+					xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob g = null;
+					for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m.buff( xyz.gabriwar.warpedpixeldungeon.levels.Delves.Guardian.class ) != null) g = m;
+					xyz.gabriwar.warpedpixeldungeon.levels.Delves.onDeath( g );
+					assertTrue( fl + ": cleared", e.cleared );
+					Heap hoard = level.heaps.get( g.pos );
+					assertNotNull( fl + ": no hoard", hoard );
+					int mine = 0;
+					Set<String> names = new HashSet<>();
+					for (String n : ITEMS) names.add( P + n );
+					for (Item it : hoard.items) if (names.contains( it.getClass().getName() )) mine++;
+					assertTrue( fl + ": the hoard holds " + mine + " new items, wanted at least " + (2 + z), mine >= 2 + z );
+					lootInHoards += mine;
+					Dungeon.level = null;
+				}
+			}
+			Dungeon.branch = 0;
+
+			//a zone survives a save
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.storeInBundle( b );
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.restoreFromBundle( b );
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry back = xyz.gabriwar.warpedpixeldungeon.levels.Delves.byBranch( e.branch );
+			assertNotNull( what + ": lost in a save", back );
+			assertTrue( what, xyz.gabriwar.warpedpixeldungeon.levels.Delves.isZone( back ) );
+			assertEquals( what, z, xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneId( back ) );
+			assertTrue( what + ": cleared forgotten", back.cleared );
+		}
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+		Dungeon.generatedLevels.clear();
+		assertTrue( "the zones' floors held no new loot at all", lootOnFloors >= 1 );
 	}
 
 	@Test

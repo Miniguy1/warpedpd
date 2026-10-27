@@ -792,6 +792,13 @@ public class Dungeon {
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.afterCreate( level );
+			//a plaza zone's floors hold the new item pool: more of it the deeper in, and the harder the zone
+			xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry zone = xyz.gabriwar.warpedpixeldungeon.levels.Delves.current();
+			if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isZone( zone )){
+				int zid = xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneId( zone ), fl = Math.max( 0, zone.floorOf( depth ) );
+				xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level,
+						Math.min( 0.85f, 0.25f + 0.10f * zid + 0.08f * fl ), 0.05f + 0.03f * zid + 0.02f * fl );
+			}
 		}
 		
 		//the pacifist floor badge is for the dungeon proper: the surface is not a floor

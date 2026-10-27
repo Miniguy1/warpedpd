@@ -223,6 +223,50 @@ public final class Delves {
 		}
 	}
 
+	// ------------------------------------------------------------- the plaza zones
+	//
+	//Three side dungeons reached from the town's plaza staircase (beside the way down to the dark
+	//mines), for a hero fresh out of the dungeon: each is a barrow-kind Entry with a fixed shape,
+	//open to anyone (no amulet asked) and cut like one of the dungeon's own regions, the same
+	//floors, mob rotation, scaling and guardian as a barrow's. They are kept in the barrows' own
+	//list under a made-up sector (sx from ZONE_SX), so they save and load with everything else.
+	public static final int ZONE_SX = 9000;
+	public static final String[] ZONE_NAMES = { "The Old Cellars", "The Ashen Crypt", "The Frostbound Vault" };
+	//the dungeon region each is cut like (2 caves, 3 city, 4 halls) and how many floors it runs
+	public static final int[] ZONE_REGION = { 2, 3, 4 };
+	public static final int[] ZONE_FLOORS = { 3, 4, 4 };
+	//the depth the first floor counts as: enemies, gold and gear scale from it
+	public static final int[] ZONE_LEVEL  = { 14, 19, 24 };
+	public static final String[] ZONE_HINT = {
+			"Gentle: the old cave-dwellers' ground. About hero level 18 to 22. 3 floors.",
+			"Harder: the city's dead. About hero level 20 to 24. 4 floors.",
+			"The hardest of the three, still easier than the dark mines. About hero level 23 to 27. 4 floors." };
+
+	public static boolean isZone( Entry e ){
+		return e != null && e.sx >= ZONE_SX;
+	}
+
+	public static int zoneId( Entry e ){
+		return e.sx - ZONE_SX;
+	}
+
+	/** The zone's entry, given a branch the first time it is opened. */
+	public static Entry openZone( int id ){
+		Entry e = bySector( ZONE_SX + id, 0 );
+		if (e != null) return e;
+		e = new Entry();
+		e.sx = ZONE_SX + id;
+		e.sy = 0;
+		e.level = ZONE_LEVEL[id];
+		e.region = ZONE_REGION[id];
+		e.floors = ZONE_FLOORS[id];
+		int branch = BRANCH_BASE;
+		for (Entry o : entries) branch = Math.max( branch, o.branch + 1 );
+		e.branch = branch;
+		entries.add( e );
+		return e;
+	}
+
 	private static final ArrayList<Entry> entries = new ArrayList<>();
 
 	public static void reset(){
@@ -352,6 +396,7 @@ public final class Delves {
 
 	/** The name of an opened barrow or temple. */
 	public static String name( Entry e ){
+		if (isZone( e )) return ZONE_NAMES[zoneId( e )];
 		return e.temple ? templeName( worldSeed(), e.sx, e.sy ) : name( worldSeed(), e.sx, e.sy );
 	}
 
@@ -553,6 +598,11 @@ public final class Delves {
 
 	/** The world cell of a barrow's stairway, where leaving it lands the hero. */
 	public static int[] stairs( Entry e ){
+		//a zone's way out is the plaza staircase, above the stairs down to the mines
+		if (isZone( e )){
+			int c = WorldStructures.TOWN_MINE_GATE - 32;
+			return new int[]{ WorldStructures.townWorldX( c ), WorldStructures.townWorldY( c ) };
+		}
 		return new int[]{ WorldStructures.siteX( worldSeed(), e.sx, e.sy ), WorldStructures.siteY( worldSeed(), e.sx, e.sy ) };
 	}
 
@@ -635,6 +685,12 @@ public final class Delves {
 				: Random.IntRange( 100 * depth, 200 * depth ) ), mob.pos );
 		for (Item item : e.temple ? templeHoard( e.level, depth ) : hoard( e.level, depth )){
 			Dungeon.level.drop( item, mob.pos );
+		}
+		//a zone's guardian also guards the new item pool: more of it the harder the zone
+		if (isZone( e )){
+			for (int i = 0; i < 2 + zoneId( e ); i++){
+				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.roll(), mob.pos );
+			}
 		}
 		heap.type = Heap.Type.CHEST;
 		if (heap.sprite != null) heap.sprite.view( heap ).place( heap.pos );
