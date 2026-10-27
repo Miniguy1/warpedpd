@@ -2920,7 +2920,7 @@ public class Hero extends Char {
 		damage = EndTalents.melee( this, enemy, damage );
 
 		//matching sets of the new items
-		damage = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( this, damage );
+		damage = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( this, enemy, damage );
 
 		//Ring of Cruelty: every blow you land hits harder
 		{

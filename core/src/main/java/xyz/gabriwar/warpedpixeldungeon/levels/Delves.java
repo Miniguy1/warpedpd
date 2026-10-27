@@ -743,6 +743,15 @@ public final class Delves {
 			for (int i = 0; i < 2 + zoneId( e ) + Math.min( 4, zoneTier( e ) ); i++){
 				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.roll(), mob.pos );
 			}
+			//always a piece of the hero's own class set, and the Vault's guardian also holds the Yog-Forged
+			if (Dungeon.hero != null && Dungeon.hero.heroClass != null){
+				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( Dungeon.hero.heroClass ), mob.pos );
+			}
+			if (zoneId( e ) == 2){
+				for (int i = 0; i < 1 + zoneTier( e ) / 2; i++){
+					Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollYog(), mob.pos );
+				}
+			}
 		}
 		heap.type = Heap.Type.CHEST;
 		if (heap.sprite != null) heap.sprite.view( heap ).place( heap.pos );

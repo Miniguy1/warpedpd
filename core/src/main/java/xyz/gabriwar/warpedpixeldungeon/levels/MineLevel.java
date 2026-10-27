@@ -301,7 +301,7 @@ public class MineLevel extends Level {
 		}
 
 		//the dark mines hold the new items (the climb out of the dungeon holds the rest of the same pool)
-		xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( this, 0.35f, 0.08f );
+		xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populateMines( this );
 
 		//the mines are lined with ore - it is the act's whole gold economy
 		for (int i = 0; i < 9; i++) {

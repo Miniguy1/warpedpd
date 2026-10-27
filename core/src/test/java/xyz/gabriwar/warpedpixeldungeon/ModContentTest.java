@@ -93,6 +93,46 @@ public class ModContentTest {
 			"items.trinkets.WayfarersBoots",
 			"items.trinkets.EmberCharm" };
 
+	private static final String[] CLASS_ITEMS = {
+			"items.armor.WarlordsPlate",
+			"items.weapon.melee.WarlordsGreatsword",
+			"items.rings.WarlordsSignet",
+			"items.WarlordsBanner",
+			"items.WarlordsCrest",
+			"items.armor.ArchmagesRobe",
+			"items.weapon.melee.ArchmagesStaff",
+			"items.rings.ArchmagesBand",
+			"items.ArchmagesOrb",
+			"items.ArchmagesSigil",
+			"items.armor.ShadowbladesCloak",
+			"items.weapon.melee.ShadowbladesDirk",
+			"items.rings.ShadowbladesRing",
+			"items.ShadowbladesMask",
+			"items.ShadowbladesToken",
+			"items.armor.WardensHide",
+			"items.weapon.melee.WardensGlaive",
+			"items.rings.WardensRing",
+			"items.WardensHorn",
+			"items.WardensTotem",
+			"items.armor.DuelistsCoat",
+			"items.weapon.melee.DuelistsRapier",
+			"items.rings.DuelistsSignet",
+			"items.DuelistsGlove",
+			"items.DuelistsMedal",
+			"items.armor.SaintsVestment",
+			"items.weapon.melee.SaintsMace",
+			"items.rings.SaintsHalo",
+			"items.SaintsChalice",
+			"items.SaintsRelic" };
+
+	private static final String[] YOG_ITEMS = {
+			"items.armor.YogForgedPlate",
+			"items.weapon.melee.YogForgedBlade",
+			"items.rings.YogForgedBand",
+			"items.YogsEye",
+			"items.YogsHeart",
+			"items.YogsFang" };
+
 	private static final String[] TALENTS = {
 			"IRONCLAD",
 			"BLOODIED_RESOLVE",
@@ -129,6 +169,14 @@ public class ModContentTest {
 		Dungeon.init();
 	}
 
+	private static String[] all(){
+		java.util.ArrayList<String> l = new java.util.ArrayList<>();
+		l.addAll( java.util.Arrays.asList( ITEMS ) );
+		l.addAll( java.util.Arrays.asList( CLASS_ITEMS ) );
+		l.addAll( java.util.Arrays.asList( YOG_ITEMS ) );
+		return l.toArray( new String[0] );
+	}
+
 	private static boolean missing( String s ){
 		return s == null || s.isEmpty() || s.contains( "NO TEXT FOUND" );
 	}
@@ -148,7 +196,7 @@ public class ModContentTest {
 
 	@Test
 	public void everyItemHasItsTextAndBuilds() throws Exception {
-		for (String name : ITEMS) {
+		for (String name : all()) {
 			Class<?> c = Class.forName( P + name );
 			Item it = (Item)c.getDeclaredConstructor().newInstance();
 			assertFalse( name + ": no name", missing( it.name() ) );
@@ -161,7 +209,7 @@ public class ModContentTest {
 	public void theDropPoolHoldsEveryItemAndNeverCurses() {
 		Set<String> seen = new HashSet<>();
 		for (int i = 0; i < 12000; i++) {
-			Item it = EndgameLoot.roll();
+			Item it = EndgameLoot.rollGeneral();
 			assertNotNull( it );
 			assertFalse( "cursed: " + it.getClass().getSimpleName(), it.cursed );
 			seen.add( it.getClass().getName() );
@@ -284,7 +332,7 @@ public class ModContentTest {
 
 	private static int newItems( Level level ) {
 		Set<String> mine = new HashSet<>();
-		for (String name : ITEMS) mine.add( P + name );
+		for (String name : all()) mine.add( P + name );
 		int n = 0;
 		for (Heap heap : level.heaps.valueList()) {
 			for (Item item : heap.items) if (mine.contains( item.getClass().getName() )) n++;
@@ -351,7 +399,7 @@ public class ModContentTest {
 					assertNotNull( fl + ": no hoard", hoard );
 					int mine = 0;
 					Set<String> names = new HashSet<>();
-					for (String n : ITEMS) names.add( P + n );
+					for (String n : all()) names.add( P + n );
 					for (Item it : hoard.items) if (names.contains( it.getClass().getName() )) mine++;
 					assertTrue( fl + ": the hoard holds " + mine + " new items, wanted at least " + (2 + z), mine >= 2 + z );
 					lootInHoards += mine;
@@ -384,12 +432,14 @@ public class ModContentTest {
 		Set<Class<?>> all = new HashSet<>();
 		for (int set = 0; set < xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES.length; set++) {
 			Class<?>[] pieces = xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( set );
-			assertEquals( "set " + set + " is five pieces", 5, pieces.length );
+			assertEquals( "set " + set + " size", set == xyz.gabriwar.warpedpixeldungeon.items.GearSets.YOG ? 6 : 5, pieces.length );
 			for (Class<?> c : pieces) {
 				assertTrue( c.getSimpleName() + " is in two sets", all.add( c ) );
 				assertEquals( xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ), set );
 			}
 		}
+		for (String name : CLASS_ITEMS) assertTrue( name, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( Class.forName( P + name ) ) >= 6 );
+		for (String name : YOG_ITEMS) assertEquals( name, xyz.gabriwar.warpedpixeldungeon.items.GearSets.YOG, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( Class.forName( P + name ) ) );
 		for (String name : ITEMS) {
 			Class<?> c = Class.forName( P + name );
 			boolean in = xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ) >= 0;
@@ -417,6 +467,136 @@ public class ModContentTest {
 		//item descriptions carry their set
 		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker().desc().contains( "Emberwrought" ) );
 		assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff().desc().contains( "Set:" ) );
+	}
+
+	@Test
+	public void classSetsDropForTheirOwnClassOnly() throws Exception {
+		Hero h = Dungeon.hero;
+		HeroClass keep = h.heroClass;
+		Set<String> allClassPieces = new HashSet<>();
+		for (String n : CLASS_ITEMS) allClassPieces.add( P + n );
+		for (String n : YOG_ITEMS) allClassPieces.add( P + n );
+		try {
+			HeroClass[] order = { HeroClass.WARRIOR, HeroClass.MAGE, HeroClass.ROGUE, HeroClass.HUNTRESS, HeroClass.DUELIST, HeroClass.CLERIC };
+			for (int i = 0; i < order.length; i++) {
+				h.heroClass = order[i];
+				Set<Class<?>> want = new HashSet<>( java.util.Arrays.asList( xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( 6 + i ) ) );
+				Set<Class<?>> seen = new HashSet<>();
+				for (int k = 0; k < 4000; k++) {
+					Item it = EndgameLoot.rollClassSet( order[i] );
+					assertFalse( "cursed", it.cursed );
+					seen.add( it.getClass() );
+				}
+				assertEquals( order[i] + ": its own five pieces, nothing else", want, seen );
+				//the ordinary roll: some class pieces, never another class's and never Yog-Forged
+				int mine = 0;
+				for (int k = 0; k < 6000; k++) {
+					Item it = EndgameLoot.roll();
+					if (allClassPieces.contains( it.getClass().getName() )) {
+						assertTrue( order[i] + " was given " + it.getClass().getSimpleName(), want.contains( it.getClass() ) );
+						mine++;
+					}
+				}
+				assertTrue( order[i] + ": about 30% of rolls are its own set, got " + mine + "/6000", mine > 1400 && mine < 2200 );
+			}
+			Set<Class<?>> yog = new HashSet<>();
+			for (int k = 0; k < 3000; k++) yog.add( EndgameLoot.rollYog().getClass() );
+			assertEquals( new HashSet<>( java.util.Arrays.asList( xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( xyz.gabriwar.warpedpixeldungeon.items.GearSets.YOG ) ) ), yog );
+		} finally {
+			h.heroClass = keep;
+		}
+	}
+
+	@Test
+	public void theClassAndYogSetBonusesAddUp() {
+		xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 5 } );
+		assertEquals( "warrior damage", 1.24f, e.damage, 0.0001f );
+		assertEquals( 0.88f, e.taken, 0.0001f );
+		assertEquals( 0.04f, e.lifesteal, 0.0001f );
+		assertEquals( 0.25f, e.lowHp, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 4 } );
+		assertEquals( "four pieces, no rage yet", 0f, e.lowHp, 0f );
+		assertEquals( 0.04f, e.lifesteal, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 4 } );
+		assertEquals( 1.24f, e.wandDamage, 0.0001f );
+		assertEquals( 1.24f, e.wandRecharge, 0.0001f );
+		assertEquals( 0.10f, e.freeZap, 0.0001f );
+		assertEquals( 0f, e.zapBarrier, 0f );
+		assertEquals( 0.05f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 5 } ).zapBarrier, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 5 } );
+		assertEquals( 1.16f, e.evasion, 0.0001f );
+		assertEquals( 0.48f, e.sneak, 0.0001f );
+		assertEquals( 0.25f, e.vsWeak, 0.0001f );
+		assertEquals( 1.10f, e.speed, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 } );
+		assertEquals( 1.15f, e.accuracy, 0.0001f );
+		assertEquals( 0.30f, e.vsFull, 0.0001f );
+		assertEquals( 1.06f, e.speed, 0.0001f );
+		assertEquals( 0f, e.thorns, 0f );
+		assertEquals( 0.10f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 5 } ).thorns, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5 } );
+		assertEquals( "duelist: 4 tiers of 4% plus the full-set 10%", 1.26f, e.damage, 0.0001f );
+		assertEquals( 1.12f, e.accuracy, 0.0001f );
+		assertEquals( 1.12f, e.evasion, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4 } );
+		assertEquals( 0.91f, e.taken, 0.0001f );
+		assertEquals( 14, e.regenEvery );
+		assertEquals( 20, e.barrierEvery );
+		assertEquals( 0.03f, e.barrierPct, 0.0001f );
+		assertEquals( 0f, e.lifesteal, 0f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5 } );
+		assertEquals( 0.05f, e.lifesteal, 0.0001f );
+		assertEquals( 10, e.regenEvery );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6 } );
+		assertEquals( "yog damage", 1.30f, e.damage, 0.0001f );
+		assertEquals( 0.80f, e.taken, 0.0001f );
+		assertEquals( 0.075f, e.lifesteal, 0.0001f );
+		assertEquals( 1.10f, e.speed, 0.0001f );
+		assertEquals( 1.30f, e.exp, 0.0001f );
+		assertTrue( "the capstone needs all six", e.lastStand );
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5 } ).lastStand );
+		//two sets at once simply add (a short array is zeros after its end)
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 2, 0, 0, 0, 0, 0, 2 } );
+		assertEquals( 1.14f, e.damage, 0.0001f );
+	}
+
+	@Test
+	public void aWholeClassSetIsCountedFromWhatIsWornAndCarried() {
+		Hero h = Dungeon.hero;
+		Object armor = h.belongings.armor, weapon = h.belongings.weapon, ring = h.belongings.ring;
+		int packSize = h.belongings.backpack.items.size();
+		try {
+			h.belongings.armor = new xyz.gabriwar.warpedpixeldungeon.items.armor.WarlordsPlate();
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword();
+			h.belongings.ring = new xyz.gabriwar.warpedpixeldungeon.items.rings.WarlordsSignet();
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.WarlordsBanner() );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.WarlordsCrest() );
+			assertEquals( "the full Warlord's Regalia", 5, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[6] );
+			xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.of( h );
+			assertEquals( 1.24f, e.damage, 0.0001f );
+			//the rage: +25% while at 35% health or less, and the heal that comes with four pieces
+			h.HT = 100; h.HP = 100;
+			assertEquals( "healthy: 24% more", 124, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, 100 ) );
+			h.HP = 30;
+			int hurt = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, 100 );
+			assertEquals( "hurt: 24% and the rage 25% on top", Math.round( 100 * 1.24f * 1.25f ), hurt );
+			//an unworn relic of another set does nothing for this one
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.ArchmagesOrb() );
+			assertEquals( 5, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[6] );
+			assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[7] );
+
+			//the Mage's staff is a piece of its own set and of its wand's
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ArchmagesStaff( new xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze() );
+			int[] n = xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h );
+			assertEquals( 2, n[7] );   //the staff and the orb
+			assertEquals( 1, n[1] );   //the wand it holds
+		} finally {
+			h.belongings.armor = (xyz.gabriwar.warpedpixeldungeon.items.armor.Armor)armor;
+			h.belongings.weapon = (xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon)weapon;
+			h.belongings.ring = (xyz.gabriwar.warpedpixeldungeon.items.rings.Ring)ring;
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
+		}
 	}
 
 	@Test
@@ -491,7 +671,7 @@ public class ModContentTest {
 				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m.buff( xyz.gabriwar.warpedpixeldungeon.levels.Delves.Guardian.class ) != null) g = m;
 				xyz.gabriwar.warpedpixeldungeon.levels.Delves.onDeath( g );
 				Set<String> names = new HashSet<>();
-				for (String n : ITEMS) names.add( P + n );
+				for (String n : all()) names.add( P + n );
 				for (Item it : level.heaps.get( g.pos ).items) if (names.contains( it.getClass().getName() )) mine++;
 				Dungeon.level = null;
 			}

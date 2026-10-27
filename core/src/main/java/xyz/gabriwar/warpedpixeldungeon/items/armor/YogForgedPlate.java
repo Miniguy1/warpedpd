@@ -1,0 +1,46 @@
+/*
+ * Pixel Dungeon
+ * Copyright (C) 2012-2015 Oleg Dolya
+ *
+ * Shattered Pixel Dungeon
+ * Copyright (C) 2014-2026 Evan Debenham
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
+package xyz.gabriwar.warpedpixeldungeon.items.armor;
+
+import xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet;
+
+/** yog-forged plate: a piece of the Yog-Forged set. */
+public class YogForgedPlate extends EndgameArmor {
+
+	{
+		image = ItemSpriteSheet.ARMOR_PLATE;
+	}
+
+	public YogForgedPlate() {
+		super( 5 );
+	}
+
+	@Override
+	public Class[] grantedImmunities() {
+		return new Class[0];
+	}
+
+	@Override
+	public int DRMax( int lvl ) {
+		return super.DRMax( lvl ) + 3;
+	}
+}

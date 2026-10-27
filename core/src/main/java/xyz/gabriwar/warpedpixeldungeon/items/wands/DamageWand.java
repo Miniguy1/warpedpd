@@ -71,6 +71,8 @@ public abstract class DamageWand extends Wand{
 		dmg = sorcered;
 		//level 40 Mage talent: Overcharge
 		dmg = Math.round( dmg * xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.wandDamageMultiplier() );
+		//Archmage's Vestments
+		dmg = Math.round( dmg * xyz.gabriwar.warpedpixeldungeon.items.GearSets.wandDamageMultiplier() );
 		WandEmpower emp = Dungeon.hero.buff(WandEmpower.class);
 		if (emp != null){
 			xyz.gabriwar.warpedpixeldungeon.actors.ledger.DamageLedger.pendingStep( xyz.gabriwar.warpedpixeldungeon.actors.ledger.Step.ADD, emp, dmg, dmg + emp.dmgBoost );
