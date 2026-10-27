@@ -235,12 +235,6 @@ public class ElementalBlast extends ArmorAbility {
 									GameScene.add( Blob.seed( cell, 4, Fire.class ) );
 								}
 
-							//*** Wand of Combustion ***
-							} else if (finalWandCls == WandOfCombustion.class){
-								if (Dungeon.level.flamable[cell]){
-									GameScene.add( Blob.seed( cell, 4, Fire.class ) );
-								}
-
 							//*** Wand of Frost ***
 							} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
 								if (fire != null){
@@ -331,12 +325,6 @@ public class ElementalBlast extends ArmorAbility {
 								} else if (finalWandCls == WandOfFrost.class || finalWandCls == WandOfFreeze.class){
 									if (mob.isAlive() && mob.alignment != Char.Alignment.ALLY) {
 										Buff.affect( mob, Frost.class, effectMulti*Frost.DURATION );
-									}
-
-								//*** Wand of Combustion ***
-								} else if (finalWandCls == WandOfCombustion.class){
-									if (mob.isAlive() && mob.alignment != Char.Alignment.ALLY) {
-										Buff.affect( mob, Burning.class ).reignite( mob );
 									}
 
 								//*** Wand of Siphon ***

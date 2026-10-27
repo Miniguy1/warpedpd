@@ -25,10 +25,6 @@ import xyz.gabriwar.warpedpixeldungeon.Assets;
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.Actor;
 import xyz.gabriwar.warpedpixeldungeon.actors.Char;
-import xyz.gabriwar.warpedpixeldungeon.actors.blobs.Blob;
-import xyz.gabriwar.warpedpixeldungeon.actors.blobs.Fire;
-import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
-import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Burning;
 import xyz.gabriwar.warpedpixeldungeon.audio.SpatialSound;
 import xyz.gabriwar.warpedpixeldungeon.effects.CellEmitter;
 import xyz.gabriwar.warpedpixeldungeon.effects.MagicMissile;
@@ -37,16 +33,15 @@ import xyz.gabriwar.warpedpixeldungeon.effects.particles.SmokeParticle;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MagesStaff;
 import xyz.gabriwar.warpedpixeldungeon.mechanics.Ballistica;
 import xyz.gabriwar.warpedpixeldungeon.messages.Messages;
-import xyz.gabriwar.warpedpixeldungeon.scenes.GameScene;
 import xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
-/** The strongest wand in the game: the target itself detonates. The target takes the full hit,
- *  everything standing around it takes a share of it, and all of it burns. Allies and the caster
- *  are never caught in the blast. */
+/** The strongest wand in the game: the target detonates from the inside. The target takes the full
+ *  hit and everything standing around it takes a share of it. It is a blast, not a fire: nothing is
+ *  set alight, no flames are left on the ground, and allies and the caster are never caught in it. */
 public class WandOfCombustion extends DamageWand {
 
 	{
@@ -91,8 +86,7 @@ public class WandOfCombustion extends DamageWand {
 		Char target = Actor.findChar(cell);
 
 		if (target == null) {
-			//even a miss sets the ground alight where it lands
-			explodeAt(cell, 0, null);
+			//no target, no blast
 			return;
 		}
 
@@ -120,10 +114,6 @@ public class WandOfCombustion extends DamageWand {
 				if (dx != 0 || dy != 0) {
 					CellEmitter.get(c).burst(SmokeParticle.FACTORY, 4);
 				}
-				if (Dungeon.level.flamable[c]) {
-					GameScene.add(Blob.seed(c, 4, Fire.class));
-				}
-
 				Char ch = Actor.findChar(c);
 				if (ch != null && ch != target && ch != curUser && ch.alignment != Char.Alignment.ALLY) {
 					splashed.add(ch);
@@ -133,13 +123,11 @@ public class WandOfCombustion extends DamageWand {
 
 		if (target != null) {
 			target.damage(damage, this);
-			if (target.isAlive()) Buff.affect(target, Burning.class).reignite(target);
 		}
 
 		int splash = Math.round(damage * SPLASH);
 		for (Char ch : splashed) {
 			if (splash > 0) ch.damage(splash, this);
-			if (ch.isAlive()) Buff.affect(ch, Burning.class).reignite(ch);
 		}
 	}
 
@@ -156,12 +144,12 @@ public class WandOfCombustion extends DamageWand {
 
 	@Override
 	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
-		//the Battlemage's staff leaves the enemy smouldering, and sometimes it flares
+		//the Battlemage's staff sometimes sets off a small internal blast in whoever it strikes
 		int level = Math.max(0, buffedLvl());
 		float procChance = (level + 1f) / (level + 3f) * procChanceMultiplier(attacker);
 		if (Random.Float() < procChance) {
-			Buff.affect(defender, Burning.class).reignite(defender);
 			CellEmitter.center(defender.pos).burst(BlastParticle.FACTORY, 8);
+			defender.damage(Math.max(1, Math.round(damage * 0.5f)), this);
 		}
 	}
 
