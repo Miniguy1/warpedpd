@@ -281,6 +281,32 @@ public class Dungeon {
 	/** the floors already rebuilt during this carry, so pacing a staircase back and forth can't farm loot */
 	public static java.util.HashSet<Integer> ascentSession = new java.util.HashSet<>();
 
+	public static void storeAscentState( Bundle bundle ){
+		int[] rebuildArr = new int[ascentRebuilds.size() * 2];
+		int ri = 0;
+		for (java.util.Map.Entry<Integer, Integer> e : ascentRebuilds.entrySet()){
+			rebuildArr[ri++] = e.getKey();
+			rebuildArr[ri++] = e.getValue();
+		}
+		bundle.put( ASCENT_REBUILDS, rebuildArr );
+		int[] sessionArr = new int[ascentSession.size()];
+		int si = 0;
+		for (int d : ascentSession) sessionArr[si++] = d;
+		bundle.put( ASCENT_SESSION, sessionArr );
+	}
+
+	public static void restoreAscentState( Bundle bundle ){
+		ascentRebuilds.clear();
+		ascentSession.clear();
+		if (bundle.contains( ASCENT_REBUILDS )){
+			int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
+			for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
+		}
+		if (bundle.contains( ASCENT_SESSION )){
+			for (int d : bundle.getIntArray( ASCENT_SESSION )) ascentSession.add( d );
+		}
+	}
+
 	public static int rebuildCount( int depth ){
 		Integer g = ascentRebuilds.get( depth );
 		return g == null ? 0 : g;
@@ -797,7 +823,8 @@ public class Dungeon {
 			if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isZone( zone )){
 				int zid = xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneId( zone ), fl = Math.max( 0, zone.floorOf( depth ) );
 				xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level,
-						Math.min( 0.85f, 0.25f + 0.10f * zid + 0.08f * fl ), 0.05f + 0.03f * zid + 0.02f * fl );
+						Math.min( 0.90f, 0.25f + 0.10f * zid + 0.08f * fl + 0.03f * xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( zone ) ),
+						0.05f + 0.03f * zid + 0.02f * fl );
 			}
 		}
 		
@@ -1381,17 +1408,7 @@ public class Dungeon {
 			}
 			bundle.put( GENERATED_LEVELS, bundleArr);
 
-			int[] rebuildArr = new int[ascentRebuilds.size() * 2];
-			int ri = 0;
-			for (java.util.Map.Entry<Integer, Integer> e : ascentRebuilds.entrySet()){
-				rebuildArr[ri++] = e.getKey();
-				rebuildArr[ri++] = e.getValue();
-			}
-			bundle.put( ASCENT_REBUILDS, rebuildArr );
-			int[] sessionArr = new int[ascentSession.size()];
-			int si = 0;
-			for (int d : ascentSession) sessionArr[si++] = d;
-			bundle.put( ASCENT_SESSION, sessionArr );
+			storeAscentState( bundle );
 			
 			Scroll.save( bundle );
 			Potion.save( bundle );
@@ -1504,15 +1521,7 @@ public class Dungeon {
 			for (int i : bundle.getIntArray(GENERATED_LEVELS)){
 				generatedLevels.add(i);
 			}
-			ascentRebuilds.clear();
-			ascentSession.clear();
-			if (bundle.contains( ASCENT_REBUILDS )){
-				int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
-				for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
-			}
-			if (bundle.contains( ASCENT_SESSION )){
-				for (int d : bundle.getIntArray( ASCENT_SESSION )) ascentSession.add( d );
-			}
+			restoreAscentState( bundle );
 
 			fallenMobs = xyz.gabriwar.warpedpixeldungeon.levels.features.FallenMob.restore( bundle );
 			droppedItems = new SparseArray<>();

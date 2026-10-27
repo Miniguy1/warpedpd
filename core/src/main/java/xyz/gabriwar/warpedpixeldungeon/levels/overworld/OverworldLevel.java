@@ -1555,10 +1555,11 @@ public class OverworldLevel extends Level {
 		final java.util.ArrayList<Integer> kinds = new java.util.ArrayList<>();   //-1 mines, 0..2 zones
 		StringBuilder desc = new StringBuilder( "Four ways lead down from the plaza.\n" );
 		for (int z = 0; z < xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES.length; z++){
-			labels.add( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z] );
+			labels.add( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z]
+					+ (xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( z ) > 0 ? " " + xyz.gabriwar.warpedpixeldungeon.levels.Delves.roman( xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( z ) + 1 ) : "") );
 			kinds.add( z );
 			desc.append( "\n_" ).append( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[z] ).append( "_: " )
-					.append( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_HINT[z] ).append( "\n" );
+					.append( xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneBlurb( z ) ).append( "\n" );
 		}
 		if (mines){
 			labels.add( "The Dark Mines" );

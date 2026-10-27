@@ -636,7 +636,7 @@ public class Item implements Bundlable {
 	}
 	
 	public String desc() {
-		return Messages.get(this, "desc");
+		return Messages.get(this, "desc") + GearSets.describe( this );
 	}
 
 	//catalog hint for craft-only items (Re-ARranged alchemy weapons override this)

@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -373,6 +374,188 @@ public class ModContentTest {
 		xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
 		Dungeon.generatedLevels.clear();
 		assertTrue( "the zones' floors held no new loot at all", lootOnFloors >= 1 );
+	}
+
+	@Test
+	public void gearSetsAreConsistentAndAddUp() throws Exception {
+		Set<String> unassigned = new HashSet<>( java.util.Arrays.asList(
+				"items.weapon.melee.HollowwoodStaff", "items.weapon.melee.IronboundStaff", "items.weapon.melee.WyrmboneStaff",
+				"items.wands.WandOfSiphon", "items.rings.RingOfRetribution" ) );
+		Set<Class<?>> all = new HashSet<>();
+		for (int set = 0; set < xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES.length; set++) {
+			Class<?>[] pieces = xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( set );
+			assertEquals( "set " + set + " is five pieces", 5, pieces.length );
+			for (Class<?> c : pieces) {
+				assertTrue( c.getSimpleName() + " is in two sets", all.add( c ) );
+				assertEquals( xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ), set );
+			}
+		}
+		for (String name : ITEMS) {
+			Class<?> c = Class.forName( P + name );
+			boolean in = xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ) >= 0;
+			assertEquals( name + (in ? " is in a set but listed as not" : " belongs to no set"), !unassigned.contains( name ), in );
+		}
+		//the numbers
+		int[] none = new int[6];
+		xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( none );
+		assertEquals( 1f, e.damage, 0f ); assertEquals( 1f, e.taken, 0f ); assertEquals( 0, e.regenEvery );
+		assertEquals( "a lone piece does nothing", 1f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 1, 1, 1, 1, 1, 1 } ).damage, 0f );
+		assertEquals( 1.08f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 2, 0, 0, 0, 0, 0 } ).damage, 0.0001f );
+		assertEquals( 1.32f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 5, 0, 0, 0, 0, 0 } ).damage, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 3, 0, 2, 0, 0 } );
+		assertEquals( "frost 2 tiers + stone 1 tier", 0.88f, e.taken, 0.0001f );
+		assertEquals( 1.08f, e.evasion, 0.0001f );
+		assertEquals( 0.04f, e.thorns, 0.0001f );
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 0, 0, 4, 0, 4, 2 } );
+		assertEquals( 0.09f, e.lifesteal, 0.0001f );
+		assertEquals( 1.15f, e.accuracy, 0.0001f );
+		assertEquals( 1.09f, e.speed, 0.0001f );
+		assertEquals( 1.08f, e.exp, 0.0001f );
+		assertEquals( 26, e.regenEvery );
+		assertEquals( "never past the full set", xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 5, 0, 0, 0, 0, 0 } ).damage,
+				xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( new int[]{ 9, 0, 0, 0, 0, 0 } ).damage, 0f );
+		//item descriptions carry their set
+		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker().desc().contains( "Emberwrought" ) );
+		assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.HollowwoodStaff().desc().contains( "Set:" ) );
+	}
+
+	@Test
+	public void gearSetsReadWhatTheHeroWearsAndCarries() {
+		Hero h = Dungeon.hero;
+		assertNotNull( h );
+		Object armor = h.belongings.armor, weapon = h.belongings.weapon, ring = h.belongings.ring;
+		int packSize = h.belongings.backpack.items.size();
+		try {
+			h.belongings.armor = new xyz.gabriwar.warpedpixeldungeon.items.armor.BleedingArmor();
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.BloodmoonAxe();
+			h.belongings.ring = new xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism();
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal() );
+			int[] n = xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h );
+			assertEquals( "armor, weapon, ring and a carried trinket", 4, n[2] );
+			//the same trinket twice is still one piece
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.trinkets.WarlordsMedal() );
+			assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[2] );
+			assertEquals( "nothing else matches", 0, n[0] + n[1] + n[3] + n[4] + n[5] );
+
+			//the Bloodbound heal: 3 tiers of 3% on a 100 blow
+			h.HT = 100; h.HP = 50;
+			assertEquals( "no damage bonus in this set", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, 100 ) );
+			assertEquals( "healed 9", 59, h.HP );
+
+			//a staff counts as the wand it holds
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.IronboundStaff( new xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze() );
+			assertEquals( "the staff's wand is a Frostbound piece", 1, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[1] );
+		} finally {
+			h.belongings.armor = (xyz.gabriwar.warpedpixeldungeon.items.armor.Armor)armor;
+			h.belongings.weapon = (xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon)weapon;
+			h.belongings.ring = (xyz.gabriwar.warpedpixeldungeon.items.rings.Ring)ring;
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
+		}
+	}
+
+	@Test
+	public void zonesEscalateTierByTier() {
+		int id = 1;
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+		Dungeon.generatedLevels.clear();
+		assertEquals( 0, xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( id ) );
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry a = xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( id );
+		assertEquals( 0, xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( a ) );
+		assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_NAMES[id], xyz.gabriwar.warpedpixeldungeon.levels.Delves.name( a ) );
+		assertSame( "unfinished: the same run", a, xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( id ) );
+		assertEquals( 0, xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( id ) );
+
+		a.cleared = true;
+		assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( id ) );
+		assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneBlurb( id ).contains( "Tier II" ) );
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.Entry b = xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( id );
+		assertNotSame( "a cleared zone re-arms", a, b );
+		assertTrue( "on a branch of its own", b.branch > a.branch );
+		assertEquals( "a tier is four levels up", a.level + xyz.gabriwar.warpedpixeldungeon.levels.Delves.ZONE_TIER_STEP, b.level );
+		assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( b ) );
+		assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.Delves.name( b ).endsWith( " II" ) );
+		assertSame( b, xyz.gabriwar.warpedpixeldungeon.levels.Delves.openZone( id ) );
+
+		//its floors are new floors, and its guardian pays out one more new item
+		Dungeon.branch = b.branch;
+		int mine = 0;
+		for (int f = 0; f < b.floors; f++) {
+			Dungeon.depth = b.depthOf( f );
+			Level level = Dungeon.newLevel();
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.DeadEndLevel.class.isInstance( level ) );
+			if (f == b.floors - 1) {
+				Dungeon.level = level;
+				xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob g = null;
+				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m.buff( xyz.gabriwar.warpedpixeldungeon.levels.Delves.Guardian.class ) != null) g = m;
+				xyz.gabriwar.warpedpixeldungeon.levels.Delves.onDeath( g );
+				Set<String> names = new HashSet<>();
+				for (String n : ITEMS) names.add( P + n );
+				for (Item it : level.heaps.get( g.pos ).items) if (names.contains( it.getClass().getName() )) mine++;
+				Dungeon.level = null;
+			}
+		}
+		Dungeon.branch = 0;
+		assertTrue( "tier II hoard: 2 + zone 1 + tier 1 = 4 new items, got " + mine, mine >= 4 );
+		assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( id ) );
+
+		//the tier survives a save
+		com.watabou.utils.Bundle bundle = new com.watabou.utils.Bundle();
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.storeInBundle( bundle );
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.restoreFromBundle( bundle );
+		assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.levels.Delves.nextTier( id ) );
+		assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( xyz.gabriwar.warpedpixeldungeon.levels.Delves.byBranch( b.branch ) ) );
+		xyz.gabriwar.warpedpixeldungeon.levels.Delves.reset();
+		Dungeon.generatedLevels.clear();
+	}
+
+	@Test
+	public void theAscentCountersSurviveASave() {
+		Dungeon.ascentRebuilds.clear();
+		Dungeon.ascentSession.clear();
+		Dungeon.ascentRebuilds.put( 7, 2 );
+		Dungeon.ascentRebuilds.put( 12, 1 );
+		Dungeon.ascentSession.add( 7 );
+		com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+		Dungeon.storeAscentState( b );
+		Dungeon.ascentRebuilds.clear();
+		Dungeon.ascentSession.clear();
+		Dungeon.restoreAscentState( b );
+		assertEquals( 2, Dungeon.rebuildCount( 7 ) );
+		assertEquals( 1, Dungeon.rebuildCount( 12 ) );
+		assertEquals( 0, Dungeon.rebuildCount( 3 ) );
+		assertTrue( Dungeon.ascentSession.contains( 7 ) );
+		assertEquals( 1, Dungeon.ascentSession.size() );
+		//a save from before the feature restores to nothing
+		Dungeon.restoreAscentState( new com.watabou.utils.Bundle() );
+		assertEquals( 0, Dungeon.rebuildCount( 7 ) );
+		assertTrue( Dungeon.ascentSession.isEmpty() );
+	}
+
+	@Test
+	public void level40And60TalentsSurviveASave() {
+		Hero h = Dungeon.hero;
+		clearTalents( h );
+		h.talents.get( 4 ).put( Talent.IRONCLAD, 3 );
+		h.talents.get( 5 ).put( Talent.UNBROKEN, 2 );
+		com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+		Talent.storeTalentsInBundle( b, h );
+		clearTalents( h );
+		h.talents.clear();
+		Talent.restoreTalentsFromBundle( b, h );
+		assertEquals( 6, h.talents.size() );
+		assertEquals( 3, h.pointsInTalent( Talent.IRONCLAD ) );
+		assertEquals( 2, h.pointsInTalent( Talent.UNBROKEN ) );
+		assertEquals( 0, h.pointsInTalent( Talent.BLOODIED_RESOLVE ) );
+
+		//a save from before the level 40/60 talents: they simply start empty
+		com.watabou.utils.Bundle old = new com.watabou.utils.Bundle();
+		for (int i = 1; i <= 4; i++) old.put( "talents_tier_" + i, new com.watabou.utils.Bundle() );
+		h.talents.clear();
+		Talent.restoreTalentsFromBundle( old, h );
+		assertEquals( 6, h.talents.size() );
+		assertEquals( 0, h.pointsInTalent( Talent.IRONCLAD ) );
+		clearTalents( h );
 	}
 
 	@Test

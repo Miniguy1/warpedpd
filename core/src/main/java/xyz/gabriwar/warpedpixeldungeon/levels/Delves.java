@@ -237,10 +237,16 @@ public final class Delves {
 	public static final int[] ZONE_FLOORS = { 3, 4, 4 };
 	//the depth the first floor counts as: enemies, gold and gear scale from it
 	public static final int[] ZONE_LEVEL  = { 14, 19, 24 };
-	public static final String[] ZONE_HINT = {
-			"Gentle: the old cave-dwellers' ground. About hero level 18 to 22. 3 floors.",
-			"Harder: the city's dead. About hero level 20 to 24. 4 floors.",
-			"The hardest of the three, still easier than the dark mines. About hero level 23 to 27. 4 floors." };
+
+	//a cleared zone re-arms: the next time it is opened it is a tier higher, rebuilt with new floors
+	//(a new branch), its level 4 higher, its hoard and its floors richer
+	public static final int ZONE_TIER_STEP = 4;
+	//the hero level each zone is suggested for at tier one, and the flavour line
+	public static final int[] ZONE_HINT_LO = { 18, 20, 23 };
+	public static final String[] ZONE_FLAVOUR = {
+			"Gentle: the old cave-dwellers' ground.",
+			"Harder: the city's dead.",
+			"The hardest of the three, still easier than the dark mines." };
 
 	public static boolean isZone( Entry e ){
 		return e != null && e.sx >= ZONE_SX;
@@ -250,14 +256,49 @@ public final class Delves {
 		return e.sx - ZONE_SX;
 	}
 
-	/** The zone's entry, given a branch the first time it is opened. */
+	/** which tier (0 the first) a zone's entry is: its level above the zone's own, in steps */
+	public static int zoneTier( Entry e ){
+		return Math.max( 0, (e.level - ZONE_LEVEL[zoneId( e )]) / ZONE_TIER_STEP );
+	}
+
+	/** the newest entry opened of a zone, or null */
+	private static Entry latestZone( int id ){
+		Entry best = null;
+		for (Entry e : entries){
+			if (isZone( e ) && zoneId( e ) == id && (best == null || e.branch > best.branch)) best = e;
+		}
+		return best;
+	}
+
+	/** the tier the zone will be the next time it is opened */
+	public static int nextTier( int id ){
+		Entry e = latestZone( id );
+		return e == null ? 0 : e.cleared ? zoneTier( e ) + 1 : zoneTier( e );
+	}
+
+	private static final String[] ROMAN = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+
+	public static String roman( int n ){
+		return n >= 1 && n <= ROMAN.length ? ROMAN[n - 1] : String.valueOf( n );
+	}
+
+	/** the plaza menu's line on a zone: its tier, how it plays and who it is for */
+	public static String zoneBlurb( int id ){
+		int t = nextTier( id );
+		int lo = ZONE_HINT_LO[id] + 3 * t;
+		return (t > 0 ? "Tier " + roman( t + 1 ) + ": rebuilt harder, and richer. " : "") + ZONE_FLAVOUR[id]
+				+ " About hero level " + lo + " to " + (lo + 4) + ". " + ZONE_FLOORS[id] + " floors.";
+	}
+
+	/** The zone's entry for its next run: the one in progress, or a new, higher tier once it is cleared. */
 	public static Entry openZone( int id ){
-		Entry e = bySector( ZONE_SX + id, 0 );
-		if (e != null) return e;
-		e = new Entry();
+		Entry cur = latestZone( id );
+		if (cur != null && !cur.cleared) return cur;
+		int tier = cur == null ? 0 : zoneTier( cur ) + 1;
+		Entry e = new Entry();
 		e.sx = ZONE_SX + id;
 		e.sy = 0;
-		e.level = ZONE_LEVEL[id];
+		e.level = ZONE_LEVEL[id] + ZONE_TIER_STEP * tier;
 		e.region = ZONE_REGION[id];
 		e.floors = ZONE_FLOORS[id];
 		int branch = BRANCH_BASE;
@@ -396,7 +437,10 @@ public final class Delves {
 
 	/** The name of an opened barrow or temple. */
 	public static String name( Entry e ){
-		if (isZone( e )) return ZONE_NAMES[zoneId( e )];
+		if (isZone( e )){
+			int t = zoneTier( e );
+			return ZONE_NAMES[zoneId( e )] + (t > 0 ? " " + roman( t + 1 ) : "");
+		}
 		return e.temple ? templeName( worldSeed(), e.sx, e.sy ) : name( worldSeed(), e.sx, e.sy );
 	}
 
@@ -688,7 +732,7 @@ public final class Delves {
 		}
 		//a zone's guardian also guards the new item pool: more of it the harder the zone
 		if (isZone( e )){
-			for (int i = 0; i < 2 + zoneId( e ); i++){
+			for (int i = 0; i < 2 + zoneId( e ) + Math.min( 4, zoneTier( e ) ); i++){
 				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.roll(), mob.pos );
 			}
 		}

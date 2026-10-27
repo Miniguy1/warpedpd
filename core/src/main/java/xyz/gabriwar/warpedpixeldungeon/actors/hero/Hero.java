@@ -824,6 +824,7 @@ public class Hero extends Char {
 		
 		float accuracy = 1;
 		accuracy *= EndTalents.accuracyMultiplier( this );
+		accuracy *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.accuracyMultiplier( this );
 		accuracy *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.HuntersFang.accuracyMultiplier();
 		accuracy *= DamageLedger.statFactor( this, RingOfAccuracy.class, RingOfAccuracy.accuracyMultiplier( this ) );
 		accuracy *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.ACCURACY ) );
@@ -955,6 +956,7 @@ public class Hero extends Char {
 		
 		float evasion = defenseSkill;
 		evasion *= EndTalents.evasionMultiplier( this );
+		evasion *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.evasionMultiplier( this );
 		
 		evasion *= DamageLedger.statFactor( this, RingOfEvasion.class, RingOfEvasion.evasionMultiplier( this ) );
 		evasion *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.EVASION ) );
@@ -1173,6 +1175,7 @@ public class Hero extends Char {
 
 		speed *= RingOfHaste.speedMultiplier(this);
 		speed *= EndTalents.speedMultiplier(this);
+		speed *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier(this);
 		speed *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.WayfarersBoots.speedMultiplier();
 		speed *= 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus(this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.SPEED);
 		
@@ -1322,6 +1325,7 @@ public class Hero extends Char {
 	public boolean act() {
 
 		EndTalents.tick(this);
+		xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick(this);
 		if (Dungeon.debugInfiniteMana) MP = MT;
 		//also catches a direct HP cost or a lethal write outside damage()
 		if (debugInfiniteHealth) HP = HT;
@@ -2915,6 +2919,9 @@ public class Hero extends Char {
 		//level 40/60 talents: every attacking bonus, in one place
 		damage = EndTalents.melee( this, enemy, damage );
 
+		//matching sets of the new items
+		damage = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( this, damage );
+
 		//Ring of Cruelty: every blow you land hits harder
 		{
 			int cru = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfCruelty.Cruelty.class );
@@ -3312,6 +3319,9 @@ public class Hero extends Char {
 				dmg = Math.max( 1, Math.round( dmg * Math.max( 0.3f, 1f - 0.04f * bul ) ) );
 			}
 		}
+
+		//matching sets of the new items
+		dmg = xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( this, dmg, src );
 
 		//Ring of Retribution: whoever struck you takes a share of it back
 		if (src instanceof Char && src != this && dmg > 0) {
@@ -3814,6 +3824,7 @@ public class Hero extends Char {
 		//Sage's Idol: you learn more from all you do
 		if (exp > 0 && source != AscensionChallenge.class) {
 			exp = Math.round( exp * xyz.gabriwar.warpedpixeldungeon.items.trinkets.SagesIdol.expMultiplier() );
+			exp = Math.round( exp * xyz.gabriwar.warpedpixeldungeon.items.GearSets.expMultiplier( this ) );
 		}
 
 		//a well rested hero learns a little more from all he does (homestead/rooms/WellRested)
