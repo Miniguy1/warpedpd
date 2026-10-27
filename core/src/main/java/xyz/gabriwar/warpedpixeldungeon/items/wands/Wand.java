@@ -200,6 +200,7 @@ public abstract class Wand extends Item {
 
 	public void charge( Char owner, float chargeScaleFactor ){
 		chargeScaleFactor *= xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents.wandRechargeMultiplier( owner );
+		if (owner instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero) chargeScaleFactor *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.EmberCharm.rechargeMultiplier();
 		charge( owner );
 		charger.setScaleFactor( chargeScaleFactor );
 	}

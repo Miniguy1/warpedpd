@@ -20,30 +20,33 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
-      - name: Create a debug signing key
+      - name: Use the permanent signing key (so every build installs over the last one)
         run: |
           mkdir -p ~/.android
-          keytool -genkeypair -keystore ~/.android/debug.keystore -storepass android -keypass android \
-            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          cp ci/personal-debug-key.bin ~/.android/debug.keystore
 
       - name: Stop the app nagging about the original author's releases
         run: sed -i "s#githubDebugImplementation project(':services:updates:githubUpdates')#githubDebugImplementation project(':services:updates:debugUpdates')#" android/build.gradle
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build the APK
+      - name: Run the game's own tests for the new content
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace 2>&1 | tee build.log
+          ./gradlew :core:test --tests "xyz.gabriwar.warpedpixeldungeon.ModContentTest" --stacktrace 2>&1 | tee build.log
+
+      - name: Build the APK
+        run: |
+          set -o pipefail
+          ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace 2>&1 | tee -a build.log
 
       - name: Save the build errors to the repo so they can be read
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          grep -nE -B2 -A8 "error:|What went wrong|FAILURE" build.log | head -300 > errors.txt || true
+          grep -nE -B2 -A12 "error:|What went wrong|FAILURE|FAILED|AssertionError|Exception" build.log | head -400 > errors.txt || true
           tail -40 build.log >> errors.txt
           gh api --method PUT "repos/${{ github.repository }}/contents/build-logs/errors-${{ github.run_number }}.txt" \
             -f message="build errors for run ${{ github.run_number }}" -f content="$(base64 -w0 errors.txt)" -f branch=main

@@ -888,6 +888,18 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.items.armor.DragonscaleMail.class,
         xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ObsidianGreataxe.class,
         xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WyrmfangGlaive.class,
+        xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfEcho.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Frostbrand.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Thunderlance.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Gravesplitter.class,
+        xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Emberfang.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.Thornmail.class,
+        xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate.class,
+        xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfBulwark.class,
+        xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfCruelty.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.HuntersFang.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.WayfarersBoots.class,
+        xyz.gabriwar.warpedpixeldungeon.items.trinkets.EmberCharm.class,
     };
     private DebugItems() {}
 }

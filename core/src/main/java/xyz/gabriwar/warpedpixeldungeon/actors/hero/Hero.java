@@ -824,6 +824,7 @@ public class Hero extends Char {
 		
 		float accuracy = 1;
 		accuracy *= EndTalents.accuracyMultiplier( this );
+		accuracy *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.HuntersFang.accuracyMultiplier();
 		accuracy *= DamageLedger.statFactor( this, RingOfAccuracy.class, RingOfAccuracy.accuracyMultiplier( this ) );
 		accuracy *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.ACCURACY ) );
 
@@ -1172,6 +1173,7 @@ public class Hero extends Char {
 
 		speed *= RingOfHaste.speedMultiplier(this);
 		speed *= EndTalents.speedMultiplier(this);
+		speed *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.WayfarersBoots.speedMultiplier();
 		speed *= 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus(this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.SPEED);
 		
 		if (belongings.armor() != null) {
@@ -2913,6 +2915,14 @@ public class Hero extends Char {
 		//level 40/60 talents: every attacking bonus, in one place
 		damage = EndTalents.melee( this, enemy, damage );
 
+		//Ring of Cruelty: every blow you land hits harder
+		{
+			int cru = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfCruelty.Cruelty.class );
+			if (cru != 0 && damage > 0) {
+				damage = Math.max( 1, Math.round( damage * Math.max( 0.5f, 1f + 0.04f * cru ) ) );
+			}
+		}
+
 		//Ring of Vampirism: a share of every blow comes back as health
 		{
 			int vamp = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfVampirism.Vampirism.class );
@@ -3293,6 +3303,14 @@ public class Hero extends Char {
 		//Stoneheart Pendant: every blow you take is softened
 		if (dmg > 0) {
 			dmg = Math.max( 1, Math.round( dmg * xyz.gabriwar.warpedpixeldungeon.items.trinkets.StoneheartPendant.damageTakenMultiplier() ) );
+		}
+
+		//Ring of Bulwark: every blow that lands on you is softened
+		{
+			int bul = xyz.gabriwar.warpedpixeldungeon.items.rings.Ring.getBuffedBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfBulwark.Bulwark.class );
+			if (bul != 0 && dmg > 0) {
+				dmg = Math.max( 1, Math.round( dmg * Math.max( 0.3f, 1f - 0.04f * bul ) ) );
+			}
 		}
 
 		//Ring of Retribution: whoever struck you takes a share of it back

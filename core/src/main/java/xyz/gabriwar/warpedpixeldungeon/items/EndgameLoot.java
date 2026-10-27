@@ -50,7 +50,7 @@ import com.watabou.utils.Random;
  *  the normal loot tables. */
 public class EndgameLoot {
 
-	private static final int KINDS = 25;
+	private static final int KINDS = 35;
 
 	/** one random new item, already identified. Armor and weapons come at +1 to +3, rings and wands
 	 *  at their own random levels, the rest as they are. Never cursed. */
@@ -89,7 +89,22 @@ public class EndgameLoot {
 			//trinkets
 			case 20: item = new WarlordsMedal();    break;
 			case 21: item = new SagesIdol();        break;
-			default: item = new StoneheartPendant();break;
+			case 22: item = new StoneheartPendant();break;
+			//the second set
+			case 23: item = new xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfEcho().random(); break;
+			case 24: item = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Frostbrand();   leveled = true; break;
+			case 25: item = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Thunderlance(); leveled = true; break;
+			case 26: item = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Gravesplitter(); leveled = true; break;
+			case 27: item = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Emberfang();     leveled = true; break;
+			case 28: item = new xyz.gabriwar.warpedpixeldungeon.items.armor.Thornmail();  leveled = true; break;
+			case 29: item = new xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate();  leveled = true; break;
+			case 30: item = new xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfBulwark();
+					item.level( Random.IntRange( 0, 2 ) ); break;
+			case 31: item = new xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfCruelty();
+					item.level( Random.IntRange( 0, 2 ) ); break;
+			case 32: item = new xyz.gabriwar.warpedpixeldungeon.items.trinkets.HuntersFang();   break;
+			case 33: item = new xyz.gabriwar.warpedpixeldungeon.items.trinkets.WayfarersBoots(); break;
+			default: item = new xyz.gabriwar.warpedpixeldungeon.items.trinkets.EmberCharm();     break; //34
 		}
 		if (leveled) {
 			item.level( Random.IntRange( 1, 3 ) );
