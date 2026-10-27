@@ -282,12 +282,20 @@ public final class Delves {
 		return n >= 1 && n <= ROMAN.length ? ROMAN[n - 1] : String.valueOf( n );
 	}
 
+	/** how many times a zone has been cleared (every tier counts) */
+	public static int zoneClears( int id ){
+		int n = 0;
+		for (Entry e : entries) if (isZone( e ) && zoneId( e ) == id && e.cleared) n++;
+		return n;
+	}
+
 	/** the plaza menu's line on a zone: its tier, how it plays and who it is for */
 	public static String zoneBlurb( int id ){
 		int t = nextTier( id );
 		int lo = ZONE_HINT_LO[id] + 3 * t;
 		return (t > 0 ? "Tier " + roman( t + 1 ) + ": rebuilt harder, and richer. " : "") + ZONE_FLAVOUR[id]
-				+ " About hero level " + lo + " to " + (lo + 4) + ". " + ZONE_FLOORS[id] + " floors.";
+				+ " About hero level " + lo + " to " + (lo + 4) + ". " + ZONE_FLOORS[id] + " floors."
+				+ (zoneClears( id ) > 0 ? " Cleared " + zoneClears( id ) + (zoneClears( id ) == 1 ? " time." : " times.") : "");
 	}
 
 	/** The zone's entry for its next run: the one in progress, or a new, higher tier once it is cleared. */
