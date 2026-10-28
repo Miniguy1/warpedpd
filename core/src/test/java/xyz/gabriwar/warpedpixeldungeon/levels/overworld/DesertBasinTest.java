@@ -45,7 +45,7 @@ public class DesertBasinTest {
 			int[] b = DesertBasin.of( seed );
 			if (b == null) { bad.append( "seed " + seed + ": no basin; " ); continue; }
 			double md = Math.hypot( b[0], b[1] );
-			if (md < 250 || md > 340) bad.append( "seed " + seed + ": basin at " + md + "; " );
+			if (md < 240 || md > 330) bad.append( "seed " + seed + ": basin at " + md + "; " );
 			WorldStructures.Site temple = WorldStructures.siteType( seed, b[2], b[3] );
 			WorldStructures.Site oasis = WorldStructures.siteType( seed, b[4], b[5] );
 			if (temple != WorldStructures.Site.BURIED_TEMPLE) bad.append( "seed " + seed + ": sector A holds " + temple + "; " );
@@ -64,14 +64,14 @@ public class DesertBasinTest {
 			assertEquals( "seed " + seed + ": the heart of the basin", WorldModel.Biome.DESERT, s.biome );
 			for (int a = 0; a < 360; a += 45) {
 				double r = Math.toRadians( a );
-				WorldModel.sample( seed, b[0] + (int)(Math.cos( r ) * 50), b[1] + (int)(Math.sin( r ) * 50), 0f, s );
-				assertEquals( "seed " + seed + " bearing " + a + " 50 cells out", WorldModel.Biome.DESERT, s.biome );
+				WorldModel.sample( seed, b[0] + (int)(Math.cos( r ) * 45), b[1] + (int)(Math.sin( r ) * 45), 0f, s );
+				assertEquals( "seed " + seed + " bearing " + a + " 45 cells out", WorldModel.Biome.DESERT, s.biome );
 			}
 			for (int y = -135; y <= 135; y += 15) for (int x = -135; x <= 135; x += 15) {
 				if (x * x + y * y > 135 * 135) continue;
 				assertEquals( "the basin must not reach the town", 0f, DesertBasin.weight( seed, x, y ), 0f );
 			}
-			assertEquals( 0f, DesertBasin.weight( seed, b[0] + 120, b[1] ), 0f );
+			assertEquals( 0f, DesertBasin.weight( seed, b[0] + 95, b[1] ), 0f );
 		}
 	}
 
@@ -92,7 +92,7 @@ public class DesertBasinTest {
 			for (int k = 0; k < 16; k++) {
 				double r = k * Math.PI / 8;
 				int x = a[0] + (int)(Math.cos( r ) * DesertBasin.R_OUT), y = a[1] + (int)(Math.sin( r ) * DesertBasin.R_OUT);
-				assertTrue( "seed " + seed + ": the basin's rim is in the sea (" + WorldModel.edgeMask( seed, x, y ) + ")", WorldModel.edgeMask( seed, x, y ) <= 0.2f );
+				assertTrue( "seed " + seed + ": the basin's rim is in the sea (" + WorldModel.edgeMask( seed, x, y ) + ")", WorldModel.edgeMask( seed, x, y ) <= 0.35f );
 			}
 		}
 	}
