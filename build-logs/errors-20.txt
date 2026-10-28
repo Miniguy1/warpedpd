@@ -1,0 +1,94 @@
+> Task :core:test FAILED
+RainMendsTest > whatStillBurnsOrWasNeverGrowthStays FAILED
+RockTopsTest > noWallUnderTheSkyIsRoofedBlack FAILED
+SettlerDayTest > talkFitsTheHourAndTheTrade FAILED
+-----
+261-
+262-RockTopsTest > noWallUnderTheSkyIsRoofedBlack FAILED
+263:    java.lang.AssertionError: alt 0 origin -400,1200 cell 174,92 terrain 4
+264-        at org.junit.Assert.fail(Assert.java:89)
+265-        at org.junit.Assert.assertTrue(Assert.java:42)
+266-        at xyz.gabriwar.warpedpixeldungeon.levels.overworld.RockTopsTest.noWallUnderTheSkyIsRoofedBlack(RockTopsTest.java:193)
+267-
+268-SettlementAmbienceRebaseTest > theWildCostsNothing STANDARD_OUT
+269-    [ambience] collect in the wild: 1.0298128 us/turn
+270-    [ambience] collect in a 84-house settlement: 11.8359634 us/turn
+271-
+272-SettlerDayTest > aMetropolisSleepsInItsOwnHouses STANDARD_OUT
+273-    SettlerDayTest: 13 metropolis folk arrived in 3 ms
+274-
+275-SettlerDayTest > aWholeDayInAGnollCamp STANDARD_OUT
+--
+283-
+284-SettlerDayTest > talkFitsTheHourAndTheTrade FAILED
+285:    java.lang.AssertionError: wet FISHER said: 
+286-        at org.junit.Assert.fail(Assert.java:89)
+287-        at org.junit.Assert.assertTrue(Assert.java:42)
+288-        at xyz.gabriwar.warpedpixeldungeon.levels.overworld.SettlerDayTest.talkFitsTheHourAndTheTrade(SettlerDayTest.java:970)
+289-
+290-SliceLifeWorldTest > peakLifeKeepsToItsGroundOnRealWindows STANDARD_OUT
+291-    peaks +7 at -80,452: sea cells 29809, marmot cells 0, ridges 0
+292-    peaks +7 at -32,410: sea cells 29968, marmot cells 0, ridges 0
+293-    peaks +3 at 488,-1368: sea cells 22525, marmot cells 868, ridges 0
+294-    peaks +4 at -80,452: sea cells 19320, marmot cells 0, ridges 235
+295-    peaks +1 at -88,-88: sea cells 27985, marmot cells 0, ridges 82
+296-
+297-SliceLifeWorldTest > caveLifeKeepsToItsGroundOnRealWindows STANDARD_OUT
+--
+745-[Incubating] Problems report is available at: file:///home/runner/work/warpedpd/warpedpd/build/reports/problems/problems-report.html
+746-
+747:FAILURE: Build failed with an exception.
+748-
+749:* What went wrong:
+750-Execution failed for task ':core:test'.
+751-> There were failing tests. See the report at: file:///home/runner/work/warpedpd/warpedpd/core/build/reports/tests/test/index.html
+752-
+753-* Try:
+754-> Run with --scan to generate a Build Scan (powered by Develocity).
+755-
+756-* Exception is:
+757-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':core:test'.
+758-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+759-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+760-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+761-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 61 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 3m 13s
+7 actionable tasks: 7 executed
