@@ -270,6 +270,30 @@ public class WorldModel {
 
 	public static final float SEA = 0.335f;
 
+	// ------------------------------------------------------------ the world's edge
+	//
+	//The world is made as an island around the town, with open sea beyond: the same generator
+	//as ever, with the land sinking into the ocean past a ragged coast. WORLD_RADIUS is about how
+	//far from the town the land runs out (the coast wanders from 0.78 to 1.22 times that, by
+	//bearing); WORLD_SHORE is how many cells the land takes to fall to the sea. A radius of 0 or
+	//less gives the old, endless world. Everything else (sites, events, roads, hazards) reads the
+	//terrain, so it all follows the edge by itself.
+	public static int WORLD_RADIUS = 520;
+	public static final int WORLD_SHORE = 110;
+
+	/** How far the world's edge has taken a cell: 0 on the island, 1 in the open sea. */
+	public static float edgeMask( long seed, int wx, int wy ){
+		if (WORLD_RADIUS <= 0) return 0f;
+		float d = (float)Math.sqrt( (float)wx*wx + (float)wy*wy );
+		//well inside every possible coast: nothing to work out
+		if (d < WORLD_RADIUS * 0.60f) return 0f;
+		float ang = (float)Math.atan2( wy, wx );
+		float wob = 0.78f + 0.44f * fbm( seed ^ 0xED6E5L, (float)Math.cos( ang ) * 2.5f + 9f, (float)Math.sin( ang ) * 2.5f + 9f, 3 );
+		float reach = WORLD_RADIUS * wob;
+		float t = (d - (reach - WORLD_SHORE)) / WORLD_SHORE;
+		return t <= 0f ? 0f : t >= 1f ? 1f : smooth( t );
+	}
+
 	/** Everything the generator knows about one world cell. */
 	public static class Sample {
 		public float elev, elevRaw, moisture, temperature, river, open;
@@ -297,6 +321,11 @@ public class WorldModel {
 	 */
 	public static Sample sample( long seed, int wx, int wy, Sample out ){
 		return sample( seed, wx, wy, seasonShift, out );
+	}
+
+	/** diagnostic helper: fill out.elev for a cell */
+	public static void terrainElev( long seed, int wx, int wy, Sample out ){
+		terrainOf( seed, wx, wy, out );
 	}
 
 	/** The elevation of a cell alone: the very number sample() gives, at about half its cost
@@ -348,6 +377,8 @@ public class WorldModel {
 		float elev = 0.50f * cont + 0.20f * hills + 0.48f * peaks;
 
 		float rv = riverness( seed, x, y );
+		float edge = edgeMask( seed, wx, wy );
+		if (edge > 0f) rv = rv * (1f - edge);   //no river runs out over the sea
 		float town = townInfluence( seed, wx, wy, TOWN_LAND );
 		if (town > 0){
 			//the town patch: level and above the sea. rivers run through the
@@ -364,6 +395,12 @@ public class WorldModel {
 		}
 		if (rv > 0){
 			elev = elev - rv * (elev - 0.30f);
+		}
+		//the world's edge: the land, and the continent under it, sink into the open sea
+		if (edge > 0f){
+			elev = elev + edge * (0.10f - elev);
+			eRaw = eRaw + edge * (0.10f - eRaw);
+			cont = cont + edge * (0.10f - cont);
 		}
 		out.elev = clamp01( elev );
 		out.elevRaw = clamp01( eRaw );
