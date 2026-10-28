@@ -1,0 +1,56 @@
+> Task :core:test FAILED
+WorldContentReportTest > report FAILED
+-----
+WorldContentReportTest > report FAILED
+    java.lang.AssertionError: WORLD CONTENT REPORT (endless world, per world average over 4 seeds: NEAR within 450 / FAR 450-1400) ##   CAVE CAMP: near 47.0 / far 425.3 ##   CAVE CRYSTAL: near 95.5 / far 803.3 ##   CAVE GROTTO: near 156.3 / far 1291.3 ##   CAVE MINE: near 74.0 / far 520.0 ##   CAVE RIFT: near 53.0 / far 455.5 ##   CAVE SHRINE: near 36.5 / far 326.3 ##   CAVE TOMB: near 39.5 / far 350.5 ##   MOUNTAIN CAIRN: near 5.8 / far 21.5 ##   MOUNTAIN CLIMBER: near 3.0 / far 19.8 ##   MOUNTAIN EYRIE: near 6.8 / far 22.0 ##   MOUNTAIN HERMIT: near 0.3 / far 1.5 ##   MOUNTAIN PASS: near 2.0 / far 9.5 ##   MOUNTAIN SPRINGS: near 2.0 / far 10.5 ##   MOUNTAIN TOWER: near 1.3 / far 2.0 ##   SURFACE BIGTREE: near 0.5 / far 5.3 ##   SURFACE BURIED_TEMPLE: near 0.5 / far 1.8 ##   SURFACE CAMP: near 2.5 / far 9.0 ##   SURFACE DRAGON: near 0.3 / far 3.8 ##   SURFACE DUNGEON: near 5.0 / far 27.0 ##   SURFACE OASIS: near 0.0 / far 2.5 ##   SURFACE RUIN: near 2.0 / far 16.5 ##   SURFACE STONES: near 0.8 / far 3.3 ##   SURFACE SUNKEN_SHRINE: near 1.3 / far 9.8 ##   SURFACE TIDE_POOLS: near 1.5 / far 9.8 ##   SURFACE VILLAGE: near 13.5 / far 123.5 ##   SURFACE WITCH_HUT: near 1.8 / far 8.8 ## 
+46-FAILURE: Build failed with an exception.
+47-
+48:* What went wrong:
+49-Execution failed for task ':core:test'.
+50-> There were failing tests. See the report at: file:///home/runner/work/warpedpd/warpedpd/core/build/reports/tests/test/index.html
+51-
+52-* Try:
+53-> Run with --scan to generate a Build Scan (powered by Develocity).
+54-
+55-* Exception is:
+56-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':core:test'.
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 54s
+7 actionable tasks: 7 executed
