@@ -63,9 +63,9 @@ public class WorldContentReportTest {
 		} finally {
 			WorldModel.WORLD_RADIUS = keep;
 		}
-		StringBuilder out = new StringBuilder( "\nWORLD CONTENT REPORT (endless world, per world average over " + seeds + " seeds: NEAR within 450 / FAR 450-1400)\n" );
+		StringBuilder out = new StringBuilder( "WORLD CONTENT REPORT (endless world, per world average over " + seeds + " seeds: NEAR within 450 / FAR 450-1400) ## " );
 		for (Map.Entry<String, int[]> e : m.entrySet()) {
-			out.append( "  " + e.getKey() + ": near " + Math.round( 10.0 * e.getValue()[0] / seeds ) / 10.0 + " / far " + Math.round( 10.0 * e.getValue()[1] / seeds ) / 10.0 + "\n" );
+			out.append( "  " + e.getKey() + ": near " + Math.round( 10.0 * e.getValue()[0] / seeds ) / 10.0 + " / far " + Math.round( 10.0 * e.getValue()[1] / seeds ) / 10.0 + " ## " );
 		}
 		throw new AssertionError( out.toString() );
 	}
