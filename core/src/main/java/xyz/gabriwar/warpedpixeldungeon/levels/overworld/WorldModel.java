@@ -149,7 +149,7 @@ public class WorldModel {
 
 	//global feature scale: every biome/continent/river field is this many
 	//times wider than the first-cut world (whose regions were pocket-sized)
-	public static float S = 5f;
+	public static final float S = 5f;
 
 	//below this temperature the world freezes over
 	public static final float FREEZE = 0.30f;
