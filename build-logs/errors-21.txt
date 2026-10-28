@@ -1,0 +1,76 @@
+> Task :core:test FAILED
+WorldTrimReportTest > report FAILED
+-----
+34-
+35-WorldTrimReportTest > report FAILED
+36:    java.lang.AssertionError: 
+37-    WORLD TRIM REPORT 2
+38-    S=5.0 R=480: land shares RIVER 2% BEACH 2% PLAINS 1% MEADOW 20% FOREST 18% SWAMP 1% DESERT 0% TUNDRA 0% SNOWFIELD 17% FOOTHILLS 18% MOUNTAIN 21% | seeds (of 6) WITHOUT: mountains 0, desert 6, cold 0, swamp 3 | per world: villages 10, dungeon gates 6
+39-    S=3.0 R=480: land shares RIVER 2% BEACH 2% PLAINS 1% MEADOW 27% FOREST 16% SWAMP 1% DESERT 1% TUNDRA 1% SNOWFIELD 27% FOOTHILLS 12% MOUNTAIN 10% | seeds (of 6) WITHOUT: mountains 0, desert 5, cold 0, swamp 4 | per world: villages 14, dungeon gates 6
+40-    S=2.0 R=480: land shares RIVER 2% BEACH 2% PLAINS 3% MEADOW 24% FOREST 12% SWAMP 1% DESERT 0% TUNDRA 6% SNOWFIELD 31% FOOTHILLS 10% MOUNTAIN 10% | seeds (of 6) WITHOUT: mountains 0, desert 6, cold 0, swamp 5 | per world: villages 12, dungeon gates 4
+41-    S=1.5 R=480: land shares RIVER 3% BEACH 2% PLAINS 4% MEADOW 24% FOREST 13% SWAMP 1% DESERT 2% TUNDRA 5% SNOWFIELD 31% FOOTHILLS 9% MOUNTAIN 5% | seeds (of 6) WITHOUT: mountains 0, desert 3, cold 0, swamp 4 | per world: villages 12, dungeon gates 4
+42-    S=1.0 R=480: land shares RIVER 5% BEACH 3% PLAINS 4% MEADOW 21% FOREST 13% SWAMP 1% DESERT 3% TUNDRA 5% SNOWFIELD 25% FOOTHILLS 11% MOUNTAIN 11% | seeds (of 6) WITHOUT: mountains 0, desert 2, cold 0, swamp 3 | per world: villages 9, dungeon gates 4
+43-        at xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldTrimReportTest.report(WorldTrimReportTest.java:90)
+44-
+45-17 tests completed, 1 failed
+46-
+47-> Task :core:test FAILED
+48-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_4-1793173962243.json
+--
+50-[Incubating] Problems report is available at: file:///home/runner/work/warpedpd/warpedpd/build/reports/problems/problems-report.html
+51-
+52:FAILURE: Build failed with an exception.
+53-
+54:* What went wrong:
+55-Execution failed for task ':core:test'.
+56-> There were failing tests. See the report at: file:///home/runner/work/warpedpd/warpedpd/core/build/reports/tests/test/index.html
+57-
+58-* Try:
+59-> Run with --scan to generate a Build Scan (powered by Develocity).
+60-
+61-* Exception is:
+62-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':core:test'.
+63-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+64-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+65-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+66-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 61 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 54s
+7 actionable tasks: 7 executed
