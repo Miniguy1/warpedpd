@@ -118,6 +118,9 @@ public final class DesertBasin {
 		trial.set( cand );
 		try {
 			WorldModel.Sample t = new WorldModel.Sample();
+			//a wetland's place (a witch's hut, a tide pool) in the sector would come before the desert's
+			if (WetlandSites.place( seed, cand[2], cand[3] ) != null) return false;
+			if (cand[4] != Integer.MIN_VALUE && WetlandSites.place( seed, cand[4], cand[5] ) != null) return false;
 			int tx = WorldStructures.siteX( seed, cand[2], cand[3] ), ty = WorldStructures.siteY( seed, cand[2], cand[3] );
 			if (!Drylands.landClear( seed, tx, ty, Drylands.TEMPLE_REACH + 1, t )) return false;
 			if (cand[4] != Integer.MIN_VALUE){
