@@ -174,9 +174,23 @@ public final class DesertBasin {
 		return smooth( (R_OUT - d) / (R_OUT * 0.45f) );
 	}
 
-	/** a report on why a world has (or has not) a basin */
+	/** a report on why a world has (or has not) a basin, and what each of its sectors says */
 	static String explain( long seed ){
 		int[] a = of( seed );
-		return "seed " + seed + (a == null ? ": none" : ": basin at " + a[0] + "," + a[1] + " temple sector " + a[2] + "," + a[3] + " oasis sector " + a[4] + "," + a[5]);
+		if (a == null) return "seed " + seed + ": none";
+		StringBuilder o = new StringBuilder( "seed " + seed + ": basin " + a[0] + "," + a[1] );
+		WorldModel.Sample smp = new WorldModel.Sample();
+		for (int k = 0; k < 2; k++){
+			int sx = a[2 + 2 * k], sy = a[3 + 2 * k];
+			WorldStructures.Site kind = k == 0 ? WorldStructures.Site.BURIED_TEMPLE : WorldStructures.Site.OASIS;
+			int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
+			int reach = Drylands.reach( kind );
+			WorldModel.sample( seed, cx, cy, 0f, smp );
+			o.append( " [" + kind + " base=" + WorldStructures.baseType( seed, sx, sy ) + " wetland=" + (WetlandSites.place( seed, sx, sy ) != null)
+					+ " rolled=" + Drylands.kindRolled( seed, sx, sy ) + " biome=" + smp.biome + " places=" + Drylands.clearOfPlaces( seed, sx, sy, cx, cy, reach )
+					+ " roads=" + Drylands.clearOfRoads( seed, cx, cy, reach + 1 ) + " land=" + Drylands.landClear( seed, cx, cy, reach + 1, smp )
+					+ " result=" + WorldStructures.siteType( seed, sx, sy ) + "]" );
+		}
+		return o.toString();
 	}
 }

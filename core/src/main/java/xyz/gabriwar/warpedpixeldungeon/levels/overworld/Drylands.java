@@ -109,7 +109,7 @@ public final class Drylands {
 
 	//every cell within r: desert of the surface's band at the annual mean, and no cell a cave mouth
 	//would open on (the mouths keep their cells: WindowGenerator.mouthCandidate)
-	private static boolean landClear( long seed, int cx, int cy, int r, WorldModel.Sample smp ){
+	static boolean landClear( long seed, int cx, int cy, int r, WorldModel.Sample smp ){
 		for (int y = cy - r; y <= cy + r; y++){
 			for (int x = cx - r; x <= cx + r; x++){
 				WorldModel.sample( seed, x, y, 0f, smp );
