@@ -235,7 +235,7 @@ public final class DesertBasin {
 	/** a report on why a world has (or has not) a basin, and what each of its sectors says */
 	static String explain( long seed ){
 		int[] a = of( seed );
-		if (a == null) return "seed " + seed + ": none";
+		if (a == null) return "seed " + seed + ": none, single-site stages: " + stages( seed );
 		StringBuilder o = new StringBuilder( "seed " + seed + ": basin " + a[0] + "," + a[1] );
 		WorldModel.Sample smp = new WorldModel.Sample();
 		for (int k = 0; k < 2; k++){
@@ -251,5 +251,38 @@ public final class DesertBasin {
 					+ " result=" + WorldStructures.siteType( seed, sx, sy ) + "]" );
 		}
 		return o.toString();
+	}
+
+	//how many sectors survive each condition of the single-site search
+	private static String stages( long seed ){
+		placing.set( Boolean.TRUE );
+		try {
+			WorldModel.Sample smp = new WorldModel.Sample();
+			int inRing = 0, island = 0, land = 0, cascade = 0, free = 0, ground = 0, near = 0;
+			for (int sy = -6; sy <= 6; sy++) for (int sx = -6; sx <= 6; sx++) {
+				int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
+				double d = Math.hypot( cx, cy );
+				if (d < 240 || d > 345) { if (d >= 150 && d <= 420) near++; continue; }
+				inRing++;
+				boolean ok = WorldModel.edgeMask( seed, cx, cy ) == 0f;
+				for (int k = 0; k < 16 && ok; k++) {
+					double a = k * Math.PI / 8;
+					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.40f;
+				}
+				if (!ok) continue;
+				island++;
+				if (!dryOrdinaryLand( seed, cx, cy, smp )) continue;
+				land++;
+				if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+				cascade++;
+				if (!siteFree( seed, sx, sy, WorldStructures.Site.BURIED_TEMPLE )) continue;
+				free++;
+				if (!groundClear( seed, new int[]{ cx, cy, sx, sy, Integer.MIN_VALUE, Integer.MIN_VALUE } )) continue;
+				ground++;
+			}
+			return "ring " + inRing + " island " + island + " land " + land + " cascade " + cascade + " free " + free + " ground " + ground + " (sectors 150-420 out: " + near + ")";
+		} finally {
+			placing.remove();
+		}
 	}
 }
