@@ -152,4 +152,46 @@ public final class DesertBasin {
 		if (d >= R_OUT) return 0f;
 		return smooth( (R_OUT - d) / (R_OUT * 0.45f) );
 	}
+
+	/** a report on why a world has (or has not) a basin: how many sector pairs pass each condition */
+	static String explain( long seed ){
+		placing.set( Boolean.TRUE );
+		try {
+			WorldModel.Sample smp = new WorldModel.Sample();
+			int total = 0, far = 0, gapOk = 0, mdOk = 0, maskOk = 0, landOk = 0, cascadeOk = 0;
+			int[][] steps = { { 1, 0 }, { 0, 1 }, { 1, 1 }, { 1, -1 } };
+			for (int sy = -6; sy <= 6; sy++) for (int sx = -6; sx <= 6; sx++) {
+				int ax = WorldStructures.siteX( seed, sx, sy ), ay = WorldStructures.siteY( seed, sx, sy );
+				for (int[] st : steps) {
+					int bx2 = sx + st[0], by2 = sy + st[1];
+					int bx = WorldStructures.siteX( seed, bx2, by2 ), by = WorldStructures.siteY( seed, bx2, by2 );
+					total++;
+					if (Math.hypot( ax, ay ) < 250 || Math.hypot( bx, by ) < 250) continue;
+					far++;
+					double gap = Math.hypot( ax - bx, ay - by );
+					if (gap < 40 || gap > 120) continue;
+					gapOk++;
+					int mx = (ax + bx) / 2, my = (ay + by) / 2;
+					double md = Math.hypot( mx, my );
+					if (md < 250 || md > 340) continue;
+					mdOk++;
+					boolean ok = WorldModel.edgeMask( seed, mx, my ) == 0f;
+					for (int k = 0; k < 16 && ok; k++) {
+						double a = k * Math.PI / 8;
+						ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.08f;
+					}
+					if (!ok) continue;
+					maskOk++;
+					if (!dryOrdinaryLand( seed, ax, ay, smp ) || !dryOrdinaryLand( seed, bx, by, smp ) || !dryOrdinaryLand( seed, mx, my, smp )) continue;
+					landOk++;
+					if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+					if (WorldStructures.baseTypeFor( seed, bx2, by2, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+					cascadeOk++;
+				}
+			}
+			return "seed " + seed + ": pairs " + total + " >250 " + far + " gap " + gapOk + " mid " + mdOk + " island " + maskOk + " land " + landOk + " cascade " + cascadeOk;
+		} finally {
+			placing.remove();
+		}
+	}
 }

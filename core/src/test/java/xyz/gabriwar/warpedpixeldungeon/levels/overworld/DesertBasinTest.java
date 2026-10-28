@@ -40,6 +40,7 @@ public class DesertBasinTest {
 	@Test
 	public void everyIslandHasABasinWithAnOasisAndATemple() {
 		StringBuilder bad = new StringBuilder();
+		for (long seed : SEEDS) if (DesertBasin.of( seed ) == null) bad.append( DesertBasin.explain( seed ) + " || " );
 		for (long seed : SEEDS) {
 			int[] b = DesertBasin.of( seed );
 			if (b == null) { bad.append( "seed " + seed + ": no basin; " ); continue; }
