@@ -34,7 +34,7 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew :core:test --tests "xyz.gabriwar.warpedpixeldungeon.ModContentTest" --tests "xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldTrimReportTest" --stacktrace 2>&1 | tee build.log
+          ./gradlew :core:test --tests "xyz.gabriwar.warpedpixeldungeon.ModContentTest" --tests "xyz.gabriwar.warpedpixeldungeon.levels.overworld.*" --stacktrace 2>&1 | tee build.log
 
       - name: Build the APK
         run: |
@@ -48,7 +48,8 @@ jobs:
         run: |
           grep -E "FAILED$" build.log | sort -u | head -80 > errors.txt || true
           echo "-----" >> errors.txt
-          grep -nE -B2 -A12 "error:|What went wrong|FAILURE|AssertionError" build.log | head -300 >> errors.txt || true
+          grep -E -B1 "^\s+(java|org)\.[A-Za-z.]+(Error|Exception)" build.log | grep -v "^--" | head -250 >> errors.txt || true
+          grep -nE -B2 -A8 "error:|What went wrong" build.log | head -60 >> errors.txt || true
           tail -40 build.log >> errors.txt
           gh api --method PUT "repos/${{ github.repository }}/contents/build-logs/errors-${{ github.run_number }}.txt" \
             -f message="build errors for run ${{ github.run_number }}" -f content="$(base64 -w0 errors.txt)" -f branch=main

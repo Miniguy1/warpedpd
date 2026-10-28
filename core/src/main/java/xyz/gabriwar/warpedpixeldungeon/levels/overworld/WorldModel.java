@@ -278,7 +278,7 @@ public class WorldModel {
 	//bearing); WORLD_SHORE is how many cells the land takes to fall to the sea. A radius of 0 or
 	//less gives the old, endless world. Everything else (sites, events, roads, hazards) reads the
 	//terrain, so it all follows the edge by itself.
-	public static int WORLD_RADIUS = 0;
+	public static int WORLD_RADIUS = 480;
 	public static final int WORLD_SHORE = 110;
 
 	/** How far the world's edge has taken a cell: 0 on the island, 1 in the open sea. */
