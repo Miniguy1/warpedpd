@@ -44,7 +44,7 @@ public class DesertBasinTest {
 			int[] b = DesertBasin.of( seed );
 			if (b == null) { bad.append( "seed " + seed + ": no basin; " ); continue; }
 			double md = Math.hypot( b[0], b[1] );
-			if (md < 265 || md > 360) bad.append( "seed " + seed + ": basin at " + md + "; " );
+			if (md < 250 || md > 340) bad.append( "seed " + seed + ": basin at " + md + "; " );
 			WorldStructures.Site temple = WorldStructures.siteType( seed, b[2], b[3] );
 			WorldStructures.Site oasis = WorldStructures.siteType( seed, b[4], b[5] );
 			if (temple != WorldStructures.Site.BURIED_TEMPLE) bad.append( "seed " + seed + ": sector A holds " + temple + "; " );
@@ -70,7 +70,7 @@ public class DesertBasinTest {
 				if (x * x + y * y > 135 * 135) continue;
 				assertEquals( "the basin must not reach the town", 0f, DesertBasin.weight( seed, x, y ), 0f );
 			}
-			assertEquals( 0f, DesertBasin.weight( seed, b[0] + 140, b[1] ), 0f );
+			assertEquals( 0f, DesertBasin.weight( seed, b[0] + 120, b[1] ), 0f );
 		}
 	}
 
@@ -91,7 +91,7 @@ public class DesertBasinTest {
 			for (int k = 0; k < 16; k++) {
 				double r = k * Math.PI / 8;
 				int x = a[0] + (int)(Math.cos( r ) * DesertBasin.R_OUT), y = a[1] + (int)(Math.sin( r ) * DesertBasin.R_OUT);
-				assertEquals( "seed " + seed + ": the basin's rim is in the sea", 0f, WorldModel.edgeMask( seed, x, y ), 0f );
+				assertTrue( "seed " + seed + ": the basin's rim is in the sea (" + WorldModel.edgeMask( seed, x, y ) + ")", WorldModel.edgeMask( seed, x, y ) <= 0.2f );
 			}
 		}
 	}

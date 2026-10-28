@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * Where it goes is a pure function of the world seed and the island's size, like everything in the
  * world: the first (by a hash) of the neighbouring sector pairs whose two sites lie 40-120 cells apart,
- * both 250+ cells from the town and the pair's middle 265-360 out, with the whole basin on the island,
+ * both 250+ cells from the town and the pair's middle 250-340 out, with the whole basin on the island,
  * on dry ordinary land (not sea, river, beach, hills, mountain or bog) as it is without the basin, and
  * whose sectors the cascade would leave empty on desert. The endless world (a radius of 0) has no
  * basin: it has deserts of its own.
@@ -45,7 +45,7 @@ public final class DesertBasin {
 	private DesertBasin(){}
 
 	/** The basin's reach: full desert within 0.55 of it, fading out to nothing at this many cells. */
-	public static final float R_OUT = 130f;
+	public static final float R_OUT = 115f;
 
 	private static final Map<Long, int[]> cache = new ConcurrentHashMap<>();
 	private static final int[] NONE = new int[0];
@@ -111,12 +111,13 @@ public final class DesertBasin {
 					if (gap < 40 || gap > 120) continue;
 					int mx = (ax + bx) / 2, my = (ay + by) / 2;
 					double md = Math.hypot( mx, my );
-					if (md < 265 || md > 360) continue;
-					//all of it on the island
+					if (md < 250 || md > 340) continue;
+					//all of it on the island: the middle on the flat, and the rim no further than the very
+					//start of the coast's fall to the sea
 					boolean ok = WorldModel.edgeMask( seed, mx, my ) == 0f;
-					for (int k = 0; k < 8 && ok; k++){
-						double a = k * Math.PI / 4;
-						ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) == 0f;
+					for (int k = 0; k < 16 && ok; k++){
+						double a = k * Math.PI / 8;
+						ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.08f;
 					}
 					if (!ok) continue;
 					//dry ordinary land at both sites and the middle, as the world is without the basin
