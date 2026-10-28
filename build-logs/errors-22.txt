@@ -1,0 +1,348 @@
+> Task :core:test FAILED
+DrylandsTest > aTempleTopHasItsStairwellAndItsStones FAILED
+DrylandsTest > anOasisHasWaterPalmsARugAndAWayIn FAILED
+DrylandsTest > thePropsFollowTheCellsTheyStandOn FAILED
+DrylandsTest > theyTakeOnlyWhatNothingElseClaimed FAILED
+FestivalEventTest > aHeroHearsOfOneEveryFewWeeks FAILED
+FieldPlotsTest > everyHumanVillageHasTwoToFourPlotsOutsideItsFence FAILED
+HazardWatchTest > gustWarnsBeforeItPushes FAILED
+HazardWatchTest > heldFastNeitherFlameNorGustTakesHim FAILED
+HazardWatchTest > noGustBelowTheHeightsOrOffTheRidge FAILED
+HazardsVerifyTest > aGustNeverPutsAnyoneInADrop FAILED
+HuntEventTest > huntsArePureAndRare FAILED
+LayerFaunaTest > theIcyOnesStillFindSnowInSummer FAILED
+LayerHazardsTest > heightsFinders FAILED
+LayersAliveTest > aHermitsRumoursAreTrue FAILED
+LayersAliveTest > aRoofEasesThinAir FAILED
+LayersAliveTest > aTowersLairComesWeekly FAILED
+LayersAliveTest > noPictureOfAnEagleOverAnEyrie FAILED
+LayersAliveTest > noTwoFeaturesShareACell FAILED
+LayersAliveTest > thePeaksFolkReachAGuest FAILED
+LayersAliveTest > wildlifeKeepsOutOfThePlacesAndGuardsLeaveRoomForIt FAILED
+LayersAliveTest > wispsLeaveNoGemOutsideTheCaves FAILED
+MarchPlannerTest > aRealIslandIsFoundOutOfReachQuickly FAILED
+MarchPlannerTest > sixHundredCellsOfARealWorldPlanInMilliseconds FAILED
+MigrationEventTest > aHeroMeetsHerdsInTheirSeasons FAILED
+MigrationEventTest > herdsTakeTheirSeasonsRoadOverFourDays FAILED
+MountainSitesLiveTest > oldSavesLoad FAILED
+MountainSitesLiveTest > theHermitIsAtHomeAndTheShelterIsWarm FAILED
+MountainSitesLiveTest > thePeaksSmokeGlowAndSteam FAILED
+MountainSitesLiveTest > theTowerLairFillsAtMostOnceAWeek FAILED
+MountainSitesTest > classMethod FAILED
+MountainSitesVerifyTest > aWindowsSitesAreThePureOnesWhateverResolvedThemFirst FAILED
+MountainSitesVerifyTest > builtWallsHoldNoOreAndTheWindowAgreesWithTheWorld FAILED
+MountainSitesVerifyTest > sitesAndTheirMasonryDoNotChangeWithTheSeason FAILED
+OresTest > builtWallsHoldNoOre FAILED
+OresTest > dressCostIsSmall FAILED
+OresTest > glintsAreSeen FAILED
+OresTest > glintsOnlyOnShownFaces FAILED
+OresTest > minerRate FAILED
+OresTest > rockBitsAreTheWorldsRock FAILED
+OresTest > tierTable FAILED
+OresTest > veinsAreDeterministic FAILED
+OresTest > veinsAreRuns FAILED
+OresTest > windowMapMatchesCellFunction FAILED
+OverworldCrittersTest > theSceneFindsAMeadowByARiverAndAWood FAILED
+RaidEventTest > noVillageWithoutAHouseIsEverRaided FAILED
+RaidEventTest > raidsAreRareHumanAndNeverCrowd FAILED
+RaidHuntEdgesTest > aGuestStartsAndKeepsAHunt FAILED
+RaidHuntEdgesTest > aHuntsBeastsComeOutOfNoHerosSight FAILED
+RaidHuntEdgesTest > aPackPutToSleepSleepsThroughItsHuntsEnd FAILED
+RaidHuntEdgesTest > theHuntIsPinnedWhileItIsOn FAILED
+RainMendsTest > whatStillBurnsOrWasNeverGrowthStays FAILED
+RoadLifeEdgesTest > aRealClockLookStaysCheap FAILED
+RoadLifeEdgesTest > theWatchNeverTurnsOnTheHeroOrTheFolk FAILED
+RoadLifeEdgesTest > theWatchWalksByDayAsAPairAndGoesInByNight FAILED
+RoadLifeEdgesTest > theWatchWalksTheWholeRoadToTheNextVillageAndBack FAILED
+RoadTrafficTest > everyWalkedRoadHasADoorAtEachEnd FAILED
+RoadTrafficTest > roadsAreTheCaravansPairs FAILED
+RoadTrafficTest > roadsStayNearTheirLine FAILED
+RoadTrafficTest > routesRunDoorToDoor FAILED
+RoadTrafficTest > theCaravansCartKeepsToItsLeg FAILED
+RoadTrafficTest > theWatchWalksTheWholeRoadAndBack FAILED
+RoadTrafficTest > travelPairsAreEveryDrawnRoadOnce FAILED
+RoadTrafficTest > travellersKeepToTheClock FAILED
+SettlementLightsTest > populatedHousesCapsAtTen FAILED
+SettlementLightsTest > ringsNeverBurnOnAWallLip FAILED
+SettlementLightsTest > ringsStayPutWhileTheGrassChanges FAILED
+SettlementLightsTest > settlementsNearAreNearestFirst FAILED
+SettlerDayTest > aMetropolisSleepsInItsOwnHouses FAILED
+SettlerDayTest > aWholeWinterDayInATown FAILED
+SettlerDayTest > talkFitsTheHourAndTheTrade FAILED
+SliceLifeTest > scenesFindTheirPlaces FAILED
+SliceLifeWorldTest > peakLifeKeepsToItsGroundOnRealWindows FAILED
+SliceViewsTest > tarnsOnTheTopsHaveShores FAILED
+VillageHousesTest > everyHouseDoorBelongsToItsOwnSettlement FAILED
+VillageRoutineTest > arrivalsCanWalkHome FAILED
+VillageRoutineTest > banksComeNearestFirst FAILED
+WetlandSitesTest > everyKindIsLaidInEveryWorld FAILED
+WetlandSitesTest > footprintsAreWhatTheGeneratorLays FAILED
+WetlandSitesTest > theWindowLaysThemAndTheirWaterFreezes FAILED
+-----
+DrylandsTest > thePropsFollowTheCellsTheyStandOn FAILED
+    java.lang.AssertionError
+DrylandsTest > theyTakeOnlyWhatNothingElseClaimed FAILED
+    java.lang.AssertionError: oases 0
+DrylandsTest > anOasisHasWaterPalmsARugAndAWayIn FAILED
+    java.lang.AssertionError
+DrylandsTest > aTempleTopHasItsStairwellAndItsStones FAILED
+    java.lang.AssertionError
+FestivalEventTest > aHeroHearsOfOneEveryFewWeeks FAILED
+    java.lang.AssertionError: too seldom: every 100.8
+FieldPlotsTest > everyHumanVillageHasTwoToFourPlotsOutsideItsFence FAILED
+    java.lang.AssertionError
+HazardWatchTest > heldFastNeitherFlameNorGustTakesHim FAILED
+    java.lang.AssertionError
+HazardWatchTest > noGustBelowTheHeightsOrOffTheRidge FAILED
+    java.lang.AssertionError
+HazardWatchTest > gustWarnsBeforeItPushes FAILED
+    java.lang.AssertionError
+HazardsVerifyTest > aGustNeverPutsAnyoneInADrop FAILED
+    java.lang.AssertionError
+HuntEventTest > huntsArePureAndRare FAILED
+    java.lang.AssertionError: met too seldom: every 44.44444444444444
+LayerFaunaTest > theIcyOnesStillFindSnowInSummer FAILED
+    java.lang.AssertionError: no ground of +8
+LayerHazardsTest > heightsFinders FAILED
+    java.lang.AssertionError
+LayersAliveTest > aHermitsRumoursAreTrue FAILED
+    java.lang.AssertionError: no hermit near the origin
+LayersAliveTest > noPictureOfAnEagleOverAnEyrie FAILED
+    java.lang.AssertionError: no hermit near the origin
+LayersAliveTest > aTowersLairComesWeekly FAILED
+    java.lang.AssertionError: no tower with a lair round the origin
+LayersAliveTest > wispsLeaveNoGemOutsideTheCaves FAILED
+    java.lang.AssertionError: no hermit near the origin
+LayersAliveTest > thePeaksFolkReachAGuest FAILED
+    java.lang.AssertionError: nobody at the hermit
+LayersAliveTest > aRoofEasesThinAir FAILED
+    java.lang.AssertionError: no hermit near the origin
+LayersAliveTest > noTwoFeaturesShareACell FAILED
+    java.lang.AssertionError: no hermit near the origin
+LayersAliveTest > wildlifeKeepsOutOfThePlacesAndGuardsLeaveRoomForIt FAILED
+    java.lang.AssertionError: no hermit near the origin
+MarchPlannerTest > sixHundredCellsOfARealWorldPlanInMilliseconds FAILED
+    java.lang.AssertionError: expected:<REACHED> but was:<NEAREST>
+MarchPlannerTest > aRealIslandIsFoundOutOfReachQuickly FAILED
+    java.lang.AssertionError: expected:<NEAREST> but was:<REACHED>
+MigrationEventTest > aHeroMeetsHerdsInTheirSeasons FAILED
+    java.lang.AssertionError: too seldom: 0.01639344262295082
+MigrationEventTest > herdsTakeTheirSeasonsRoadOverFourDays FAILED
+    java.lang.AssertionError: only 5 herds
+MountainSitesLiveTest > theHermitIsAtHomeAndTheShelterIsWarm FAILED
+    java.lang.AssertionError
+MountainSitesLiveTest > theTowerLairFillsAtMostOnceAWeek FAILED
+    java.lang.AssertionError: no tower with a lair
+MountainSitesLiveTest > thePeaksSmokeGlowAndSteam FAILED
+    java.lang.AssertionError
+MountainSitesLiveTest > oldSavesLoad FAILED
+    java.lang.AssertionError
+MountainSitesTest > classMethod FAILED
+    java.lang.AssertionError: no HERMIT within 48 sectors of the origin
+MountainSitesVerifyTest > sitesAndTheirMasonryDoNotChangeWithTheSeason FAILED
+    java.lang.AssertionError: no HERMIT
+MountainSitesVerifyTest > aWindowsSitesAreThePureOnesWhateverResolvedThemFirst FAILED
+    java.lang.AssertionError: no HERMIT
+MountainSitesVerifyTest > builtWallsHoldNoOreAndTheWindowAgreesWithTheWorld FAILED
+    java.lang.AssertionError: no HERMIT
+OresTest > glintsOnlyOnShownFaces FAILED
+    java.lang.AssertionError: no rocky ground on slice 8
+OresTest > veinsAreDeterministic FAILED
+    java.lang.AssertionError: no rocky ground on slice 4
+OresTest > windowMapMatchesCellFunction FAILED
+    java.lang.AssertionError: no rocky ground on slice 4
+OresTest > veinsAreRuns FAILED
+    java.lang.AssertionError: no rocky ground on slice 5
+OresTest > rockBitsAreTheWorldsRock FAILED
+    java.lang.AssertionError: no rocky ground on slice 3
+OresTest > minerRate FAILED
+    java.lang.AssertionError: no rocky ground on slice 5
+OresTest > builtWallsHoldNoOre FAILED
+    java.lang.AssertionError: no rocky ground on slice 3
+OresTest > dressCostIsSmall FAILED
+    java.lang.AssertionError: no rocky ground on slice 3
+OresTest > glintsAreSeen FAILED
+    java.lang.AssertionError: no rocky ground on slice 5
+OresTest > tierTable FAILED
+    java.lang.AssertionError: no rocky ground on slice 2
+OverworldCrittersTest > theSceneFindsAMeadowByARiverAndAWood FAILED
+    java.lang.AssertionError
+RaidEventTest > raidsAreRareHumanAndNeverCrowd FAILED
+    java.lang.AssertionError: heard of too seldom: every 31.596209912536445 days
+RaidEventTest > noVillageWithoutAHouseIsEverRaided FAILED
+    java.lang.AssertionError: no human village without a house in the sample
+RaidHuntEdgesTest > aGuestStartsAndKeepsAHunt FAILED
+    java.lang.AssertionError: Values should be different. Actual: -1
+RaidHuntEdgesTest > aHuntsBeastsComeOutOfNoHerosSight FAILED
+    java.lang.AssertionError: Values should be different. Actual: -1
+RaidHuntEdgesTest > theHuntIsPinnedWhileItIsOn FAILED
+    java.lang.AssertionError: Values should be different. Actual: -1
+RaidHuntEdgesTest > aPackPutToSleepSleepsThroughItsHuntsEnd FAILED
+    java.lang.AssertionError: Values should be different. Actual: -1
+RainMendsTest > whatStillBurnsOrWasNeverGrowthStays FAILED
+    java.lang.ClassCastException: class java.util.concurrent.ConcurrentHashMap cannot be cast to class java.util.Set (java.util.concurrent.ConcurrentHashMap and java.util.Set are in module java.base of loader 'bootstrap')
+RoadLifeEdgesTest > theWatchWalksByDayAsAPairAndGoesInByNight FAILED
+    java.lang.AssertionError: no town with a watch
+RoadLifeEdgesTest > aRealClockLookStaysCheap FAILED
+    java.lang.AssertionError: lanes 3
+RoadLifeEdgesTest > theWatchNeverTurnsOnTheHeroOrTheFolk FAILED
+    java.lang.AssertionError: no town with a watch
+RoadLifeEdgesTest > theWatchWalksTheWholeRoadToTheNextVillageAndBack FAILED
+    java.lang.AssertionError: no town with a watch
+RoadTrafficTest > everyWalkedRoadHasADoorAtEachEnd FAILED
+    java.lang.AssertionError: no peaceful settlement without a house in the sample
+RoadTrafficTest > travelPairsAreEveryDrawnRoadOnce FAILED
+    java.lang.AssertionError: no road beyond the caravans' in the sample
+RoadTrafficTest > travellersKeepToTheClock FAILED
+    java.lang.AssertionError: trips: 241
+RoadTrafficTest > roadsAreTheCaravansPairs FAILED
+    java.lang.AssertionError: roads: 4
+RoadTrafficTest > routesRunDoorToDoor FAILED
+    java.lang.AssertionError: expected:<30> but was:<2>
+RoadTrafficTest > theCaravansCartKeepsToItsLeg FAILED
+    java.lang.AssertionError: legs 56
+RoadTrafficTest > roadsStayNearTheirLine FAILED
+    java.lang.AssertionError: samples: 81
+RoadTrafficTest > theWatchWalksTheWholeRoadAndBack FAILED
+    java.lang.AssertionError: towns with a watch: 0
+SettlementLightsTest > settlementsNearAreNearestFirst FAILED
+    java.lang.AssertionError
+SettlementLightsTest > ringsNeverBurnOnAWallLip FAILED
+    java.lang.AssertionError: expected:<6> but was:<1>
+SettlementLightsTest > populatedHousesCapsAtTen FAILED
+    java.lang.AssertionError: houses checked: 42
+SettlementLightsTest > ringsStayPutWhileTheGrassChanges FAILED
+    java.lang.AssertionError: rings the grass would have moved 0 in 1 camps
+SettlerDayTest > aMetropolisSleepsInItsOwnHouses FAILED
+    java.lang.AssertionError: no HUMAN settlement of 45+ houses
+SettlerDayTest > aWholeWinterDayInATown FAILED
+    java.lang.AssertionError: no HUMAN settlement of 18+ houses
+SettlerDayTest > talkFitsTheHourAndTheTrade FAILED
+    java.lang.AssertionError: wet FISHER said: 
+SliceLifeTest > scenesFindTheirPlaces FAILED
+    java.lang.AssertionError
+SliceLifeWorldTest > peakLifeKeepsToItsGroundOnRealWindows FAILED
+    java.lang.AssertionError
+SliceViewsTest > tarnsOnTheTopsHaveShores FAILED
+    java.lang.AssertionError: no tarn's shore on the tops
+VillageHousesTest > everyHouseDoorBelongsToItsOwnSettlement FAILED
+    java.lang.AssertionError: doors checked: 60
+VillageRoutineTest > banksComeNearestFirst FAILED
+    java.lang.AssertionError
+VillageRoutineTest > arrivalsCanWalkHome FAILED
+    java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+WetlandSitesTest > footprintsAreWhatTheGeneratorLays FAILED
+    java.lang.AssertionError
+WetlandSitesTest > theWindowLaysThemAndTheirWaterFreezes FAILED
+    java.lang.AssertionError
+WetlandSitesTest > everyKindIsLaidInEveryWorld FAILED
+    java.lang.AssertionError: WITCH_HUT in world 407704141479
+WetlandsLiveTest > theFolkAreSetDownOnceThroughASave FAILED
+    java.lang.AssertionError: WITCH_HUT
+WetlandsLiveTest > theWitchsRemedyDrawsTheBogOut FAILED
+    java.lang.AssertionError: WITCH_HUT
+WetlandsLiveTest > acolytesRiseOnceANightAndSinkByDay FAILED
+    java.lang.AssertionError: SUNKEN_SHRINE
+WetlandsLiveTest > placesAreFoundWhenSeenAndKeptThroughASave FAILED
+    java.lang.AssertionError: WITCH_HUT
+WetlandsLiveTest > tilesTellWhatTheyAre FAILED
+    java.lang.AssertionError: SUNKEN_SHRINE
+WetlandsLiveTest > anAcolytePastItsLeashWadesHomeAndSpendsItsTurn FAILED
+    java.lang.AssertionError: SUNKEN_SHRINE
+WetlandsLiveTest > theBogDragsAtWadersAndTheMistThickensTheFog FAILED
+    java.lang.AssertionError: WITCH_HUT
+WindowSlideTest > aFrameBetweenTheHalvesOfARebasePaintsNoFog FAILED
+    java.lang.AssertionError
+WindowSlideTest > explorationSlidesWithTheWindow FAILED
+    java.lang.AssertionError
+WindowSlideTest > aZigZagWalkPreparesEachGuessOnce FAILED
+    java.lang.AssertionError
+WindowSlideTest > framesDrawnThroughARunLeaveTheFogAsSeen FAILED
+    java.lang.AssertionError
+WorldEventsPersistenceTest > starsFallInTheNightOfEverySeason FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > anEventOverStaysOverWhenTheClockRunsBack FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > aStarHeardOfOnceItsCraterCooledIsToldOfAsCold FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > aLootedStarStaysSettledThroughASaveAndAFarTrip FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > aCoopGuestsMapPinsWhatTheHostsDoes FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > eachPlayerHearsOfAnEventFromWhereHeStands FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsPersistenceTest > anUnlootedFragmentComesBackOnceAndIsTakenBackWhileAway FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > starsFallAboutEveryFourToSixDays FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > theScorchKeepsOffWaterAndWaysAtEverySeason FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > eventsAreAPureFunctionOfTheirInputs FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > theStarSaveAndTheMarketSaveNeitherDoubleNorReturn FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > marketsAreSeenEveryWeekOrTwo FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > starsFallAtNight FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > pickingUpTheFragmentSettlesTheStarForGood FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > forcedEventsGoThroughTheSameEnumeration FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > aStarComesDownOnItsCraterAndTheLandTakesItBack FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldEventsTest > starsKeepOffWaterTownAndSettlements FAILED
+    java.lang.AssertionError: only 0 land locations for the test seed
+WorldLayersTest > caveWaysMatchOnBothSlices FAILED
+    java.lang.AssertionError: mouths 0
+1106-FAILURE: Build failed with an exception.
+1107-
+1108:* What went wrong:
+1109-Execution failed for task ':core:test'.
+1110-> There were failing tests. See the report at: file:///home/runner/work/warpedpd/warpedpd/core/build/reports/tests/test/index.html
+1111-
+1112-* Try:
+1113-> Run with --scan to generate a Build Scan (powered by Develocity).
+1114-
+1115-* Exception is:
+1116-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':core:test'.
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 4m 15s
+7 actionable tasks: 7 executed
