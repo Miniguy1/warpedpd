@@ -296,7 +296,12 @@ public class WorldStructures {
 		//existence as the seasonal snow line crosses its sector (and this
 		//answer is cached per seed - it has to be the same whenever asked)
 		WorldModel.Biome b = WorldModel.baseBiomeAt( seed, wx, wy );
+		return baseTypeFor( seed, sx, sy, b );
+	}
 
+	/** The cascade's rules for a sector whose site stands on this biome (the dune basin asks what a
+	 *  sector would hold on desert, before the desert is there). */
+	static Site baseTypeFor( long seed, int sx, int sy, WorldModel.Biome b ){
 		long h = hash( seed ^ 0x1A11L, sx, sy );
 
 		//villages settle friendly open ground

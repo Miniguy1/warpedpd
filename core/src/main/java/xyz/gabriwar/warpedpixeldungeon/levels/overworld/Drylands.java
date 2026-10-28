@@ -96,6 +96,12 @@ public final class Drylands {
 
 	//what the sector's own hashes ask for, before the land is looked at
 	static WorldStructures.Site kindRolled( long seed, int sx, int sy ){
+		//the dune basin's two sectors hold a buried temple and an oasis, whatever their hashes say
+		int[] basin = DesertBasin.of( seed );
+		if (basin != null){
+			if (sx == basin[2] && sy == basin[3]) return WorldStructures.Site.BURIED_TEMPLE;
+			if (sx == basin[4] && sy == basin[5]) return WorldStructures.Site.OASIS;
+		}
 		if (Math.floorMod( hash( seed ^ OASIS_SALT, sx, sy ), 3 ) == 0) return WorldStructures.Site.OASIS;
 		if (Math.floorMod( hash( seed ^ TEMPLE_SALT, sx, sy ), 2 ) == 0) return WorldStructures.Site.BURIED_TEMPLE;
 		return WorldStructures.Site.NONE;

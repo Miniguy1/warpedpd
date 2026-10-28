@@ -380,6 +380,13 @@ public class WorldModel {
 		float rv = riverness( seed, x, y );
 		float edge = edgeMask( seed, wx, wy );
 		if (edge > 0f) rv = rv * (1f - edge);   //no river runs out over the sea
+		//the dune basin: flat low ground, no river across it
+		float basin = DesertBasin.weight( seed, wx, wy );
+		if (basin > 0f){
+			rv = rv * (1f - basin);
+			elev = elev + basin * (0.47f - elev);
+			eRaw = eRaw + basin * (0.47f - eRaw);
+		}
 		float town = townInfluence( seed, wx, wy, TOWN_LAND );
 		if (town > 0){
 			//the town patch: level and above the sea. rivers run through the
@@ -419,6 +426,8 @@ public class WorldModel {
 		terrainOf( seed, wx, wy, out );
 		final float x = out.x, y = out.y, lat = out.lat, cont = out.cont, eRaw = out.eRaw, rv = out.river;
 		float cold = townInfluence( seed, wx, wy, Math.round( TOWN_COLD * townColdFactor( shift ) ) );
+		float basin = DesertBasin.weight( seed, wx, wy );
+		if (basin > 0f) cold = cold * (1f - basin);   //no snow in the dunes
 
 		//how close the sea is: the continent field near its shoreline value
 		float maritime = 1f - smooth( (cont - 0.36f) / 0.16f );
@@ -447,6 +456,7 @@ public class WorldModel {
 		float pressure = fbm( seed ^ 0x9A55E7L, wx/(900f*S), wy/(900f*S), 2 );
 		m -= 0.32f * smooth( (pressure - 0.52f) / 0.14f ) * (1f - 0.6f * maritime);
 		if (cold > 0) m = m + cold * (0.70f - m);   //snowfield, not bare tundra
+		if (basin > 0f) m = m + basin * (0.08f - m);   //the dune basin is dry
 		out.moisture = clamp01( m );
 
 		//TEMPERATURE: the regional climate, pulled toward mild by the sea (the
@@ -458,6 +468,7 @@ public class WorldModel {
 		t = t + 0.22f * maritime * (0.52f - t);
 		float alt = Math.max( 0f, out.elev - 0.50f ) / 0.50f;
 		t -= 0.62f * (float)Math.pow( alt, 1.2f );
+		if (basin > 0f) t = t + basin * (0.82f - t);   //and hot
 		out.annualTemperature = clamp01( t );
 		t += shift * (1f - 0.45f * maritime);
 		if (cold > 0) t = t + cold * (0.10f - t);   //the town is always snowed under
