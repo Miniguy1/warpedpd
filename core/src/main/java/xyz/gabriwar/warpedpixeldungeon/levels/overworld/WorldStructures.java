@@ -321,6 +321,13 @@ public class WorldStructures {
 				&& (h & 3) != 0){          //3 in 4 suitable sectors have one
 			return Site.VILLAGE;
 		}
+		//on an island there is so little room that the rare places are made likelier (the endless world
+		//keeps its old odds): a dragon's lair on one high sector in eight, a great oak in one forest sector
+		//in eight and a stone circle in one open sector in eight
+		boolean island = WorldModel.WORLD_RADIUS > 0;
+		if (island && (b == WorldModel.Biome.FOOTHILLS || b == WorldModel.Biome.MOUNTAIN) && (h & 7) == 0){
+			return Site.DRAGON;
+		}
 		//ruined dungeon mouths favour wilder places
 		if ((b == WorldModel.Biome.FOREST || b == WorldModel.Biome.FOOTHILLS
 				|| b == WorldModel.Biome.TUNDRA || b == WorldModel.Biome.DESERT)
@@ -338,13 +345,13 @@ public class WorldStructures {
 			return Site.CAMP;
 		}
 		//the great oak: one forest sector in sixteen grew a giant
-		if (b == WorldModel.Biome.FOREST && (h & 15) == 2){
+		if (b == WorldModel.Biome.FOREST && (h & (island ? 7 : 15)) == 2){
 			return Site.BIGTREE;
 		}
 		//a circle of standing stones on the open wastes
 		if ((b == WorldModel.Biome.PLAINS || b == WorldModel.Biome.TUNDRA
 				|| b == WorldModel.Biome.SNOWFIELD)
-				&& (h & 15) == 2){         //1 in 16
+				&& (h & (island ? 7 : 15)) == 2){         //1 in 16 (1 in 8 on an island)
 			return Site.STONES;
 		}
 		//a sealed barrow, one of the world's other dungeons (Delves): on dry, level land, in
