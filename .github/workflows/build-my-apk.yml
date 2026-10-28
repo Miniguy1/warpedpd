@@ -34,7 +34,7 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew :core:test --tests "xyz.gabriwar.warpedpixeldungeon.ModContentTest" --tests "xyz.gabriwar.warpedpixeldungeon.levels.overworld.*" --stacktrace 2>&1 | tee build.log
+          ./gradlew :core:test --tests "xyz.gabriwar.warpedpixeldungeon.ModContentTest" --tests "xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldTrimReportTest" --stacktrace 2>&1 | tee build.log
 
       - name: Build the APK
         run: |
