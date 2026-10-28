@@ -78,9 +78,10 @@ public final class DesertBasin {
 			} finally {
 				placing.remove();
 			}
-			cache.put( key, r == null ? NONE : r );
+			if (r == null) r = NONE;
+			cache.put( key, r );
 		}
-		return r == NONE || r.length == 0 ? null : r;
+		return r.length == 0 ? null : r;
 	}
 
 	private static boolean dryOrdinaryLand( long seed, int x, int y, WorldModel.Sample s ){

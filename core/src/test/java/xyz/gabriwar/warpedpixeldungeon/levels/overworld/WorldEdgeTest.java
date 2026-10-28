@@ -109,8 +109,9 @@ public class WorldEdgeTest {
 	public void theIslandIsTheOldWorldUntilItsCoastIsNear() {
 		WorldModel.Sample a = new WorldModel.Sample(), b = new WorldModel.Sample();
 		for (long seed : SEEDS) {
-			for (int y = -250; y <= 250; y += 25) for (int x = -250; x <= 250; x += 25) {
-				if (x * x + y * y > 250 * 250) continue;
+			//(the dune basin, 135 cells out at the nearest, is the island's one deliberate change)
+			for (int y = -130; y <= 130; y += 13) for (int x = -130; x <= 130; x += 13) {
+				if (x * x + y * y > 130 * 130) continue;
 				WorldModel.WORLD_RADIUS = 480;
 				WorldModel.terrainElev( seed, x, y, a );
 				float island = a.elev;
