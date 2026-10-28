@@ -45,7 +45,7 @@ public class DesertBasinTest {
 			int[] b = DesertBasin.of( seed );
 			if (b == null) { bad.append( DesertBasin.explain( seed ) + " || " ); continue; }
 			double md = Math.hypot( b[0], b[1] );
-			if (md < 215 || md > 345) bad.append( "seed " + seed + ": basin at " + md + "; " );
+			if (md < 185 || md > 415) bad.append( "seed " + seed + ": basin at " + md + "; " );
 			WorldStructures.Site temple = WorldStructures.siteType( seed, b[2], b[3] );
 			if (temple != WorldStructures.Site.BURIED_TEMPLE) bad.append( DesertBasin.explain( seed ) + " || " );
 			if (b[4] == Integer.MIN_VALUE || WorldStructures.siteType( seed, b[4], b[5] ) != WorldStructures.Site.OASIS) { noOasis++; bad.append( "(no oasis " + DesertBasin.explain( seed ) + ") " ); }

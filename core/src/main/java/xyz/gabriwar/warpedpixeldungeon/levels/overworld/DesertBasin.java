@@ -106,7 +106,9 @@ public final class DesertBasin {
 		int[] r = search( seed, 30, 100, 240, 330, 0.25f );
 		if (r == null) r = search( seed, 25, 130, 215, 345, 0.40f );
 		//a crowded island: a basin round a single temple
-		if (r == null) r = searchSingle( seed );
+		if (r == null) r = searchSingle( seed, 240, 345, 0.40f );
+		//an island hemmed in by villages and roads: look further out and further in
+		if (r == null) r = searchSingle( seed, 190, 410, 0.30f );
 		return r;
 	}
 
@@ -128,7 +130,7 @@ public final class DesertBasin {
 		}
 	}
 
-	private static int[] searchSingle( long seed ){
+	private static int[] searchSingle( long seed, int dLo, int dHi, float rimTol ){
 		WorldModel.Sample s = new WorldModel.Sample();
 		int[] best = null;
 		long bestScore = Long.MAX_VALUE;
@@ -136,11 +138,11 @@ public final class DesertBasin {
 			for (int sx = -6; sx <= 6; sx++){
 				int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
 				double d = Math.hypot( cx, cy );
-				if (d < 240 || d > 345) continue;
+				if (d < dLo || d > dHi) continue;
 				boolean ok = WorldModel.edgeMask( seed, cx, cy ) == 0f;
 				for (int k = 0; k < 16 && ok; k++){
 					double a = k * Math.PI / 8;
-					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.40f;
+					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= rimTol;
 				}
 				if (!ok || !dryOrdinaryLand( seed, cx, cy, s )) continue;
 				if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
@@ -262,12 +264,12 @@ public final class DesertBasin {
 			for (int sy = -6; sy <= 6; sy++) for (int sx = -6; sx <= 6; sx++) {
 				int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
 				double d = Math.hypot( cx, cy );
-				if (d < 240 || d > 345) { if (d >= 150 && d <= 420) near++; continue; }
+				if (d < 190 || d > 410) continue;
 				inRing++;
 				boolean ok = WorldModel.edgeMask( seed, cx, cy ) == 0f;
 				for (int k = 0; k < 16 && ok; k++) {
 					double a = k * Math.PI / 8;
-					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.40f;
+					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.30f;
 				}
 				if (!ok) continue;
 				island++;
