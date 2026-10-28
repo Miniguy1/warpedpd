@@ -26,46 +26,55 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.TreeMap;
 
-/** TEMPORARY: what the old (endless) world holds near the town and far from it. */
+/** TEMPORARY: what the island holds, for several sizes of the town's snowfield. */
 public class WorldContentReportTest {
-
-	private static void add( Map<String, int[]> m, String k, double d ) {
-		int[] c = m.computeIfAbsent( k, x -> new int[2] );
-		if (d <= 450) c[0]++; else if (d <= 1400) c[1]++;
-	}
 
 	@Test
 	public void report() {
-		int keep = WorldModel.WORLD_RADIUS;
-		WorldModel.WORLD_RADIUS = 0;
-		int seeds = 4;
-		Map<String, int[]> m = new TreeMap<>();
+		int keepR = WorldModel.WORLD_RADIUS, keepC = WorldModel.TOWN_COLD;
+		WorldModel.WORLD_RADIUS = 480;
+		int[] colds = { 450, 300, 200, 120 };
+		int seeds = 6;
+		StringBuilder out = new StringBuilder( "ISLAND CONTENT BY SNOWFIELD SIZE (per world, 6 seeds, island 480) ## " );
 		try {
-			for (int k = 0; k < seeds; k++) {
-				long seed = 5000L + 911L * k;
-				for (int a = 1; a <= 10; a++) {
-					for (MountainSites.Site s : MountainSites.sitesIn( seed, a, -1400, -1400, 1400, 1400 )) {
-						add( m, "MOUNTAIN " + s.kind, Math.sqrt( (double)s.wx * s.wx + (double)s.wy * s.wy ) );
+			for (int c = 0; c < colds.length; c++) {
+				WorldModel.TOWN_COLD = colds[c];
+				Map<String, Double> m = new TreeMap<>();
+				double[] share = new double[WorldModel.Biome.values().length];
+				int desertSeeds = 0;
+				for (int k = 0; k < seeds; k++) {
+					long seed = 7000000L * (c + 1) + 1337L * k + 3;
+					int land = 0; int[] cnt = new int[share.length];
+					WorldModel.Sample s = new WorldModel.Sample();
+					for (int y = -460; y <= 460; y += 12) for (int x = -460; x <= 460; x += 12) {
+						if (x * x + y * y > 430 * 430) continue;
+						WorldModel.sample( seed, x, y, 0f, s );
+						if (s.biome == WorldModel.Biome.OCEAN) continue;
+						land++; cnt[s.biome.ordinal()]++;
+					}
+					for (int b = 0; b < share.length; b++) share[b] += (land == 0 ? 0 : cnt[b] / (double)land) / seeds;
+					if (cnt[WorldModel.Biome.DESERT.ordinal()] >= land * 0.01) desertSeeds++;
+					for (int a = 1; a <= 10; a++) {
+						for (MountainSites.Site st : MountainSites.sitesIn( seed, a, -480, -480, 480, 480 )) {
+							if (Math.hypot( st.wx, st.wy ) <= 470 && (st.kind == MountainSites.Kind.HERMIT || st.kind == MountainSites.Kind.TOWER)) m.merge( "MOUNTAIN " + st.kind, 1.0 / seeds, Double::sum );
+						}
+					}
+					for (int sy = -6; sy <= 6; sy++) for (int sx = -6; sx <= 6; sx++) {
+						if (sx == 0 && sy == 0) continue;
+						if (Math.hypot( WorldStructures.siteX( seed, sx, sy ), WorldStructures.siteY( seed, sx, sy ) ) > 470) continue;
+						WorldStructures.Site site = WorldStructures.siteType( seed, sx, sy );
+						if (site == WorldStructures.Site.NONE || WorldStructures.seaSite( site )) continue;
+						m.merge( "" + site, 1.0 / seeds, Double::sum );
 					}
 				}
-				for (int a = -1; a >= -12; a--) {
-					for (CaveSites.Site s : CaveSites.inRect( seed, a, -1400, -1400, 1400, 1400 )) {
-						add( m, "CAVE " + s.type, Math.sqrt( (double)s.cx * s.cx + (double)s.cy * s.cy ) );
-					}
-				}
-				for (int sy = -15; sy <= 15; sy++) for (int sx = -15; sx <= 15; sx++) {
-					if (sx == 0 && sy == 0) continue;
-					WorldStructures.Site site = WorldStructures.siteType( seed, sx, sy );
-					if (site == WorldStructures.Site.NONE || WorldStructures.seaSite( site )) continue;
-					add( m, "SURFACE " + site, Math.sqrt( Math.pow( WorldStructures.siteX( seed, sx, sy ), 2 ) + Math.pow( WorldStructures.siteY( seed, sx, sy ), 2 ) ) );
-				}
+				out.append( "COLD " + colds[c] + ": shares " );
+				for (WorldModel.Biome b : WorldModel.Biome.values()) if (b != WorldModel.Biome.OCEAN) out.append( b + " " + Math.round( 100 * share[b.ordinal()] ) + "% " );
+				out.append( "| seeds with desert " + desertSeeds + "/" + seeds + " | " );
+				for (Map.Entry<String, Double> e : m.entrySet()) out.append( e.getKey() + " " + Math.round( 10 * e.getValue() ) / 10.0 + ", " );
+				out.append( " ## " );
 			}
 		} finally {
-			WorldModel.WORLD_RADIUS = keep;
-		}
-		StringBuilder out = new StringBuilder( "WORLD CONTENT REPORT (endless world, per world average over " + seeds + " seeds: NEAR within 450 / FAR 450-1400) ## " );
-		for (Map.Entry<String, int[]> e : m.entrySet()) {
-			out.append( "  " + e.getKey() + ": near " + Math.round( 10.0 * e.getValue()[0] / seeds ) / 10.0 + " / far " + Math.round( 10.0 * e.getValue()[1] / seeds ) / 10.0 + " ## " );
+			WorldModel.WORLD_RADIUS = keepR; WorldModel.TOWN_COLD = keepC;
 		}
 		throw new AssertionError( out.toString() );
 	}

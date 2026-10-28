@@ -250,7 +250,8 @@ public class WorldModel {
 	//the town stands at world origin on ground that is always flat, dry land
 	//(within TOWN_IN cells, fading out by TOWN_LAND) in the middle of its own
 	//snowfield (a wider cold spot, fading out by TOWN_COLD)
-	public static final int TOWN_IN = 40, TOWN_LAND = 150, TOWN_COLD = 450;
+	public static final int TOWN_IN = 40, TOWN_LAND = 150;
+	public static int TOWN_COLD = 450;
 	//rivers fade out over this many cells before the dry TOWN_IN radius
 	public static final int RIVER_DRY = 16;
 
