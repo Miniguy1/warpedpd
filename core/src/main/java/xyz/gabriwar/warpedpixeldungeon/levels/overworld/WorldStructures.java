@@ -221,6 +221,18 @@ public class WorldStructures {
 		return (((long)sx) << 32) | (sy & 0xFFFFFFFFL);
 	}
 
+	/** Forgets every sector it has worked out (the dune basin asks, once it is placed: what was worked
+	 *  out while placing it was the world without it). */
+	static synchronized void resetCaches(){
+		siteCache.clear();
+		baseCache.clear();
+		landCache.clear();
+		nearCache.clear();
+		layoutCache.clear();
+		segCache.clear();
+		fieldCache.clear();
+	}
+
 	private static synchronized void checkSeed( long seed ){
 		if (seed != cachedSeed){
 			cachedSeed = seed;

@@ -51,6 +51,8 @@ public final class DesertBasin {
 	private static final int[] NONE = new int[0];
 	//asked for while the basin itself is being placed: the world as it would be without it
 	private static final ThreadLocal<Boolean> placing = new ThreadLocal<>();
+	//a candidate basin the search is trying out (weight and of answer as if it were the basin)
+	private static final ThreadLocal<int[]> trial = new ThreadLocal<>();
 	private static final long SALT = 0xD35E27B5L;
 
 	private static long hash( long seed, long x, long y ){
@@ -66,6 +68,9 @@ public final class DesertBasin {
 	/** {centre x, centre y, sector A x, A y (the temple's), sector B x, B y (the oasis's)}, or null for none. */
 	public static int[] of( long seed ){
 		if (WorldModel.WORLD_RADIUS <= 0) return null;
+		//a candidate being tried: the world as it would be with it
+		int[] tr = trial.get();
+		if (tr != null) return tr;
 		if (Boolean.TRUE.equals( placing.get() )) return null;
 		//the island's size is part of the answer: a world of another radius is another basin
 		long key = seed * 31L + WorldModel.WORLD_RADIUS;
@@ -80,6 +85,8 @@ public final class DesertBasin {
 			}
 			if (r == null) r = NONE;
 			cache.put( key, r );
+			//everything the sector caches worked out while placing was the world without the basin
+			WorldStructures.resetCaches();
 		}
 		return r.length == 0 ? null : r;
 	}
@@ -98,7 +105,56 @@ public final class DesertBasin {
 		//the first pass is picky; the second takes what a crowded island has left
 		int[] r = search( seed, 30, 100, 240, 330, 0.25f );
 		if (r == null) r = search( seed, 25, 130, 215, 345, 0.40f );
+		//a crowded island: a basin round a single temple
+		if (r == null) r = searchSingle( seed );
 		return r;
+	}
+
+	//with the candidate switched on, is the ground round each place (a ring of desert on the surface's
+	//band, clear of cave mouths) what Drylands will ask of it?
+	private static boolean groundClear( long seed, int[] cand ){
+		trial.set( cand );
+		try {
+			WorldModel.Sample t = new WorldModel.Sample();
+			int tx = WorldStructures.siteX( seed, cand[2], cand[3] ), ty = WorldStructures.siteY( seed, cand[2], cand[3] );
+			if (!Drylands.landClear( seed, tx, ty, Drylands.TEMPLE_REACH + 1, t )) return false;
+			if (cand[4] != Integer.MIN_VALUE){
+				int ox = WorldStructures.siteX( seed, cand[4], cand[5] ), oy = WorldStructures.siteY( seed, cand[4], cand[5] );
+				if (!Drylands.landClear( seed, ox, oy, Drylands.OASIS_REACH + 1, t )) return false;
+			}
+			return true;
+		} finally {
+			trial.remove();
+		}
+	}
+
+	private static int[] searchSingle( long seed ){
+		WorldModel.Sample s = new WorldModel.Sample();
+		int[] best = null;
+		long bestScore = Long.MAX_VALUE;
+		for (int sy = -6; sy <= 6; sy++){
+			for (int sx = -6; sx <= 6; sx++){
+				int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
+				double d = Math.hypot( cx, cy );
+				if (d < 240 || d > 345) continue;
+				boolean ok = WorldModel.edgeMask( seed, cx, cy ) == 0f;
+				for (int k = 0; k < 16 && ok; k++){
+					double a = k * Math.PI / 8;
+					ok = WorldModel.edgeMask( seed, cx + (int)(Math.cos( a ) * (R_OUT + 8)), cy + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.40f;
+				}
+				if (!ok || !dryOrdinaryLand( seed, cx, cy, s )) continue;
+				if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+				if (!siteFree( seed, sx, sy, WorldStructures.Site.BURIED_TEMPLE )) continue;
+				int[] cand = { cx, cy, sx, sy, Integer.MIN_VALUE, Integer.MIN_VALUE };
+				if (!groundClear( seed, cand )) continue;
+				long score = hash( seed, sx * 1000L, sy * 1000L );
+				if (score < bestScore){
+					bestScore = score;
+					best = cand;
+				}
+			}
+		}
+		return best;
 	}
 
 	//would a place of this kind at this sector's site pass what Drylands.site will ask of it (the world
@@ -145,10 +201,12 @@ public final class DesertBasin {
 						if (WorldStructures.baseTypeFor( seed, osx, osy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
 						//and neither place may be crowded by a village or a road
 						if (!siteFree( seed, tsx, tsy, WorldStructures.Site.BURIED_TEMPLE ) || !siteFree( seed, osx, osy, WorldStructures.Site.OASIS )) continue;
+						int[] cand = { mx, my, tsx, tsy, osx, osy };
+						if (!groundClear( seed, cand )) continue;
 						long score = hash( seed, tsx * 1000L + osx, tsy * 1000L + osy );
 						if (score < bestScore){
 							bestScore = score;
-							best = new int[]{ mx, my, tsx, tsy, osx, osy };
+							best = cand;
 						}
 					}
 				}
@@ -181,6 +239,7 @@ public final class DesertBasin {
 		StringBuilder o = new StringBuilder( "seed " + seed + ": basin " + a[0] + "," + a[1] );
 		WorldModel.Sample smp = new WorldModel.Sample();
 		for (int k = 0; k < 2; k++){
+			if (a[2 + 2 * k] == Integer.MIN_VALUE){ o.append( " [no oasis]" ); continue; }
 			int sx = a[2 + 2 * k], sy = a[3 + 2 * k];
 			WorldStructures.Site kind = k == 0 ? WorldStructures.Site.BURIED_TEMPLE : WorldStructures.Site.OASIS;
 			int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );

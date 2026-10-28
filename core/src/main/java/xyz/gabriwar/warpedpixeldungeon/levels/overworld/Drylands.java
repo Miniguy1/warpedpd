@@ -100,7 +100,7 @@ public final class Drylands {
 		int[] basin = DesertBasin.of( seed );
 		if (basin != null){
 			if (sx == basin[2] && sy == basin[3]) return WorldStructures.Site.BURIED_TEMPLE;
-			if (sx == basin[4] && sy == basin[5]) return WorldStructures.Site.OASIS;
+			if (basin[4] != Integer.MIN_VALUE && sx == basin[4] && sy == basin[5]) return WorldStructures.Site.OASIS;
 		}
 		if (Math.floorMod( hash( seed ^ OASIS_SALT, sx, sy ), 3 ) == 0) return WorldStructures.Site.OASIS;
 		if (Math.floorMod( hash( seed ^ TEMPLE_SALT, sx, sy ), 2 ) == 0) return WorldStructures.Site.BURIED_TEMPLE;
