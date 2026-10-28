@@ -95,6 +95,21 @@ public final class DesertBasin {
 	}
 
 	private static int[] place( long seed ){
+		//the first pass is picky; the second takes what a crowded island has left
+		int[] r = search( seed, 30, 100, 240, 330, 0.25f );
+		if (r == null) r = search( seed, 25, 130, 215, 345, 0.40f );
+		return r;
+	}
+
+	//would a place of this kind at this sector's site pass what Drylands.site will ask of it (the world
+	//as it is without the basin: a village or a road in the way now is in the way then)
+	private static boolean siteFree( long seed, int sx, int sy, WorldStructures.Site kind ){
+		int cx = WorldStructures.siteX( seed, sx, sy ), cy = WorldStructures.siteY( seed, sx, sy );
+		int reach = Drylands.reach( kind );
+		return Drylands.clearOfPlaces( seed, sx, sy, cx, cy, reach ) && Drylands.clearOfRoads( seed, cx, cy, reach + 1 );
+	}
+
+	private static int[] search( long seed, int gapLo, int gapHi, int mdLo, int mdHi, float rimTol ){
 		WorldModel.Sample s = new WorldModel.Sample();
 		int[] best = null;
 		long bestScore = Long.MAX_VALUE;
@@ -104,31 +119,37 @@ public final class DesertBasin {
 				int ax = WorldStructures.siteX( seed, sx, sy ), ay = WorldStructures.siteY( seed, sx, sy );
 				if (Math.hypot( ax, ay ) < 250) continue;
 				for (int[] st : steps){
-					int bx2 = sx + st[0], by2 = sy + st[1];
-					int bx = WorldStructures.siteX( seed, bx2, by2 ), by = WorldStructures.siteY( seed, bx2, by2 );
-					if (Math.hypot( bx, by ) < 250) continue;
-					double gap = Math.hypot( ax - bx, ay - by );
-					if (gap < 30 || gap > 100) continue;
-					int mx = (ax + bx) / 2, my = (ay + by) / 2;
-					double md = Math.hypot( mx, my );
-					if (md < 240 || md > 330) continue;
-					//all of it on the island: the middle on the flat, and the rim no further than the very
-					//start of the coast's fall to the sea
-					boolean ok = WorldModel.edgeMask( seed, mx, my ) == 0f;
-					for (int k = 0; k < 16 && ok; k++){
-						double a = k * Math.PI / 8;
-						ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.25f;
-					}
-					if (!ok) continue;
-					//dry ordinary land at both sites and the middle, as the world is without the basin
-					if (!dryOrdinaryLand( seed, ax, ay, s ) || !dryOrdinaryLand( seed, bx, by, s ) || !dryOrdinaryLand( seed, mx, my, s )) continue;
-					//the cascade must leave both sectors empty on desert (no ruin, no barrow in the way)
-					if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
-					if (WorldStructures.baseTypeFor( seed, bx2, by2, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
-					long score = hash( seed, sx * 1000L + bx2, sy * 1000L + by2 );
-					if (score < bestScore){
-						bestScore = score;
-						best = new int[]{ mx, my, sx, sy, bx2, by2 };
+					//the temple in this sector and the oasis in the next, or the other way about
+					for (int flip = 0; flip < 2; flip++){
+						int tsx = flip == 0 ? sx : sx + st[0], tsy = flip == 0 ? sy : sy + st[1];
+						int osx = flip == 0 ? sx + st[0] : sx, osy = flip == 0 ? sy + st[1] : sy;
+						int bx = WorldStructures.siteX( seed, sx + st[0], sy + st[1] ), by = WorldStructures.siteY( seed, sx + st[0], sy + st[1] );
+						if (Math.hypot( bx, by ) < 250) continue;
+						double gap = Math.hypot( ax - bx, ay - by );
+						if (gap < gapLo || gap > gapHi) continue;
+						int mx = (ax + bx) / 2, my = (ay + by) / 2;
+						double md = Math.hypot( mx, my );
+						if (md < mdLo || md > mdHi) continue;
+						//all of it on the island: the middle on the flat, the rim no further than the coast's
+						//first slope
+						boolean ok = WorldModel.edgeMask( seed, mx, my ) == 0f;
+						for (int k = 0; k < 16 && ok; k++){
+							double a = k * Math.PI / 8;
+							ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= rimTol;
+						}
+						if (!ok) continue;
+						//dry ordinary land at both sites and the middle, as the world is without the basin
+						if (!dryOrdinaryLand( seed, ax, ay, s ) || !dryOrdinaryLand( seed, bx, by, s ) || !dryOrdinaryLand( seed, mx, my, s )) continue;
+						//the cascade must leave both sectors empty on desert (no ruin, no barrow in the way)
+						if (WorldStructures.baseTypeFor( seed, tsx, tsy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+						if (WorldStructures.baseTypeFor( seed, osx, osy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
+						//and neither place may be crowded by a village or a road
+						if (!siteFree( seed, tsx, tsy, WorldStructures.Site.BURIED_TEMPLE ) || !siteFree( seed, osx, osy, WorldStructures.Site.OASIS )) continue;
+						long score = hash( seed, tsx * 1000L + osx, tsy * 1000L + osy );
+						if (score < bestScore){
+							bestScore = score;
+							best = new int[]{ mx, my, tsx, tsy, osx, osy };
+						}
 					}
 				}
 			}
@@ -153,45 +174,9 @@ public final class DesertBasin {
 		return smooth( (R_OUT - d) / (R_OUT * 0.45f) );
 	}
 
-	/** a report on why a world has (or has not) a basin: how many sector pairs pass each condition */
+	/** a report on why a world has (or has not) a basin */
 	static String explain( long seed ){
-		placing.set( Boolean.TRUE );
-		try {
-			WorldModel.Sample smp = new WorldModel.Sample();
-			int total = 0, far = 0, gapOk = 0, mdOk = 0, maskOk = 0, landOk = 0, cascadeOk = 0;
-			int[][] steps = { { 1, 0 }, { 0, 1 }, { 1, 1 }, { 1, -1 } };
-			for (int sy = -6; sy <= 6; sy++) for (int sx = -6; sx <= 6; sx++) {
-				int ax = WorldStructures.siteX( seed, sx, sy ), ay = WorldStructures.siteY( seed, sx, sy );
-				for (int[] st : steps) {
-					int bx2 = sx + st[0], by2 = sy + st[1];
-					int bx = WorldStructures.siteX( seed, bx2, by2 ), by = WorldStructures.siteY( seed, bx2, by2 );
-					total++;
-					if (Math.hypot( ax, ay ) < 250 || Math.hypot( bx, by ) < 250) continue;
-					far++;
-					double gap = Math.hypot( ax - bx, ay - by );
-					if (gap < 30 || gap > 100) continue;
-					gapOk++;
-					int mx = (ax + bx) / 2, my = (ay + by) / 2;
-					double md = Math.hypot( mx, my );
-					if (md < 240 || md > 330) continue;
-					mdOk++;
-					boolean ok = WorldModel.edgeMask( seed, mx, my ) == 0f;
-					for (int k = 0; k < 16 && ok; k++) {
-						double a = k * Math.PI / 8;
-						ok = WorldModel.edgeMask( seed, mx + (int)(Math.cos( a ) * (R_OUT + 8)), my + (int)(Math.sin( a ) * (R_OUT + 8)) ) <= 0.25f;
-					}
-					if (!ok) continue;
-					maskOk++;
-					if (!dryOrdinaryLand( seed, ax, ay, smp ) || !dryOrdinaryLand( seed, bx, by, smp ) || !dryOrdinaryLand( seed, mx, my, smp )) continue;
-					landOk++;
-					if (WorldStructures.baseTypeFor( seed, sx, sy, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
-					if (WorldStructures.baseTypeFor( seed, bx2, by2, WorldModel.Biome.DESERT ) != WorldStructures.Site.NONE) continue;
-					cascadeOk++;
-				}
-			}
-			return "seed " + seed + ": pairs " + total + " >250 " + far + " gap " + gapOk + " mid " + mdOk + " island " + maskOk + " land " + landOk + " cascade " + cascadeOk;
-		} finally {
-			placing.remove();
-		}
+		int[] a = of( seed );
+		return "seed " + seed + (a == null ? ": none" : ": basin at " + a[0] + "," + a[1] + " temple sector " + a[2] + "," + a[3] + " oasis sector " + a[4] + "," + a[5]);
 	}
 }

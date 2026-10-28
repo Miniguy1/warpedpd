@@ -121,7 +121,7 @@ public final class Drylands {
 	}
 
 	//no road within r (a road keeps every cell it had)
-	private static boolean clearOfRoads( long seed, int cx, int cy, int r ){
+	static boolean clearOfRoads( long seed, int cx, int cy, int r ){
 		for (int y = cy - r; y <= cy + r; y++){
 			for (int x = cx - r; x <= cx + r; x++){
 				if (WorldStructures.onRoad( seed, x, y )) return false;
@@ -132,7 +132,7 @@ public final class Drylands {
 
 	//clear of the grounds of every place the cascade laid round it (a village's with its fields);
 	//two sites of different sectors stand 49 cells apart at least, so two desert places never meet
-	private static boolean clearOfPlaces( long seed, int sx, int sy, int cx, int cy, int reach ){
+	static boolean clearOfPlaces( long seed, int sx, int sy, int cx, int cy, int reach ){
 		for (int dy = -2; dy <= 2; dy++){
 			for (int dx = -2; dx <= 2; dx++){
 				if (dx == 0 && dy == 0) continue;
