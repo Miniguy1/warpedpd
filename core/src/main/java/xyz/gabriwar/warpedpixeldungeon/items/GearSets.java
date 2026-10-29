@@ -53,10 +53,10 @@ public class GearSets {
 
 	public static final String[] NAMES = { "Emberwrought", "Frostbound", "Bloodbound", "Stonewarden", "Stormcaller", "Wanderer's Vigil",
 			"Warlord's Regalia", "Archmage's Vestments", "Shadowblade's Shroud", "Warden's Hunt", "Duelist's Flourish", "Saint's Raiment",
-			"Yog-Forged" };
+			"Yog-Forged", "Ascended Warlord's Regalia", "Ascended Archmage's Vestments", "Ascended Shadowblade's Shroud", "Ascended Warden's Hunt", "Ascended Duelist's Flourish", "Ascended Saint's Raiment", "Mythic Warlord's Regalia", "Mythic Archmage's Vestments", "Mythic Shadowblade's Shroud", "Mythic Warden's Hunt", "Mythic Duelist's Flourish", "Mythic Saint's Raiment", "Godforged Warlord's Regalia", "Godforged Archmage's Vestments", "Godforged Shadowblade's Shroud", "Godforged Warden's Hunt", "Godforged Duelist's Flourish", "Godforged Saint's Raiment" };
 
 	/** what one tier of each set gives, in words (the item descriptions quote it) */
-	public static final String[] PER_TIER = {
+	private static final String[] BASE_PER = {
 			"+8% damage dealt",
 			"-4% damage taken and +4% evasion",
 			"heal for 3% of the damage you deal",
@@ -72,7 +72,7 @@ public class GearSets {
 			"+6% damage dealt, -4% damage taken, heal for 1.5% of the damage you deal, +2% movement speed and +6% experience" };
 
 	/** what a set keeps back for its later pieces (empty for none) */
-	public static final String[] EXTRA = {
+	private static final String[] BASE_EXTRA = {
 			"A full set of five is worth four times that.", "A full set of five is worth four times that.", "A full set of five is worth four times that.",
 			"A full set of five is worth four times that.", "A full set of five is worth four times that.", "A full set of five is worth four times that.",
 			"With four pieces you also heal for 4% of the damage you deal; with all five you deal 25% more damage while at 35% health or less.",
@@ -82,6 +82,20 @@ public class GearSets {
 			"With all five pieces you deal a further 10% more damage.",
 			"With four pieces a barrier of 3% of your health forms every 20 turns; with all five you also heal for 5% of the damage you deal.",
 			"With the full set of six, once every 300 turns a killing blow leaves you alive and heals you for 30% of your health." };
+
+	//the tier 7, 8 and 9 sets repeat a class set's bonuses, stronger: the same words with the scale
+	public static final float[] TIER_SCALE = { 1f, 1.25f, 1.5f, 2f };
+	public static final int FIRST_T7 = 13, FIRST_T8 = 19, FIRST_T9 = 25;
+
+	public static final String[] PER_TIER = new String[31], EXTRA = new String[31];
+	static {
+		for (int i = 0; i < 31; i++) {
+			int base = i < 13 ? i : 6 + (i - 13) % 6;
+			float m = i < 13 ? 1f : TIER_SCALE[(i - 13) / 6 + 1];
+			PER_TIER[i] = BASE_PER[base] + (m == 1f ? "" : " (x" + (m == 1.25f ? "1.25" : m == 1.5f ? "1.5" : "2") + ")");
+			EXTRA[i] = BASE_EXTRA[base];
+		}
+	}
 
 	public static final int GENERIC_SETS = 6;
 	public static final int YOG = 12;
@@ -101,6 +115,24 @@ public class GearSets {
 			{ DuelistsCoat.class, DuelistsRapier.class, DuelistsSignet.class, DuelistsGlove.class, DuelistsMedal.class },
 			{ SaintsVestment.class, SaintsMace.class, SaintsHalo.class, SaintsChalice.class, SaintsRelic.class },
 			{ YogForgedPlate.class, YogForgedBlade.class, YogForgedBand.class, YogsEye.class, YogsHeart.class, YogsFang.class },
+			{ AscendedWarlordsPlate.class, AscendedWarlordsGreatsword.class, AscendedWarlordsSignet.class, AscendedWarlordsBanner.class, AscendedWarlordsCrest.class },
+			{ AscendedArchmagesRobe.class, AscendedArchmagesStaff.class, AscendedArchmagesBand.class, AscendedArchmagesOrb.class, AscendedArchmagesSigil.class },
+			{ AscendedShadowbladesCloak.class, AscendedShadowbladesDirk.class, AscendedShadowbladesRing.class, AscendedShadowbladesMask.class, AscendedShadowbladesToken.class },
+			{ AscendedWardensHide.class, AscendedWardensGlaive.class, AscendedWardensRing.class, AscendedWardensHorn.class, AscendedWardensTotem.class },
+			{ AscendedDuelistsCoat.class, AscendedDuelistsRapier.class, AscendedDuelistsSignet.class, AscendedDuelistsGlove.class, AscendedDuelistsMedal.class },
+			{ AscendedSaintsVestment.class, AscendedSaintsMace.class, AscendedSaintsHalo.class, AscendedSaintsChalice.class, AscendedSaintsRelic.class },
+			{ MythicWarlordsPlate.class, MythicWarlordsGreatsword.class, MythicWarlordsSignet.class, MythicWarlordsBanner.class, MythicWarlordsCrest.class },
+			{ MythicArchmagesRobe.class, MythicArchmagesStaff.class, MythicArchmagesBand.class, MythicArchmagesOrb.class, MythicArchmagesSigil.class },
+			{ MythicShadowbladesCloak.class, MythicShadowbladesDirk.class, MythicShadowbladesRing.class, MythicShadowbladesMask.class, MythicShadowbladesToken.class },
+			{ MythicWardensHide.class, MythicWardensGlaive.class, MythicWardensRing.class, MythicWardensHorn.class, MythicWardensTotem.class },
+			{ MythicDuelistsCoat.class, MythicDuelistsRapier.class, MythicDuelistsSignet.class, MythicDuelistsGlove.class, MythicDuelistsMedal.class },
+			{ MythicSaintsVestment.class, MythicSaintsMace.class, MythicSaintsHalo.class, MythicSaintsChalice.class, MythicSaintsRelic.class },
+			{ GodforgedWarlordsPlate.class, GodforgedWarlordsGreatsword.class, GodforgedWarlordsSignet.class, GodforgedWarlordsBanner.class, GodforgedWarlordsCrest.class },
+			{ GodforgedArchmagesRobe.class, GodforgedArchmagesStaff.class, GodforgedArchmagesBand.class, GodforgedArchmagesOrb.class, GodforgedArchmagesSigil.class },
+			{ GodforgedShadowbladesCloak.class, GodforgedShadowbladesDirk.class, GodforgedShadowbladesRing.class, GodforgedShadowbladesMask.class, GodforgedShadowbladesToken.class },
+			{ GodforgedWardensHide.class, GodforgedWardensGlaive.class, GodforgedWardensRing.class, GodforgedWardensHorn.class, GodforgedWardensTotem.class },
+			{ GodforgedDuelistsCoat.class, GodforgedDuelistsRapier.class, GodforgedDuelistsSignet.class, GodforgedDuelistsGlove.class, GodforgedDuelistsMedal.class },
+			{ GodforgedSaintsVestment.class, GodforgedSaintsMace.class, GodforgedSaintsHalo.class, GodforgedSaintsChalice.class, GodforgedSaintsRelic.class },
 	};
 
 	/** the set an item belongs to (an index into NAMES), or -1 */
@@ -157,45 +189,15 @@ public class GearSets {
 		e.exp += 0.08f * vigil;
 		if (vigil > 0) e.regenEvery = 30 - 4 * vigil;
 
-		int warrior = tier( 6, p( pieces, 6 ) ), mage = tier( 7, p( pieces, 7 ) ), rogue = tier( 8, p( pieces, 8 ) ),
-				hunt = tier( 9, p( pieces, 9 ) ), duel = tier( 10, p( pieces, 10 ) ), cleric = tier( 11, p( pieces, 11 ) ),
-				yog = tier( YOG, p( pieces, YOG ) );
+		int yog = tier( YOG, p( pieces, YOG ) );
 
-		e.damage += 0.06f * warrior;
-		e.taken -= 0.03f * warrior;
-		if (warrior >= 3) e.lifesteal += 0.04f;
-		if (warrior >= 4) e.lowHp = 0.25f;
-
-		e.wandDamage += 0.08f * mage;
-		e.wandRecharge += 0.08f * mage;
-		if (mage >= 3) e.freeZap = 0.10f;
-		if (mage >= 4) e.zapBarrier = 0.05f;
-
-		e.evasion += 0.04f * rogue;
-		e.sneak += 0.12f * rogue;
-		if (rogue >= 3) e.vsWeak = 0.25f;
-		if (rogue >= 4) e.speed += 0.10f;
-
-		e.accuracy += 0.05f * hunt;
-		e.vsFull += 0.10f * hunt;
-		if (hunt >= 3) e.speed += 0.06f;
-		if (hunt >= 4) e.thorns += 0.10f;
-
-		e.damage += 0.04f * duel;
-		e.accuracy += 0.03f * duel;
-		e.evasion += 0.03f * duel;
-		if (duel >= 4) e.damage += 0.10f;
-
-		e.taken -= 0.03f * cleric;
-		if (cleric > 0) {
-			int every = 26 - 4 * cleric;
-			e.regenEvery = e.regenEvery == 0 ? every : Math.min( e.regenEvery, every );
+		//the six class sets, and their tier 7, 8 and 9 forms: the same bonuses, scaled
+		for (int f = 0; f < 6; f++) {
+			classSet( e, f, tier( 6 + f, p( pieces, 6 + f ) ), 1f );
+			classSet( e, f, tier( FIRST_T7 + f, p( pieces, FIRST_T7 + f ) ), TIER_SCALE[1] );
+			classSet( e, f, tier( FIRST_T8 + f, p( pieces, FIRST_T8 + f ) ), TIER_SCALE[2] );
+			classSet( e, f, tier( FIRST_T9 + f, p( pieces, FIRST_T9 + f ) ), TIER_SCALE[3] );
 		}
-		if (cleric >= 3) {
-			e.barrierEvery = 20;
-			e.barrierPct = 0.03f;
-		}
-		if (cleric >= 4) e.lifesteal += 0.05f;
 
 		e.damage += 0.06f * yog;
 		e.taken -= 0.04f * yog;
@@ -204,6 +206,54 @@ public class GearSets {
 		e.exp += 0.06f * yog;
 		if (yog >= 5) e.lastStand = true;
 		return e;
+	}
+
+	/** One class set's bonus for this many steps (pieces beyond the first), scaled by m: a class set
+	 *  is family 0 Warrior, 1 Mage, 2 Rogue, 3 Huntress, 4 Duelist, 5 Cleric. */
+	private static void classSet( Effects e, int family, int steps, float m ) {
+		if (steps <= 0) return;
+		switch (family) {
+			case 0:
+				e.damage += 0.06f * steps * m;
+				e.taken -= 0.03f * steps * m;
+				if (steps >= 3) e.lifesteal += 0.04f * m;
+				if (steps >= 4) e.lowHp = Math.max( e.lowHp, 0.25f * m );
+				break;
+			case 1:
+				e.wandDamage += 0.08f * steps * m;
+				e.wandRecharge += 0.08f * steps * m;
+				if (steps >= 3) e.freeZap = Math.max( e.freeZap, Math.min( 0.5f, 0.10f * m ) );
+				if (steps >= 4) e.zapBarrier = Math.max( e.zapBarrier, 0.05f * m );
+				break;
+			case 2:
+				e.evasion += 0.04f * steps * m;
+				e.sneak += 0.12f * steps * m;
+				if (steps >= 3) e.vsWeak = Math.max( e.vsWeak, 0.25f * m );
+				if (steps >= 4) e.speed += 0.10f * m;
+				break;
+			case 3:
+				e.accuracy += 0.05f * steps * m;
+				e.vsFull += 0.10f * steps * m;
+				if (steps >= 3) e.speed += 0.06f * m;
+				if (steps >= 4) e.thorns += 0.10f * m;
+				break;
+			case 4:
+				e.damage += 0.04f * steps * m;
+				e.accuracy += 0.03f * steps * m;
+				e.evasion += 0.03f * steps * m;
+				if (steps >= 4) e.damage += 0.10f * m;
+				break;
+			default:
+				e.taken -= 0.03f * steps * m;
+				int every = Math.max( 6, Math.round( (26 - 4 * steps) / m ) );
+				e.regenEvery = e.regenEvery == 0 ? every : Math.min( e.regenEvery, every );
+				if (steps >= 3) {
+					e.barrierEvery = 20;
+					e.barrierPct = Math.max( e.barrierPct, 0.03f * m );
+				}
+				if (steps >= 4) e.lifesteal += 0.05f * m;
+				break;
+		}
 	}
 
 	private static void count( Object it, Set<Class<?>> seen ) {

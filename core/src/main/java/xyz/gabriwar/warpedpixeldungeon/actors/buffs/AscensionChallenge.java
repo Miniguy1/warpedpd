@@ -105,7 +105,7 @@ public class AscensionChallenge extends Buff {
 	/** The HP / damage / armour factor on a char: the Ascension's while the hero carries it, times
 	 *  a barrow's scaling (Delves.power) while the hero is in one. */
 	public static float statModifier(Char ch){
-		float delve = xyz.gabriwar.warpedpixeldungeon.levels.Delves.power(ch);
+		float delve = xyz.gabriwar.warpedpixeldungeon.levels.Delves.power(ch) * xyz.gabriwar.warpedpixeldungeon.levels.SideStages.power(ch);
 		if (Dungeon.hero == null || Dungeon.hero.buff(AscensionChallenge.class) == null){
 			return delve;
 		}
@@ -114,7 +114,7 @@ public class AscensionChallenge extends Buff {
 
 	/** The accuracy / evasion factor: the Ascension's, times a barrow's slower skill scaling. */
 	public static float skillModifier(Char ch){
-		float delve = xyz.gabriwar.warpedpixeldungeon.levels.Delves.skill(ch);
+		float delve = xyz.gabriwar.warpedpixeldungeon.levels.Delves.skill(ch) * xyz.gabriwar.warpedpixeldungeon.levels.SideStages.skill(ch);
 		if (Dungeon.hero == null || Dungeon.hero.buff(AscensionChallenge.class) == null){
 			return delve;
 		}

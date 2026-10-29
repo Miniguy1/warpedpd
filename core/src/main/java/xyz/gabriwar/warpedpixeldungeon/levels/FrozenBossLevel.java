@@ -212,6 +212,8 @@ public class FrozenBossLevel extends Level {
 	public void unseal() {
 		if (!locked) return;
 		super.unseal();
+		//the ice boss's hoard: tier 8 and sometimes 9
+		SideStages.bossHoard( this, cell( CX, CY ) );
 
 		Game.runOnRenderThread( new Callback() {
 			@Override

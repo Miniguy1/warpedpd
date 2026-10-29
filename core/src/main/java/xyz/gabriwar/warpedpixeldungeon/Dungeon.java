@@ -815,6 +815,8 @@ public class Dungeon {
 		if (branch == 0 && rebuildCount( depth ) > 0){
 			xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level );
 		}
+		//the Vault and the ice region pay tier 8 loot (and are harder: SideStages)
+		xyz.gabriwar.warpedpixeldungeon.levels.SideStages.afterCreate( level );
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.afterCreate( level );
@@ -824,7 +826,8 @@ public class Dungeon {
 				int zid = xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneId( zone ), fl = Math.max( 0, zone.floorOf( depth ) );
 				xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level,
 						Math.min( 0.90f, 0.25f + 0.10f * zid + 0.08f * fl + 0.03f * xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( zone ) ),
-						0.05f + 0.03f * zid + 0.02f * fl );
+						0.05f + 0.03f * zid + 0.02f * fl,
+						xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zid, xyz.gabriwar.warpedpixeldungeon.levels.Delves.zoneTier( zone ) ) );
 			}
 		}
 		

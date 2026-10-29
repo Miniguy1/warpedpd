@@ -133,6 +133,102 @@ public class ModContentTest {
 			"items.YogsHeart",
 			"items.YogsFang" };
 
+	private static final String[] TIER7_ITEMS = {
+			"items.armor.AscendedWarlordsPlate",
+			"items.weapon.melee.AscendedWarlordsGreatsword",
+			"items.rings.AscendedWarlordsSignet",
+			"items.AscendedWarlordsBanner",
+			"items.AscendedWarlordsCrest",
+			"items.armor.AscendedArchmagesRobe",
+			"items.weapon.melee.AscendedArchmagesStaff",
+			"items.rings.AscendedArchmagesBand",
+			"items.AscendedArchmagesOrb",
+			"items.AscendedArchmagesSigil",
+			"items.armor.AscendedShadowbladesCloak",
+			"items.weapon.melee.AscendedShadowbladesDirk",
+			"items.rings.AscendedShadowbladesRing",
+			"items.AscendedShadowbladesMask",
+			"items.AscendedShadowbladesToken",
+			"items.armor.AscendedWardensHide",
+			"items.weapon.melee.AscendedWardensGlaive",
+			"items.rings.AscendedWardensRing",
+			"items.AscendedWardensHorn",
+			"items.AscendedWardensTotem",
+			"items.armor.AscendedDuelistsCoat",
+			"items.weapon.melee.AscendedDuelistsRapier",
+			"items.rings.AscendedDuelistsSignet",
+			"items.AscendedDuelistsGlove",
+			"items.AscendedDuelistsMedal",
+			"items.armor.AscendedSaintsVestment",
+			"items.weapon.melee.AscendedSaintsMace",
+			"items.rings.AscendedSaintsHalo",
+			"items.AscendedSaintsChalice",
+			"items.AscendedSaintsRelic" };
+
+	private static final String[] TIER8_ITEMS = {
+			"items.armor.MythicWarlordsPlate",
+			"items.weapon.melee.MythicWarlordsGreatsword",
+			"items.rings.MythicWarlordsSignet",
+			"items.MythicWarlordsBanner",
+			"items.MythicWarlordsCrest",
+			"items.armor.MythicArchmagesRobe",
+			"items.weapon.melee.MythicArchmagesStaff",
+			"items.rings.MythicArchmagesBand",
+			"items.MythicArchmagesOrb",
+			"items.MythicArchmagesSigil",
+			"items.armor.MythicShadowbladesCloak",
+			"items.weapon.melee.MythicShadowbladesDirk",
+			"items.rings.MythicShadowbladesRing",
+			"items.MythicShadowbladesMask",
+			"items.MythicShadowbladesToken",
+			"items.armor.MythicWardensHide",
+			"items.weapon.melee.MythicWardensGlaive",
+			"items.rings.MythicWardensRing",
+			"items.MythicWardensHorn",
+			"items.MythicWardensTotem",
+			"items.armor.MythicDuelistsCoat",
+			"items.weapon.melee.MythicDuelistsRapier",
+			"items.rings.MythicDuelistsSignet",
+			"items.MythicDuelistsGlove",
+			"items.MythicDuelistsMedal",
+			"items.armor.MythicSaintsVestment",
+			"items.weapon.melee.MythicSaintsMace",
+			"items.rings.MythicSaintsHalo",
+			"items.MythicSaintsChalice",
+			"items.MythicSaintsRelic" };
+
+	private static final String[] TIER9_ITEMS = {
+			"items.armor.GodforgedWarlordsPlate",
+			"items.weapon.melee.GodforgedWarlordsGreatsword",
+			"items.rings.GodforgedWarlordsSignet",
+			"items.GodforgedWarlordsBanner",
+			"items.GodforgedWarlordsCrest",
+			"items.armor.GodforgedArchmagesRobe",
+			"items.weapon.melee.GodforgedArchmagesStaff",
+			"items.rings.GodforgedArchmagesBand",
+			"items.GodforgedArchmagesOrb",
+			"items.GodforgedArchmagesSigil",
+			"items.armor.GodforgedShadowbladesCloak",
+			"items.weapon.melee.GodforgedShadowbladesDirk",
+			"items.rings.GodforgedShadowbladesRing",
+			"items.GodforgedShadowbladesMask",
+			"items.GodforgedShadowbladesToken",
+			"items.armor.GodforgedWardensHide",
+			"items.weapon.melee.GodforgedWardensGlaive",
+			"items.rings.GodforgedWardensRing",
+			"items.GodforgedWardensHorn",
+			"items.GodforgedWardensTotem",
+			"items.armor.GodforgedDuelistsCoat",
+			"items.weapon.melee.GodforgedDuelistsRapier",
+			"items.rings.GodforgedDuelistsSignet",
+			"items.GodforgedDuelistsGlove",
+			"items.GodforgedDuelistsMedal",
+			"items.armor.GodforgedSaintsVestment",
+			"items.weapon.melee.GodforgedSaintsMace",
+			"items.rings.GodforgedSaintsHalo",
+			"items.GodforgedSaintsChalice",
+			"items.GodforgedSaintsRelic" };
+
 	private static final String[] TALENTS = {
 			"IRONCLAD",
 			"BLOODIED_RESOLVE",
@@ -174,6 +270,9 @@ public class ModContentTest {
 		l.addAll( java.util.Arrays.asList( ITEMS ) );
 		l.addAll( java.util.Arrays.asList( CLASS_ITEMS ) );
 		l.addAll( java.util.Arrays.asList( YOG_ITEMS ) );
+		l.addAll( java.util.Arrays.asList( TIER7_ITEMS ) );
+		l.addAll( java.util.Arrays.asList( TIER8_ITEMS ) );
+		l.addAll( java.util.Arrays.asList( TIER9_ITEMS ) );
 		return l.toArray( new String[0] );
 	}
 
@@ -738,6 +837,187 @@ public class ModContentTest {
 		assertEquals( 6, h.talents.size() );
 		assertEquals( 0, h.pointsInTalent( Talent.IRONCLAD ) );
 		clearTalents( h );
+	}
+
+	@Test
+	public void theTierSetsAreWiredAndStrongerThanTheirOriginals() throws Exception {
+		String[][] lists = { TIER7_ITEMS, TIER8_ITEMS, TIER9_ITEMS };
+		int[] firstSet = { xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T7, xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T8, xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T9 };
+		for (int k = 0; k < 3; k++) {
+			assertEquals( 30, lists[k].length );
+			for (int i = 0; i < 30; i++) {
+				Class<?> c = Class.forName( P + lists[k][i] );
+				assertEquals( lists[k][i] + ": its set", firstSet[k] + i / 5, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ) );
+				assertEquals( lists[k][i] + ": its tier", 7 + k, ((xyz.gabriwar.warpedpixeldungeon.items.SetTier)c.getDeclaredConstructor().newInstance()).setTier() );
+			}
+		}
+		//stronger than the tier 6 piece it is made from
+		assertEquals( new xyz.gabriwar.warpedpixeldungeon.items.armor.WarlordsPlate().DRMax( 3 ) + 6, new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate().DRMax( 3 ) );
+		assertEquals( Math.round( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().max( 2 ) * 1.25f ), new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword().max( 2 ) );
+		assertEquals( Math.round( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().max( 2 ) * 1.8f ), new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.GodforgedWarlordsGreatsword().max( 2 ) );
+		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate().desc().contains( "Godforged Warlord's Regalia" ) );
+	}
+
+	@Test
+	public void eachRatingDropsItsTierAndEachTierItsLevels() {
+		int[] n = new int[10];
+		for (int i = 0; i < 20000; i++) n[EndgameLoot.tierOfRating( 7.4f )]++;
+		assertEquals( 0, n[6] ); assertEquals( 0, n[8] + n[9] - n[8] );
+		assertEquals( "7.4 is 60% tier 7", 0.60, n[7] / 20000.0, 0.03 );
+		assertEquals( "and 40% tier 8", 0.40, n[8] / 20000.0, 0.03 );
+		for (int i = 0; i < 200; i++) {
+			assertEquals( 6, EndgameLoot.tierOfRating( 6.0f ) );
+			assertEquals( 6, EndgameLoot.tierOfRating( 3.0f ) );
+			assertEquals( 7, EndgameLoot.tierOfRating( 7.0f ) );
+			assertEquals( 8, EndgameLoot.tierOfRating( 8.0f ) );
+			assertEquals( 9, EndgameLoot.tierOfRating( 9.0f ) );
+			assertEquals( 9, EndgameLoot.tierOfRating( 12.0f ) );
+		}
+		//each place's rating
+		assertEquals( 6.0f, EndgameLoot.zoneRating( 0, 0 ), 0.001f );
+		assertEquals( 6.6f, EndgameLoot.zoneRating( 1, 0 ), 0.001f );
+		assertEquals( 7.4f, EndgameLoot.zoneRating( 2, 0 ), 0.001f );
+		assertEquals( "each clearing is half a tier more", 8.4f, EndgameLoot.zoneRating( 2, 2 ), 0.001f );
+		assertEquals( 9.0f, EndgameLoot.zoneRating( 2, 9 ), 0.001f );
+		assertEquals( 7.5f, EndgameLoot.minesRating( 56 ), 0.001f );
+		assertEquals( 8.3f, EndgameLoot.minesRating( 64 ), 0.001f );
+		assertEquals( 7.0f, EndgameLoot.ASCENT_RATING, 0.001f );
+		assertEquals( 8.0f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.RATING, 0.001f );
+		//the pieces a class gets at each tier are its own five, at the levels that tier starts at
+		Hero h = Dungeon.hero;
+		HeroClass keep = h.heroClass;
+		try {
+			HeroClass[] order = { HeroClass.WARRIOR, HeroClass.MAGE, HeroClass.ROGUE, HeroClass.HUNTRESS, HeroClass.DUELIST, HeroClass.CLERIC };
+			for (int tier = 6; tier <= 9; tier++) {
+				for (int i = 0; i < order.length; i++) {
+					h.heroClass = order[i];
+					int set = (tier == 6 ? 6 : tier == 7 ? 13 : tier == 8 ? 19 : 25) + i;
+					Set<Class<?>> want = new HashSet<>( java.util.Arrays.asList( xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( set ) ) );
+					Set<Class<?>> seen = new HashSet<>();
+					for (int k = 0; k < 1500; k++) {
+						Item it = EndgameLoot.rollClassSet( order[i], tier );
+						seen.add( it.getClass() );
+						assertFalse( it.cursed );
+						int lo = tier == 6 ? 1 : 2 * (tier - 6), hi = tier == 6 ? 3 : 2 * (tier - 6) + 2;
+						boolean leveled = it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor
+								|| (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon && !(it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MagesStaff));
+						if (leveled) assertTrue( "tier " + tier + " " + it.getClass().getSimpleName() + " at +" + it.level(), it.level() >= lo && it.level() <= hi );
+						if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring) {
+							int rlo = tier == 6 ? 0 : 2 * (tier - 6);
+							assertTrue( "ring " + it.level(), it.level() >= rlo && it.level() <= rlo + 2 );
+						}
+					}
+					assertEquals( "tier " + tier + " " + order[i], want, seen );
+				}
+			}
+		} finally {
+			h.heroClass = keep;
+		}
+	}
+
+	@Test
+	public void theTierSetBonusesScale() {
+		int T7 = xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T7, T8 = xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T8, T9 = xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T9;
+		int[] a = new int[31];
+		a[T7] = 5;
+		xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( "T7 warrior damage: 4 steps of 6% at x1.25", 1.30f, e.damage, 0.0001f );
+		assertEquals( 0.85f, e.taken, 0.0001f );
+		assertEquals( 0.05f, e.lifesteal, 0.0001f );
+		assertEquals( 0.3125f, e.lowHp, 0.0001f );
+		a = new int[31]; a[T9] = 5;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( "T9 warrior is double", 1.48f, e.damage, 0.0001f );
+		assertEquals( 0.76f, e.taken, 0.0001f );
+		a = new int[31]; a[T8 + 1] = 5;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( "T8 mage wand damage", 1.48f, e.wandDamage, 0.0001f );
+		assertEquals( 1.48f, e.wandRecharge, 0.0001f );
+		assertEquals( 0.15f, e.freeZap, 0.0001f );
+		assertEquals( 0.075f, e.zapBarrier, 0.0001f );
+		a = new int[31]; a[T9 + 5] = 5;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( "T9 cleric regenerates faster, but never faster than every 6 turns", 6, e.regenEvery );
+		assertEquals( 0.06f, e.barrierPct, 0.0001f );
+		assertEquals( 0.10f, e.lifesteal, 0.0001f );
+		//the original sets are exactly as they were
+		a = new int[31]; a[6] = 5;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( 1.24f, e.damage, 0.0001f );
+		assertEquals( 0.88f, e.taken, 0.0001f );
+		//a tier 6 set and a tier 7 set of the same class add together
+		a = new int[31]; a[6] = 2; a[T7] = 2;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( a );
+		assertEquals( 1f + 0.06f + 0.075f, e.damage, 0.0001f );
+	}
+
+	@Test
+	public void theBonusStagesAreHarderAndPayTierEight() {
+		//harder: every enemy on a bonus floor is stronger than the main floor of that depth, a little more each floor
+		assertEquals( 1.15f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 1, 16 ), 0.0001f );
+		assertEquals( 1.27f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 1, 19 ), 0.0001f );
+		assertEquals( 1.20f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 2, 21 ), 0.0001f );
+		assertEquals( 1.36f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 2, 25 ), 0.0001f );
+		for (int d = 1; d <= 30; d++) {
+			assertEquals( "the main dungeon is untouched", 1f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 0, d ), 0f );
+			assertEquals( "so are the other branches", 1f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 5, d ), 0f );
+		}
+		assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 1, 14 ), 0f );   //the mining floors
+		assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 2, 22 ) > xyz.gabriwar.warpedpixeldungeon.levels.SideStages.powerAt( 1, 17 ) );
+		int bk = Dungeon.branch, dk = Dungeon.depth;
+		try {
+			Dungeon.branch = 2; Dungeon.depth = 22;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( "the shared enemy-strength function carries it", 1.24f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0.0001f );
+			assertEquals( 1.12f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.skillModifier( rat ), 0.0001f );
+			Dungeon.branch = 0;
+			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0f );
+		} finally {
+			Dungeon.branch = bk; Dungeon.depth = dk;
+		}
+
+		//richer: the Vault's and the ice floors hold tier 8 pieces (and nothing higher or lower in the class sets)
+		Set<String> tier8 = new HashSet<>( java.util.Arrays.asList( TIER8_ITEMS ) );
+		int found8 = 0, wrong = 0, floors = 0;
+		Dungeon.generatedLevels.clear();
+		try {
+			int[][] stages = { { 1, 16 }, { 1, 17 }, { 1, 18 }, { 1, 19 }, { 2, 21 }, { 2, 22 }, { 2, 23 }, { 2, 24 } };
+			for (int rep = 0; rep < 4; rep++) {
+				for (int[] st : stages) {
+					Dungeon.branch = st[0]; Dungeon.depth = st[1];
+					Level level = Dungeon.newLevel();
+					assertFalse( "stage " + st[0] + "/" + st[1] + " is a dead end", level instanceof xyz.gabriwar.warpedpixeldungeon.levels.DeadEndLevel );
+					floors++;
+					for (xyz.gabriwar.warpedpixeldungeon.items.Heap heap : level.heaps.valueList()) {
+						for (Item it : heap.items) {
+							if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetTier || java.util.Arrays.asList( CLASS_ITEMS ).contains( it.getClass().getName().replace( P, "" ) )) {
+								if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetTier && ((xyz.gabriwar.warpedpixeldungeon.items.SetTier)it).setTier() == 8) found8++; else wrong++;
+							}
+						}
+					}
+				}
+			}
+		} finally {
+			Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.generatedLevels.clear();
+		}
+		assertTrue( "tier 8 pieces on " + floors + " bonus floors: " + found8, found8 >= 1 );
+		assertEquals( "no other class tier drops on a bonus floor", 0, wrong );
+
+		//the ice boss's hoard
+		try {
+			Dungeon.branch = 2; Dungeon.depth = 25;
+			Level boss = Dungeon.newLevel();
+			assertTrue( "the ice boss level", boss instanceof xyz.gabriwar.warpedpixeldungeon.levels.FrozenBossLevel );
+			int cell = boss.randomDestination( null );
+			xyz.gabriwar.warpedpixeldungeon.levels.SideStages.bossHoard( boss, cell );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap hoard = boss.heaps.get( cell );
+			assertNotNull( hoard );
+			assertTrue( "the hoard holds 4 items, got " + hoard.items.size(), hoard.items.size() >= 4 );
+		} finally {
+			Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.generatedLevels.clear();
+		}
 	}
 
 	@Test
