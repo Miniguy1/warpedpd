@@ -77,12 +77,18 @@ public class EndgameLoot {
 	//tier 7 six times in ten and tier 8 four times in ten. The harder the place, the higher its rating.
 
 	/** the rating of the floors rebuilt on the climb with the cursed amulet */
-	public static final float ASCENT_RATING = 7.0f;
+	public static final float ASCENT_RATING = 6.0f;
 
 	/** the highest tier the loot can be: 7 in the first run through the dungeon, 8 from the first new cycle
 	 *  (New Game+), 9 from the second. The top tiers are the new cycles' reward. */
 	public static int maxTier() {
-		return 7 + Math.min( 2, Math.max( 0, Cycle.number ) );
+		//tier 7 is the most a first run or the first new cycle can find (a low chance, from bosses); then one more each cycle
+		return 7 + Math.min( 2, Math.max( 0, Cycle.number - 1 ) );
+	}
+
+	/** the share of the dungeon's item drops that are pieces of the hero's own class set, which grows with the cycle as the general pool (tier 5) falls behind */
+	public static float classShare() {
+		return Cycle.number <= 1 ? CLASS_SHARE : Cycle.number == 2 ? 0.60f : Cycle.number == 3 ? 0.85f : 1f;
 	}
 
 	/** the tier a rating drops on this roll: its whole part, or the next one up with the fraction's
@@ -104,20 +110,20 @@ public class EndgameLoot {
 
 	/** the rating of a plaza zone's loot: the zone's own, and half a tier more for each time it has been cleared */
 	public static float zoneRating( int zone, int zoneTier ) {
-		float base = zone == 0 ? 6.0f : zone == 1 ? 6.6f : 7.4f;
-		return Math.min( 9f, base + 0.5f * zoneTier );
+		//a plaza zone's loot: tier 6, and a small chance of 7 that grows a little with the zone and with each clearing
+		return Math.min( 9f, 6.0f + 0.05f * zone + 0.05f * zoneTier );
 	}
 
 	/** the rating of a dark mine floor: 7.5 at the top, 8.3 at the bottom (the boss floor pays more) */
 	public static float minesRating( int depth ) {
-		return Math.max( 7.5f, Math.min( 8.3f, 7.5f + 0.1f * (depth - 56) ) );
+		return Math.max( 6.1f, Math.min( 6.4f, 6.1f + 0.02f * (depth - 56) ) );
 	}
 
 	/** a random new item for this rating: a piece of the hero's own class set of the tier it drops, three
 	 *  times in ten, otherwise anything from the general pool */
 	public static Item rollRated( float rating ) {
 		Hero h = Dungeon.hero;
-		if (h != null && h.heroClass != null && Random.Float() < CLASS_SHARE) {
+		if (h != null && h.heroClass != null && Random.Float() < classShare()) {
 			return rollClassSet( h.heroClass, tierOfRating( rating ), excessLevels( rating ) );
 		}
 		return rollGeneral();
@@ -188,7 +194,7 @@ public class EndgameLoot {
 	public static Item rollYog() {
 		//the Yog-Forged set is a new cycle's reward: in the first run the same place pays the best the run can
 		//offer, a tier 7 piece of the hero's own set with two bonus levels
-		if (Cycle.number < 1) {
+		if (Cycle.number < 3) {
 			Hero h = Dungeon.hero;
 			return h != null && h.heroClass != null ? rollClassSet( h.heroClass, 7, 2 ) : rollGeneral();
 		}

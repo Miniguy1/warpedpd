@@ -23,6 +23,7 @@ package xyz.gabriwar.warpedpixeldungeon.levels;
 
 import xyz.gabriwar.warpedpixeldungeon.Cycle;
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
+import xyz.gabriwar.warpedpixeldungeon.Pacts;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy;
@@ -69,10 +70,42 @@ public final class ClimbEvents {
 		return NONE;
 	}
 
-	/** may a floor hold an event? Only the dungeon proper, in a cycle, on a floor rebuilt for the climb. */
+	/** may a floor hold an event? The dungeon proper's ordinary floors (not the boss floors, nor the last) */
+	public static boolean eligible( int branch, int depth ){
+		return branch == 0 && depth >= 1 && depth <= 24 && depth % 5 != 0;
+	}
+
+	/** Every block of five floors (1 to 5, 6 to 10, and so on) has one ordinary floor that always holds an event,
+	 *  picked by the world's seed and the cycle: so there is never a stretch of five floors without one. */
+	public static boolean forced( long seed, int cycle, int depth ){
+		if (!eligible( 0, depth )) return false;
+		int block = (depth - 1) / 5;
+		long h = seed * 0x9E3779B97F4A7C15L + cycle * 0xBF58476D1CE4E5B9L + block * 0x94D049BB133111EBL;
+		h ^= h >>> 31;
+		h *= 0xD6E8FEB86659FD93L;
+		h ^= h >>> 29;
+		int index = (int)Math.floorMod( h, 4L );
+		return depth == block * 5 + 1 + index;
+	}
+
+	/** an event that is not "nothing" */
+	public static int pickEvent(){
+		int total = 0;
+		for (int e = 1; e < WEIGHTS.length; e++) total += WEIGHTS[e];
+		int r = Random.Int( total );
+		for (int e = 1; e < WEIGHTS.length; e++){
+			if (r < WEIGHTS[e]) return e;
+			r -= WEIGHTS[e];
+		}
+		return BOUNTY;
+	}
+
+	/** a newly built floor of a new cycle: the forced floor of its block always holds an event, the others one time in four */
 	public static void roll( Level level ){
-		if (Cycle.number <= 0 || Dungeon.branch != 0) return;
-		apply( level, pick() );
+		if (Cycle.number <= 0 || !eligible( Dungeon.branch, Dungeon.depth )) return;
+		boolean force = forced( Dungeon.seed, Cycle.number, Dungeon.depth );
+		if (!force && Random.Float() >= 0.25f + Pacts.eventBonus()) return;
+		apply( level, pickEvent() );
 	}
 
 	public static void apply( Level level, int event ){
@@ -84,19 +117,19 @@ public final class ClimbEvents {
 				spawn( level, true );
 				break;
 			case BLOOD_MOON:
-				EndgameLoot.populate( level, 1f, 0.5f, rating );
+				EndgameLoot.populate( level, 1f, 0.5f, rating + 0.1f );
 				break;
 			case HUNTED:
 				for (int i = 0; i < 5; i++) spawn( level, false );
 				break;
 			case CACHE:
-				EndgameLoot.populate( level, 1f, 1f, rating + 0.5f );
-				EndgameLoot.populate( level, 1f, 0.5f, rating + 0.5f );
+				EndgameLoot.populate( level, 1f, 1f, rating + 0.15f );
+				EndgameLoot.populate( level, 1f, 0.5f, rating + 0.15f );
 				int shardCell = level.randomDestination( null );
 				if (shardCell != -1) level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( 2 + Cycle.number ), shardCell );
 				break;
 			case CURSED_CHEST:
-				placeCursedChest( level, rating + 1f );
+				placeCursedChest( level, rating + 0.25f );
 				break;
 			case REMATCH:
 				spawnRematch( level );
@@ -166,7 +199,7 @@ public final class ClimbEvents {
 	}
 
 	/** one enemy native to this depth, placed away from the entrance; a bounty's is made into a hunter */
-	static Mob spawn( Level level, boolean bounty ){
+	public static Mob spawn( Level level, boolean bounty ){
 		ArrayList<Class<? extends Mob>> rotation = MobSpawner.getMobRotation( Dungeon.depth );
 		if (rotation == null || rotation.isEmpty()) return null;
 		Mob m = Reflection.newInstance( Random.element( rotation ) );

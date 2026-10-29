@@ -108,6 +108,7 @@ public class GearSets {
 
 	public static int tierOfSet( int set ) {
 		if (set == YOG) return 9;
+		if (set < GENERIC_SETS) return 5;   //the general sets: tier 5
 		if (set < FIRST_T7) return 6;
 		if (set < FIRST_T8) return 7;
 		if (set < FIRST_T9) return 8;
@@ -126,7 +127,7 @@ public class GearSets {
 		Class<?> c = pieceClass( it );
 		int s = setOf( c );
 		if (s >= 0) return tierOfSet( s );
-		for (Class<?> x : EXTRA_GEAR) if (x == c) return 6;
+		for (Class<?> x : EXTRA_GEAR) if (x == c) return 5;
 		return -1;
 	}
 
@@ -455,8 +456,8 @@ public class GearSets {
 		int have = Dungeon.hero == null ? 0 : pieceCounts( Dungeon.hero )[s];
 		String where = "";
 		int tier = item instanceof SetTier ? ((SetTier)item).setTier() : 6;
-		if (tier == 8 || s == YOG) where = "\n\nOnly found in a new cycle (New Game+).";
-		else if (tier == 9) where = "\n\nOnly found from the second new cycle (cycle 2) on.";
+		if (tier == 8) where = "\n\nOnly found from the second new cycle (cycle 2) on.";
+		else if (tier == 9 || s == YOG) where = "\n\nOnly found from the third new cycle (cycle 3) on.";
 		return "\n\n_Set: " + NAMES[s] + "_ (" + have + "/" + PIECES[s].length + " owned), a tier " + tierOfSet( s ) + " piece. Each piece beyond the first: "
 				+ PER_TIER[s] + ". " + EXTRA[s] + where;
 	}

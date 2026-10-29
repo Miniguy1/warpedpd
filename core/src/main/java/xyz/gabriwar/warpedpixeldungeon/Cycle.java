@@ -116,6 +116,11 @@ public final class Cycle {
 		if (Dungeon.level != null && Dungeon.level.climbEvent == ClimbEvents.BLOOD_MOON && affects( Dungeon.branch, Dungeon.depth )){
 			p *= ClimbEvents.BLOOD_MOON_POWER;
 		}
+		if (number > 0 && affects( Dungeon.branch, Dungeon.depth )){
+			p *= Pacts.hardened();
+			//the bosses are tougher than the rest
+			if (Char.hasProp( ch, Char.Property.BOSS ) && !Char.hasProp( ch, Char.Property.MINIBOSS )) p *= bossBoost( number );
+		}
 		return p;
 	}
 
@@ -127,8 +132,20 @@ public final class Cycle {
 	 *  run's climb paid) where the enemies match the old bottom floor, a tier more for every 16 depths of
 	 *  strength after it. It carries on across cycles, so a new cycle never pays less than the last ended on. */
 	public static float lootRating( int cycle, int depth ){
-		if (cycle <= 0) return Math.min( 9f, 6f + depth / 26f );
-		return Math.min( 9f, 7f + (effectiveDepth( cycle, depth ) - 24f) / 16f );
+		//the first run and the first new cycle pay tier 6 (and the plain pool, tier 5); each later cycle starts a
+		//tier higher and climbs through it over the dungeon's floors: cycle 2 is 6 to 7, cycle 3 is 7 to 8, cycle 4 is 8 to 9
+		float base = cycle <= 1 ? 6f : Math.min( 9f, (cycle + 4) + 0.9f * (Math.max( 1, Math.min( 26, depth ) ) - 1) / 25f );
+		return Math.min( 9f, base + (cycle > 0 ? Pacts.lootBonus() : 0f) );
+	}
+
+	/** how much tougher a boss is than the cycle's ordinary enemies on its floor */
+	public static float bossBoost( int cycle ){
+		return Math.min( 3f, 1.5f + 0.25f * (cycle - 1) );
+	}
+
+	/** the pact of swift foes */
+	public static float enemySpeed( Char ch ){
+		return scaled( ch ) && number > 0 && affects( Dungeon.branch, Dungeon.depth ) ? Pacts.enemySpeed() : 1f;
 	}
 
 	/** is the door's new-cycle offer open? Only once the climb is done and the curse lifted. */
@@ -230,7 +247,8 @@ public final class Cycle {
 			GLog.n( "The " + mob.name() + " does not fall alone: its death calls up more." );
 		}
 		if (!bounty && !(boss && number > 0 && affects( Dungeon.branch, Dungeon.depth ))) return;
-		float rating = lootRating( number, Dungeon.depth ) + (bounty ? 1.5f : 1.0f);
+		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty bb0 = mob.buff( Bounty.class );
+		float rating = lootRating( number, Dungeon.depth ) + (bounty ? 0.3f + 0.15f * ((bb0 == null ? 1 : bb0.boost) - 1) : 0.2f);
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty bb = mob.buff( Bounty.class );
 		int boost = bb == null ? 1 : bb.boost;
 		int items = bounty ? 3 + 2 * (boost - 1) : 2;
@@ -241,7 +259,7 @@ public final class Cycle {
 			Dungeon.level.drop( EndgameLoot.rollClassSet( Dungeon.hero.heroClass, EndgameLoot.tierOfRating( rating ) ), mob.pos );
 		}
 		//shards for reforging (items/CycleShard)
-		Dungeon.level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( (bounty ? 3 : 2) + number + 3 * (boost - 1) ), mob.pos );
+		Dungeon.level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( (bounty ? 3 : 2) + number + 3 * (boost - 1) + Pacts.shardBonus() ), mob.pos );
 		if (bounty){
 			int gold = Random.NormalIntRange( 150, 250 ) * Math.max( 1, number ) + 30 * Dungeon.depth;
 			Dungeon.level.drop( new Gold( gold ), mob.pos );

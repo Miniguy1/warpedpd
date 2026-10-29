@@ -605,7 +605,7 @@ public class ModContentTest {
 			}
 			Set<Class<?>> yog = new HashSet<>();
 			int cy = Cycle.number;
-			Cycle.number = 1;
+			Cycle.number = 3;
 			try {
 				for (int k = 0; k < 3000; k++) yog.add( EndgameLoot.rollYog().getClass() );
 			} finally {
@@ -872,7 +872,7 @@ public class ModContentTest {
 	@Test
 	public void eachRatingDropsItsTierAndEachTierItsLevels() {
 		int cycleKeep = Cycle.number;
-		Cycle.number = 2;   //every tier open
+		Cycle.number = 3;   //every tier open
 		try {
 			eachRatingBody();
 		} finally {
@@ -1001,7 +1001,7 @@ public class ModContentTest {
 		Set<String> tier8 = new HashSet<>( java.util.Arrays.asList( TIER8_ITEMS ) );
 		int found8 = 0, wrong = 0, floors = 0;
 		int cycleKeepB = Cycle.number;
-		Cycle.number = 1;   //tier 8 is a new cycle's
+		Cycle.number = 3;   //tiers 7 and 8 are this cycle's
 		Dungeon.generatedLevels.clear();
 		try {
 			int[][] stages = { { 1, 16 }, { 1, 17 }, { 1, 18 }, { 1, 19 }, { 2, 21 }, { 2, 22 }, { 2, 23 }, { 2, 24 } };
@@ -1014,7 +1014,7 @@ public class ModContentTest {
 					for (xyz.gabriwar.warpedpixeldungeon.items.Heap heap : level.heaps.valueList()) {
 						for (Item it : heap.items) {
 							if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetTier || java.util.Arrays.asList( CLASS_ITEMS ).contains( it.getClass().getName().replace( P, "" ) )) {
-								if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetTier && ((xyz.gabriwar.warpedpixeldungeon.items.SetTier)it).setTier() == 8) found8++; else wrong++;
+								if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetTier && ((xyz.gabriwar.warpedpixeldungeon.items.SetTier)it).setTier() >= 7 && ((xyz.gabriwar.warpedpixeldungeon.items.SetTier)it).setTier() <= 8) found8++; else wrong++;
 							}
 						}
 					}
@@ -1055,11 +1055,17 @@ public class ModContentTest {
 		assertEquals( "not the extra stages past the bottom", 1f, Cycle.powerAt( 3, 0, 28 ), 0f );
 		assertEquals( 1f, Cycle.skillAt( 0, 0, 8 ), 0f );
 		assertEquals( 1f, Cycle.expFactorAt( 0, 0, 8 ), 0f );
-		assertEquals( "the first floor of cycle 1 pays what the last run's climb did", 7.0f, Cycle.lootRating( 1, 1 ), 0.01f );
-		assertEquals( 8.25f, Cycle.lootRating( 1, 26 ), 0.01f );
-		assertEquals( "cycle 2 starts where cycle 1 ended", Cycle.lootRating( 1, 26 ), Cycle.lootRating( 2, 1 ), 0.01f );
-		assertTrue( Cycle.lootRating( 1, 5 ) < Cycle.lootRating( 1, 20 ) );
-		assertTrue( Cycle.lootRating( 2, 5 ) > Cycle.lootRating( 1, 5 ) );
+		//the loot ladder: tier 6 in the first run and the first new cycle, then a tier higher each cycle
+		assertEquals( 6.0f, Cycle.lootRating( 0, 5 ), 0.001f );
+		assertEquals( 6.0f, Cycle.lootRating( 1, 1 ), 0.001f );
+		assertEquals( 6.0f, Cycle.lootRating( 1, 26 ), 0.001f );
+		assertEquals( 6.0f, Cycle.lootRating( 2, 1 ), 0.001f );
+		assertEquals( 6.9f, Cycle.lootRating( 2, 26 ), 0.001f );
+		assertEquals( 7.0f, Cycle.lootRating( 3, 1 ), 0.001f );
+		assertEquals( 8.0f, Cycle.lootRating( 4, 1 ), 0.001f );
+		assertEquals( 9.0f, Cycle.lootRating( 5, 1 ), 0.001f );
+		assertTrue( Cycle.lootRating( 2, 5 ) < Cycle.lootRating( 2, 20 ) );
+		assertTrue( Cycle.lootRating( 3, 5 ) > Cycle.lootRating( 2, 5 ) );
 		assertEquals( 9f, Cycle.lootRating( 9, 26 ), 0f );
 
 		//the shared enemy-strength function carries it
@@ -1242,90 +1248,6 @@ public class ModContentTest {
 	}
 
 	@Test
-	public void theHigherTiersWaitForNewGamePlus() throws Exception {
-		int keep = Cycle.number;
-		Hero h = Dungeon.hero;
-		Set<String> yogNames = new HashSet<>(), t8 = new HashSet<>(), t9 = new HashSet<>(), t7 = new HashSet<>();
-		for (String n : YOG_ITEMS) yogNames.add( P + n );
-		for (String n : TIER7_ITEMS) t7.add( P + n );
-		for (String n : TIER8_ITEMS) t8.add( P + n );
-		for (String n : TIER9_ITEMS) t9.add( P + n );
-		try {
-			//the cap by cycle
-			Cycle.number = 0; assertEquals( 7, EndgameLoot.maxTier() );
-			Cycle.number = 1; assertEquals( 8, EndgameLoot.maxTier() );
-			Cycle.number = 2; assertEquals( 9, EndgameLoot.maxTier() );
-			Cycle.number = 7; assertEquals( 9, EndgameLoot.maxTier() );
-
-			//the bonus levels for a rating over the cap
-			Cycle.number = 0;
-			assertEquals( 0, EndgameLoot.excessLevels( 7.0f ) );
-			assertEquals( 0, EndgameLoot.excessLevels( 6.0f ) );
-			assertEquals( 1, EndgameLoot.excessLevels( 7.4f ) );
-			assertEquals( 2, EndgameLoot.excessLevels( 8.0f ) );
-			assertEquals( 4, EndgameLoot.excessLevels( 9.0f ) );
-			Cycle.number = 1;
-			assertEquals( 0, EndgameLoot.excessLevels( 8.0f ) );
-			assertEquals( 2, EndgameLoot.excessLevels( 9.0f ) );
-			Cycle.number = 2;
-			assertEquals( 0, EndgameLoot.excessLevels( 9.0f ) );
-
-			//no rating, however high, drops past the cap
-			for (int c = 0; c <= 2; c++) {
-				Cycle.number = c;
-				for (float r = 5f; r <= 12f; r += 0.5f) {
-					for (int i = 0; i < 300; i++) assertTrue( "cycle " + c + " rating " + r, EndgameLoot.tierOfRating( r ) <= 7 + c );
-				}
-				for (int i = 0; i < 100; i++) assertEquals( 7 + c, EndgameLoot.tierOfRating( 9.5f ) );
-			}
-
-			//the first run: tier 7 at most, no Yog-Forged, and a rich place's pieces start higher
-			Cycle.number = 0;
-			int t7found = 0;
-			for (int i = 0; i < 20000; i++) {
-				Item it = EndgameLoot.rollRated( 9.0f );
-				String n = it.getClass().getName();
-				assertFalse( "tier 8 in the first run: " + n, t8.contains( n ) );
-				assertFalse( "tier 9 in the first run: " + n, t9.contains( n ) );
-				assertFalse( "Yog-Forged in the first run: " + n, yogNames.contains( n ) );
-				if (t7.contains( n )) {
-					t7found++;
-					if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) assertTrue( "+4 over the cap: level " + it.level(), it.level() >= 6 && it.level() <= 8 );
-				}
-			}
-			assertTrue( "tier 7 pieces dropped: " + t7found, t7found > 1000 );
-			for (int i = 0; i < 400; i++) assertFalse( yogNames.contains( EndgameLoot.rollYog().getClass().getName() ) );
-
-			//the first new cycle opens tier 8 (and Yog-Forged), not 9
-			Cycle.number = 1;
-			int t8found = 0;
-			for (int i = 0; i < 20000; i++) {
-				String n = EndgameLoot.rollRated( 9.0f ).getClass().getName();
-				assertFalse( "tier 9 in the first new cycle: " + n, t9.contains( n ) );
-				if (t8.contains( n )) t8found++;
-			}
-			assertTrue( "tier 8 pieces dropped: " + t8found, t8found > 1000 );
-			boolean yog = false;
-			for (int i = 0; i < 400; i++) if (yogNames.contains( EndgameLoot.rollYog().getClass().getName() )) yog = true;
-			assertTrue( "Yog-Forged in a new cycle", yog );
-
-			//the second opens tier 9
-			Cycle.number = 2;
-			int t9found = 0;
-			for (int i = 0; i < 20000; i++) if (t9.contains( EndgameLoot.rollRated( 9.0f ).getClass().getName() )) t9found++;
-			assertTrue( "tier 9 pieces dropped: " + t9found, t9found > 1000 );
-
-			//the descriptions say so
-			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate().desc().contains( "New Game+" ) );
-			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate().desc().contains( "second new cycle" ) );
-			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate().desc().contains( "New Game+" ) );
-			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate().desc().contains( "New Game+" ) );
-		} finally {
-			Cycle.number = keep;
-		}
-	}
-
-	@Test
 	public void shardsReforgeTheHighTiers() throws Exception {
 		int keep = Cycle.number;
 		Hero h = Dungeon.hero;
@@ -1366,9 +1288,11 @@ public class ModContentTest {
 			Cycle.number = 0;
 			assertFalse( "tier 8 does not exist yet", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
 			Cycle.number = 1;
+			assertFalse( "tier 8 is not open in the first new cycle", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
+			Cycle.number = 2;
 			assertTrue( Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
 			assertFalse( "tier 9 waits for the second cycle", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate() ) );
-			Cycle.number = 2;
+			Cycle.number = 3;
 			assertTrue( Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate() ) );
 			assertFalse( "nothing above tier 9", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate() ) );
 			assertFalse( "Yog-Forged does not awaken", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate() ) );
@@ -1484,10 +1408,10 @@ public class ModContentTest {
 	@Test
 	public void bossesMutateInNewCycles() {
 		assertEquals( 0, BossMutation.count( 0 ) );
-		assertEquals( 1, BossMutation.count( 1 ) );
-		assertEquals( 2, BossMutation.count( 2 ) );
-		assertEquals( 3, BossMutation.count( 3 ) );
-		assertEquals( 3, BossMutation.count( 9 ) );
+		assertEquals( 2, BossMutation.count( 1 ) );
+		assertEquals( 3, BossMutation.count( 2 ) );
+		assertEquals( 4, BossMutation.count( 3 ) );
+		assertEquals( 4, BossMutation.count( 9 ) );
 		assertEquals( "Summoner, Frenzy", BossMutation.describe( BossMutation.SUMMONER | BossMutation.FRENZY ) );
 		int keep = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
 		Level lvKeep = Dungeon.level;
@@ -1508,7 +1432,7 @@ public class ModContentTest {
 				} else {
 					assertNotNull( m );
 					assertTrue( "every mutated boss summons", m.has( BossMutation.SUMMONER ) );
-					assertEquals( "cycle " + cycle + " mutations", Math.min( 3, cycle ), Integer.bitCount( m.mask ) );
+					assertEquals( "cycle " + cycle + " mutations", BossMutation.count( cycle ), Integer.bitCount( m.mask ) );
 				}
 				level.mobs.remove( goo );
 			}
@@ -1924,9 +1848,9 @@ public class ModContentTest {
 		assertEquals( 23, new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate().STRReq( 0 ) );
 		assertEquals( "a mage's staff too", 18, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ArchmagesStaff().STRReq( 0 ) );
 		assertEquals( 24, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.GodforgedArchmagesStaff().STRReq( 0 ) );
-		assertEquals( "the general pool is tier 6", 18, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker().STRReq( 0 ) );
-		assertEquals( 17, new xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire().STRReq( 0 ) );
-		assertEquals( "the lighter plate", 15, new xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate().STRReq( 0 ) );
+		assertEquals( "the general pool is tier 5", 16, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker().STRReq( 0 ) );
+		assertEquals( 15, new xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire().STRReq( 0 ) );
+		assertEquals( "the lighter plate", 13, new xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate().STRReq( 0 ) );
 		//a level still lowers it, as it always did
 		assertEquals( 15, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().STRReq( 6 ) );
 		//and a higher tier piece at its starting level still asks for more than a lower tier one at its own
@@ -1956,7 +1880,7 @@ public class ModContentTest {
 			if (!(o instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) && !(o instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon)) continue;
 			Item it = (Item)o;
 			int tier = xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( it );
-			assertTrue( name + " has no tier", tier >= 6 && tier <= 9 );
+			assertTrue( name + " has no tier", tier >= 5 && tier <= 9 );
 			int want = (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ? 17 : 18) + 2 * (tier - 6);
 			if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate) want -= 2;
 			int got = it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ? ((xyz.gabriwar.warpedpixeldungeon.items.armor.Armor)it).STRReq( 0 ) : ((xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon)it).STRReq( 0 );
@@ -1967,37 +1891,280 @@ public class ModContentTest {
 	}
 
 	@Test
-	public void lootTiersFollowTheDifficultyAcrossCycles() {
+	public void theTierLadderFollowsTheCycles() {
 		int keep = Cycle.number;
 		try {
-			//cycle 1: tier 7 where the enemies match the old bottom floor, tier 8 by the end
-			Cycle.number = 1;
-			for (int i = 0; i < 300; i++) assertEquals( 7, EndgameLoot.tierOfRating( Cycle.lootRating( 1, 1 ) ) );
-			for (int i = 0; i < 300; i++) assertEquals( 8, EndgameLoot.tierOfRating( Cycle.lootRating( 1, 26 ) ) );
-			int t8 = 0;
-			for (int i = 0; i < 6000; i++) if (EndgameLoot.tierOfRating( Cycle.lootRating( 1, 13 ) ) == 8) t8++;
-			assertEquals( "mid-cycle 1 is a mix of 7 and 8", 0.5, t8 / 6000.0, 0.1 );
-			//cycle 2 opens tier 9, and starts no lower than cycle 1 ended
-			Cycle.number = 2;
-			int t9 = 0, below8 = 0;
-			for (int i = 0; i < 8000; i++) {
-				int t = EndgameLoot.tierOfRating( Cycle.lootRating( 2, 1 ) );
-				if (t == 9) t9++;
-				if (t < 8) below8++;
+			//which tier is the most that can drop
+			Cycle.number = 0; assertEquals( 7, EndgameLoot.maxTier() );
+			Cycle.number = 1; assertEquals( 7, EndgameLoot.maxTier() );
+			Cycle.number = 2; assertEquals( 8, EndgameLoot.maxTier() );
+			Cycle.number = 3; assertEquals( 9, EndgameLoot.maxTier() );
+			Cycle.number = 8; assertEquals( 9, EndgameLoot.maxTier() );
+			//the share of drops that are class pieces (the rest are the plain tier 5 pool) grows with the cycle
+			Cycle.number = 0; assertEquals( 0.30f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 1; assertEquals( 0.30f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 2; assertEquals( 0.60f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 3; assertEquals( 0.85f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 4; assertEquals( 1.00f, EndgameLoot.classShare(), 0.001f );
+
+			//cycle 1 (and the first run): floors pay tier 6 and never 7; a boss has a low chance of 7
+			for (int c = 0; c <= 1; c++) {
+				Cycle.number = c;
+				for (int d : new int[]{ 1, 13, 24 }) for (int i = 0; i < 400; i++) assertEquals( 6, EndgameLoot.tierOfRating( Cycle.lootRating( c, d ) ) );
+				int t7 = 0;
+				for (int i = 0; i < 8000; i++) {
+					int t = EndgameLoot.tierOfRating( Cycle.lootRating( c, 10 ) + 0.2f );
+					assertTrue( "tier " + t, t == 6 || t == 7 );
+					if (t == 7) t7++;
+				}
+				assertEquals( "a boss: 1 in 5 for tier 7", 0.20, t7 / 8000.0, 0.03 );
 			}
-			assertEquals( "no tier 7 at the start of cycle 2", 0, below8 );
-			assertEquals( "cycle 2 floor 1 is 3 in 4 tier 8, 1 in 4 tier 9", 0.25, t9 / 8000.0, 0.04 );
-			for (int i = 0; i < 300; i++) assertEquals( 9, EndgameLoot.tierOfRating( Cycle.lootRating( 2, 26 ) ) );
-			//the bonus stages pay more in a harder cycle, and never less than before
-			assertEquals( 8.0f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 0, 16 ), 0f );
-			assertEquals( 8.6f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.bossRatingAt( 0, 25 ), 0f );
-			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 16 ) >= 8.0f );
+			//cycle 2: tiers 6 to 7 through the floors, a boss's chance of 8
+			Cycle.number = 2;
+			for (int i = 0; i < 300; i++) assertEquals( 6, EndgameLoot.tierOfRating( Cycle.lootRating( 2, 1 ) ) );
+			int late7 = 0, boss8 = 0;
+			for (int i = 0; i < 8000; i++) {
+				int t = EndgameLoot.tierOfRating( Cycle.lootRating( 2, 24 ) );
+				assertTrue( t == 6 || t == 7 );
+				if (t == 7) late7++;
+				if (EndgameLoot.tierOfRating( Cycle.lootRating( 2, 24 ) + 0.2f ) == 8) boss8++;
+			}
+			assertEquals( "late cycle 2 floors are mostly tier 7", 0.83, late7 / 8000.0, 0.04 );
+			assertTrue( "a cycle 2 boss can reach tier 8: " + boss8, boss8 > 0 );
+			//cycle 3: 7 to 8 (a boss's chance of 9), cycle 4: 8 to 9
+			Cycle.number = 3;
+			for (int i = 0; i < 300; i++) assertEquals( 7, EndgameLoot.tierOfRating( Cycle.lootRating( 3, 1 ) ) );
+			int boss9 = 0;
+			for (int i = 0; i < 8000; i++) if (EndgameLoot.tierOfRating( Cycle.lootRating( 3, 24 ) + 0.2f ) == 9) boss9++;
+			assertTrue( "a cycle 3 boss can reach tier 9: " + boss9, boss9 > 0 );
+			Cycle.number = 4;
+			for (int i = 0; i < 300; i++) assertEquals( 8, EndgameLoot.tierOfRating( Cycle.lootRating( 4, 1 ) ) );
+			Cycle.number = 5;
+			for (int i = 0; i < 300; i++) assertEquals( 9, EndgameLoot.tierOfRating( Cycle.lootRating( 5, 12 ) ) );
+
+			//the first run: no Yog-Forged, no tier 8 or 9, whatever the source
+			Cycle.number = 0;
+			Hero h = Dungeon.hero;
+			Set<String> forbidden = new HashSet<>();
+			for (String n : YOG_ITEMS) forbidden.add( P + n );
+			for (String n : TIER8_ITEMS) forbidden.add( P + n );
+			for (String n : TIER9_ITEMS) forbidden.add( P + n );
+			for (int i = 0; i < 20000; i++) assertFalse( forbidden.contains( EndgameLoot.rollRated( 9.5f ).getClass().getName() ) );
+			for (int i = 0; i < 300; i++) assertFalse( forbidden.contains( EndgameLoot.rollYog().getClass().getName() ) );
+			//the old sources, in the first run: tier 6 with a small chance of 7
+			assertEquals( 6.0f, EndgameLoot.ASCENT_RATING, 0.001f );
+			assertTrue( EndgameLoot.zoneRating( 2, 0 ) < 6.2f );
+			assertTrue( EndgameLoot.minesRating( 64 ) <= 6.4f && EndgameLoot.minesRating( 56 ) >= 6.1f );
+			assertEquals( 6.15f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 0, 16 ), 0.001f );
+			assertEquals( 6.35f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.bossRatingAt( 0, 25 ), 0.001f );
 			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 2, 16 ) > xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 16 ) );
-			assertEquals( "cycle 2's Vault pays tier 9", 9, EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 2, 16 ) ) );
 			Cycle.number = 1;
-			assertEquals( "cycle 1's Vault pays tier 8, never 9", 8, EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 19 ) ) );
+			for (int i = 0; i < 300; i++) assertTrue( EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.bossRatingAt( 1, 25 ) ) <= 7 );
+
+			//the item text says where each high tier turns up
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate().desc().contains( "second new cycle" ) );
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate().desc().contains( "third new cycle" ) );
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate().desc().contains( "third new cycle" ) );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate().desc().contains( "new cycle" ) );
 		} finally {
 			Cycle.number = keep;
+		}
+	}
+
+	@Test
+	public void everyFiveFloorsHoldAnEvent() {
+		//a block of five floors always has exactly one forced floor, never a boss floor, whatever the seed and cycle
+		int[] perIndex = new int[4];
+		for (int cycle = 1; cycle <= 6; cycle++) {
+			for (long seed = 1; seed <= 150; seed++) {
+				for (int block = 0; block < 5; block++) {
+					int found = 0, at = -1;
+					for (int depth = block * 5 + 1; depth <= block * 5 + 5; depth++) {
+						if (xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.forced( seed, cycle, depth )) { found++; at = depth; }
+					}
+					assertEquals( "cycle " + cycle + " seed " + seed + " block " + block, 1, found );
+					assertTrue( "never the boss floor", at % 5 != 0 );
+					if (cycle == 1 && block == 0) perIndex[at - 1]++;
+				}
+			}
+		}
+		for (int i = 0; i < 4; i++) assertTrue( "floor " + (i + 1) + " is chosen " + perIndex[i] + " of 150 times", perIndex[i] > 15 && perIndex[i] < 60 );
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.forced( 7, 1, 25 ) );
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.forced( 7, 1, 26 ) );
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.eligible( 1, 12 ) );   //a side branch
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.eligible( 0, 10 ) );   //a boss floor
+		//and the events picked for them are real ones
+		for (int i = 0; i < 2000; i++) assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.pickEvent() >= 1 && xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.pickEvent() <= 9 );
+
+		//in a real build of the floors: the forced floor of each block holds an event, on the way down, every time
+		int keep = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		try {
+			Cycle.number = 1; Dungeon.branch = 0;
+			for (int block = 0; block < 5; block++) {
+				int forcedFloor = -1;
+				for (int depth = block * 5 + 1; depth <= block * 5 + 4; depth++) if (xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.forced( Dungeon.seed, 1, depth )) forcedFloor = depth;
+				assertTrue( forcedFloor > 0 );
+				Dungeon.generatedLevels.clear();
+				Dungeon.depth = forcedFloor;
+				Level level = Dungeon.newLevel();
+				assertTrue( "floor " + forcedFloor + " has event " + level.climbEvent, level.climbEvent != xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE );
+			}
+			//the others: sometimes
+			int with = 0, without = 0;
+			for (int i = 0; i < 40; i++) {
+				int depth = 2;
+				while (xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.forced( Dungeon.seed, 1, depth ) || depth % 5 == 0) depth++;
+				Dungeon.generatedLevels.clear();
+				Dungeon.depth = depth;
+				if (Dungeon.newLevel().climbEvent != 0) with++; else without++;
+			}
+			assertTrue( "events on some of the other floors: " + with + "/" + without, with > 0 && without > 0 );
+		} finally {
+			Cycle.number = keep; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void eliteEnemiesHoldTheFloorsAndDropNoGear() {
+		int keep = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Pacts.reset();
+		Dungeon.generatedLevels.clear();
+		try {
+			Cycle.number = 0;
+			assertFalse( "no elites in the first run", xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.floorHasElites( 0, 7 ) );
+			Cycle.number = 1;
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.floorHasElites( 0, 7 ) );
+			assertFalse( "not the boss floors", xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.floorHasElites( 0, 5 ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.floorHasElites( 0, 25 ) );
+			assertFalse( "not a side branch", xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.floorHasElites( 1, 17 ) );
+			assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.count( 1, 1 ) );
+			assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.count( 1, 12 ) );
+			assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.count( 1, 20 ) );
+			assertEquals( "more in later cycles", 5, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.count( 3, 20 ) );
+			Pacts.set( Pacts.Pact.ELITE_PACK, true );
+			assertEquals( "the elite pack", 3, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.count( 1, 1 ) );
+			Pacts.reset();
+
+			//a real floor of cycle 1 holds elites: tougher, with an aura, paying more experience
+			int elitesSeen = 0;
+			for (int rep = 0; rep < 6; rep++) {
+				Dungeon.generatedLevels.clear();
+				Dungeon.branch = 0; Dungeon.depth = 7;
+				Level level = Dungeon.newLevel();
+				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) {
+					if (m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.class ) == null) continue;
+					elitesSeen++;
+					assertEquals( m.HT, m.HP );
+					assertNotNull( "an elite has an aura", m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.class ) );
+					assertTrue( "elite experience " + m.EXP, m.EXP >= 3 );
+				}
+			}
+			assertTrue( "elites on the floors: " + elitesSeen, elitesSeen >= 6 );
+
+			//what an elite leaves: gold or a shard, never gear
+			Dungeon.generatedLevels.clear();
+			Dungeon.depth = 9;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			int gold = 0, shard = 0, n = 300;
+			for (int i = 0; i < n; i++) {
+				xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+				xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( rat, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.class );
+				rat.pos = emptyCell( level );
+				rat.rollToDropLoot();
+				xyz.gabriwar.warpedpixeldungeon.items.Heap heap = level.heaps.get( rat.pos );
+				if (heap == null) continue;
+				for (Item it : heap.items) {
+					assertTrue( "an elite dropped " + it.getClass().getSimpleName(),
+							it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold || it instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard );
+					if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold++; else shard++;
+				}
+			}
+			assertEquals( "gold about six in ten", 0.60, gold / (double)n, 0.10 );
+			assertEquals( "a shard about one in eight", 0.125, shard / (double)n, 0.07 );
+		} finally {
+			Pacts.reset();
+			Cycle.number = keep; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void bossesAreToughestAndPactsOnlyHardenTheDungeon() {
+		int keep = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Pacts.reset();
+		Dungeon.generatedLevels.clear();
+		try {
+			assertEquals( 1.5f, Cycle.bossBoost( 1 ), 0.001f );
+			assertEquals( 1.75f, Cycle.bossBoost( 2 ), 0.001f );
+			assertEquals( 3.0f, Cycle.bossBoost( 9 ), 0.001f );
+			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 5;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( "a boss is tougher than the floor's ordinary enemies", Cycle.powerAt( 1, 0, 5 ) * 1.5f, Cycle.power( goo ), 0.001f );
+			assertEquals( Cycle.powerAt( 1, 0, 5 ), Cycle.power( rat ), 0.001f );
+
+			//the pacts: off until chosen, and each only hardens the dungeon
+			assertEquals( 0, Pacts.activeCount() );
+			assertEquals( 0f, Pacts.lootBonus(), 0f );
+			float floorRating = Cycle.lootRating( 1, 5 );
+			float base = Cycle.powerAt( 1, 0, 5 );
+			Pacts.set( Pacts.Pact.HARDENED, true );
+			assertEquals( base * 1.25f, Cycle.power( rat ), 0.001f );
+			Pacts.set( Pacts.Pact.SWIFT, true );
+			assertEquals( 1.25f, Cycle.enemySpeed( rat ), 0.001f );
+			Pacts.set( Pacts.Pact.WARLORD, true );
+			assertEquals( "every boss carries all four", 4, BossMutation.count( 1 ) );
+			Pacts.set( Pacts.Pact.CROWDED, true );
+			assertEquals( 3, Pacts.extraMobs( 10 ) );
+			Pacts.set( Pacts.Pact.HAUNTED, true );
+			assertEquals( 0.2f, Pacts.eventBonus(), 0.001f );
+			assertEquals( 5, Pacts.activeCount() );
+			assertEquals( "each vow is a tenth of a tier", floorRating + 0.5f, Cycle.lootRating( 1, 5 ), 0.001f );
+			assertEquals( 5, Pacts.shardBonus() );
+			Cycle.number = 0;
+			assertEquals( "no pact outside a new cycle", 1f, Cycle.power( rat ), 0f );
+			assertEquals( 1f, Cycle.enemySpeed( rat ), 0f );
+			Cycle.number = 1;
+			Dungeon.depth = 40;
+			assertEquals( "nor outside the dungeon", 1f, Cycle.enemySpeed( rat ), 0f );
+			Dungeon.depth = 5;
+
+			//crowded floors: more enemies on a floor
+			Dungeon.depth = 7;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			int before = level.mobs.size();
+			Pacts.crowd( level );
+			assertTrue( "crowded: " + before + " -> " + level.mobs.size(), level.mobs.size() > before );
+			Pacts.set( Pacts.Pact.CROWDED, false );
+			before = level.mobs.size();
+			Pacts.crowd( level );
+			assertEquals( before, level.mobs.size() );
+
+			//the pacts are saved with the run
+			Pacts.reset();
+			Pacts.set( Pacts.Pact.SWIFT, true );
+			Pacts.set( Pacts.Pact.RESTLESS, true );
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			Dungeon.storeAscentState( b );
+			Pacts.reset();
+			assertEquals( 0, Pacts.activeCount() );
+			Dungeon.restoreAscentState( b );
+			assertTrue( Pacts.isOn( Pacts.Pact.SWIFT ) );
+			assertTrue( Pacts.isOn( Pacts.Pact.RESTLESS ) );
+			assertFalse( Pacts.isOn( Pacts.Pact.HARDENED ) );
+			Dungeon.restoreAscentState( new com.watabou.utils.Bundle() );
+			assertEquals( "an old save has no pacts", 0, Pacts.activeCount() );
+		} finally {
+			Pacts.reset();
+			Cycle.number = keep; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
 		}
 	}
 

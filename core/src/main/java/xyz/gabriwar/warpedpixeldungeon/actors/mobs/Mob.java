@@ -1241,7 +1241,7 @@ public abstract class Mob extends Char {
 
 	@Override
 	public float speed() {
-		return super.speed() * AscensionChallenge.enemySpeedModifier(this);
+		return super.speed() * AscensionChallenge.enemySpeedModifier(this) * xyz.gabriwar.warpedpixeldungeon.Cycle.enemySpeed( this );
 	}
 
 	public final boolean surprisedBy( Char enemy ){
@@ -1511,6 +1511,11 @@ public abstract class Mob extends Char {
 	}
 	
 	public void rollToDropLoot(){
+		//an elite leaves gold or a shard, never gear
+		if (buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.class ) != null){
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.reward( this );
+			return;
+		}
 		//bosses always drop their loot - several postgame bosses have low
 		//maxLvl values and were dropping nothing for high-level heroes
 		if (Dungeon.hero.lvl > maxLvl + 2 && !properties().contains(Property.BOSS)

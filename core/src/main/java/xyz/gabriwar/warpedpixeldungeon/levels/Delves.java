@@ -741,11 +741,11 @@ public final class Delves {
 		//a zone's guardian also guards the new item pool: more of it the harder the zone
 		if (isZone( e )){
 			for (int i = 0; i < 2 + zoneId( e ) + Math.min( 4, zoneTier( e ) ); i++){
-				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollRated( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zoneId( e ), zoneTier( e ) ) + 0.5f ), mob.pos );
+				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollRated( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zoneId( e ), zoneTier( e ) ) + 0.2f ), mob.pos );
 			}
 			//always a piece of the hero's own class set, and the Vault's guardian also holds the Yog-Forged
 			if (Dungeon.hero != null && Dungeon.hero.heroClass != null){
-				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( Dungeon.hero.heroClass, xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zoneId( e ), zoneTier( e ) ) + 0.5f ) ), mob.pos );
+				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( Dungeon.hero.heroClass, xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zoneId( e ), zoneTier( e ) ) + 0.2f ) ), mob.pos );
 			}
 			//a plaza zone's guardian is a bounty board's zone contract
 			xyz.gabriwar.warpedpixeldungeon.BountyBoard.onZoneCleared();

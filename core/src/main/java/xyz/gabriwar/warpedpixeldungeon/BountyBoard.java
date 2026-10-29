@@ -92,7 +92,7 @@ public final class BountyBoard {
 			default: c.need = 1; c.shards = 5 + 2 * cy; break;
 		}
 		c.gold = 300 * cy;
-		c.rating = Cycle.lootRating( cy, 26 ) + 1f;
+		c.rating = Cycle.lootRating( cy, 26 ) + 0.2f;
 		return c;
 	}
 

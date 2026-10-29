@@ -93,7 +93,7 @@ public class Lockdown extends Buff {
 		Level lv = Dungeon.level;
 		lv.locked = false;
 		lv.climbEvent = ClimbEvents.NONE;
-		float rating = Cycle.lootRating( Cycle.number, Dungeon.depth ) + 1f;
+		float rating = Cycle.lootRating( Cycle.number, Dungeon.depth ) + 0.25f;
 		for (int i = 0; i < 3; i++) lv.drop( EndgameLoot.rollRated( rating ), target.pos );
 		lv.drop( new CycleShard().quantity( 3 + Cycle.number ), target.pos );
 		lv.drop( new Gold( Random.NormalIntRange( 100, 200 ) * Math.max( 1, Cycle.number ) ), target.pos );

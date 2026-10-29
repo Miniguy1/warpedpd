@@ -1576,6 +1576,10 @@ public class OverworldLevel extends Level {
 			msg.append( "\n_Bounty board_: three contracts for this cycle, paid in shards, gold and gear.\n" );
 			labels.add( "Bounty board" ); kinds.add( 3 );
 		}
+		if (xyz.gabriwar.warpedpixeldungeon.Cycle.number >= 1){
+			msg.append( "\n_Pacts_: " ).append( xyz.gabriwar.warpedpixeldungeon.Pacts.activeCount() ).append( " vows taken. Make the dungeon's enemies harder for better loot.\n" );
+			labels.add( "Pacts (" + xyz.gabriwar.warpedpixeldungeon.Pacts.activeCount() + ")" ); kinds.add( 4 );
+		}
 		labels.add( "Not now" ); kinds.add( -1 );
 		final String message = msg.toString();
 		com.watabou.noosa.Game.runOnRenderThread( () ->
@@ -1609,10 +1613,37 @@ public class OverworldLevel extends Level {
 						showLegacy();
 					} else if (kind == 3){
 						showBoard( hero );
+					} else if (kind == 4){
+						showPacts();
 					}
 				}
 			} ) );
 		return false;
+	}
+
+	//the pacts: tap one to take the vow or put it down. They only make the dungeon's side harder.
+	private void showPacts(){
+		final xyz.gabriwar.warpedpixeldungeon.Pacts.Pact[] all = xyz.gabriwar.warpedpixeldungeon.Pacts.Pact.values();
+		String[] labels = new String[all.length + 1];
+		StringBuilder msg = new StringBuilder( "Each vow you take makes the dungeon harder and its loot better: +0.1 of a tier to every loot rating, and a shard more from bosses and bounties. They bind only the dungeon's enemies, never you.\n\nNow: +" );
+		msg.append( xyz.gabriwar.warpedpixeldungeon.Pacts.activeCount() * 10 ).append( "% loot tier.\n" );
+		for (int i = 0; i < all.length; i++){
+			labels[i] = (xyz.gabriwar.warpedpixeldungeon.Pacts.isOn( all[i] ) ? "[ON] " : "[off] ") + all[i].label;
+			msg.append( "\n" ).append( all[i].label ).append( ": " ).append( all[i].effect );
+		}
+		labels[all.length] = "Done";
+		xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+				new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+						new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+								xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
+						"Pacts", msg.toString(), labels ){
+			@Override
+			protected void onSelect( int index ){
+				if (index >= all.length) return;
+				xyz.gabriwar.warpedpixeldungeon.Pacts.toggle( all[index] );
+				showPacts();
+			}
+		} );
 	}
 
 	//the bounty board: take a contract, then claim it when it is done

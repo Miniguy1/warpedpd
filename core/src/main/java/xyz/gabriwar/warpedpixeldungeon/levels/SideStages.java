@@ -40,19 +40,19 @@ public final class SideStages {
 	private SideStages(){}
 
 	/** the rating of a bonus stage's loot */
-	public static final float RATING = 8.0f;
+	public static final float RATING = 6.15f;
 	/** the rating of the ice boss's hoard */
-	public static final float BOSS_RATING = 8.6f;
+	public static final float BOSS_RATING = 6.35f;
 
 	/** a bonus stage's loot rating: 8, or in a new cycle half a tier above what the cycle's own floors pay
 	 *  there, so a harder cycle's Vault pays more */
 	public static float ratingAt( int cycle, int depth ){
-		return cycle > 0 ? Math.max( RATING, Math.min( 9f, Cycle.lootRating( cycle, depth ) + 0.5f ) ) : RATING;
+		return Math.min( 9f, Cycle.lootRating( Math.max( 1, cycle ), depth ) + 0.15f );
 	}
 
 	/** the ice boss's hoard: 8.6, or a tier and a half above the cycle's floor there */
 	public static float bossRatingAt( int cycle, int depth ){
-		return cycle > 0 ? Math.max( BOSS_RATING, Math.min( 9f, Cycle.lootRating( cycle, depth ) + 1.5f ) ) : BOSS_RATING;
+		return Math.min( 9f, Cycle.lootRating( Math.max( 1, cycle ), depth ) + 0.35f );
 	}
 
 	public static boolean isVault( int branch, int depth ){

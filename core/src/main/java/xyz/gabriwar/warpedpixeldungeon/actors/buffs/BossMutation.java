@@ -38,7 +38,7 @@ import com.watabou.utils.Reflection;
 import java.util.ArrayList;
 
 /**
- * The bosses of a new cycle mutate. Cycle 1 gives every boss the SUMMONER mutation; cycle 2 a second one, cycle 3 and on a third:
+ * The bosses of a new cycle mutate. Cycle 1 gives every boss the SUMMONER mutation and one more, cycle 2 three, cycle 3 and on all four:
  *  - SUMMONER: calls two more of the floor's enemies every 20 turns.
  *  - FRENZY: below half health it moves twice as fast.
  *  - WARDED: every 30 turns it grows a barrier of a tenth of its health.
@@ -71,7 +71,8 @@ public class BossMutation extends Buff {
 
 	/** how many mutations a boss has in this cycle: 1, 2, then 3 */
 	public static int count( int cycle ){
-		return Math.max( 0, Math.min( 3, cycle ) );
+		if (cycle <= 0) return 0;
+		return xyz.gabriwar.warpedpixeldungeon.Pacts.isOn( xyz.gabriwar.warpedpixeldungeon.Pacts.Pact.WARLORD ) ? 4 : Math.min( 4, cycle + 1 );
 	}
 
 	/** every boss on a floor of a later cycle gets its mutations */

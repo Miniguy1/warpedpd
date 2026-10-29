@@ -134,7 +134,7 @@ public class ClimbShrine extends NPC {
 					return false;
 				}
 				hero.HP -= cost;
-				for (int i = 0; i < 2; i++) level.drop( EndgameLoot.rollRated( rating + 1.5f ), hero.pos );
+				for (int i = 0; i < 2; i++) level.drop( EndgameLoot.rollRated( rating + 0.3f ), hero.pos );
 				GLog.n( "The idol drinks, and gives." );
 				return true;
 			}
@@ -145,13 +145,13 @@ public class ClimbShrine extends NPC {
 				}
 				Dungeon.gold -= Dungeon.gold / 2;
 				level.drop( new CycleShard().quantity( 3 + Cycle.number ), hero.pos );
-				level.drop( EndgameLoot.rollRated( rating + 1.5f ), hero.pos );
+				level.drop( EndgameLoot.rollRated( rating + 0.3f ), hero.pos );
 				GLog.n( "The gold is gone, and the idol is pleased." );
 				return true;
 			}
 			case 2: {
 				BossMutation.summon( hero, 6 );
-				for (int i = 0; i < 2; i++) level.drop( EndgameLoot.rollRated( rating + 2f ), hero.pos );
+				for (int i = 0; i < 2; i++) level.drop( EndgameLoot.rollRated( rating + 0.4f ), hero.pos );
 				level.drop( new CycleShard().quantity( 2 + Cycle.number ), hero.pos );
 				GLog.n( "The guardians wake, and the idol has paid in advance." );
 				return true;
