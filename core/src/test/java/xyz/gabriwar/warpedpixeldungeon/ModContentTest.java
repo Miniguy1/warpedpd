@@ -896,14 +896,14 @@ public class ModContentTest {
 		}
 		//each place's rating
 		assertEquals( 6.0f, EndgameLoot.zoneRating( 0, 0 ), 0.001f );
-		assertEquals( 6.6f, EndgameLoot.zoneRating( 1, 0 ), 0.001f );
-		assertEquals( 7.4f, EndgameLoot.zoneRating( 2, 0 ), 0.001f );
-		assertEquals( "each clearing is half a tier more", 8.4f, EndgameLoot.zoneRating( 2, 2 ), 0.001f );
-		assertEquals( 9.0f, EndgameLoot.zoneRating( 2, 9 ), 0.001f );
-		assertEquals( 7.5f, EndgameLoot.minesRating( 56 ), 0.001f );
-		assertEquals( 8.3f, EndgameLoot.minesRating( 64 ), 0.001f );
-		assertEquals( 7.0f, EndgameLoot.ASCENT_RATING, 0.001f );
-		assertEquals( 8.0f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.RATING, 0.001f );
+		assertEquals( 6.05f, EndgameLoot.zoneRating( 1, 0 ), 0.001f );
+		assertEquals( 6.1f, EndgameLoot.zoneRating( 2, 0 ), 0.001f );
+		assertEquals( "each clearing is a twentieth of a tier more", 6.2f, EndgameLoot.zoneRating( 2, 2 ), 0.001f );
+		assertEquals( 6.55f, EndgameLoot.zoneRating( 2, 9 ), 0.001f );
+		assertEquals( 6.1f, EndgameLoot.minesRating( 56 ), 0.001f );
+		assertEquals( 6.26f, EndgameLoot.minesRating( 64 ), 0.001f );
+		assertEquals( 6.0f, EndgameLoot.ASCENT_RATING, 0.001f );
+		assertEquals( 6.15f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.RATING, 0.001f );
 		//the pieces a class gets at each tier are its own five, at the levels that tier starts at
 		Hero h = Dungeon.hero;
 		HeroClass keep = h.heroClass;
@@ -2057,7 +2057,8 @@ public class ModContentTest {
 					if (m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.class ) == null) continue;
 					elitesSeen++;
 					assertEquals( m.HT, m.HP );
-					assertNotNull( "an elite has an aura", m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.class ) );
+					assertFalse( "an elite has an aura", m.buffs( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.class ).isEmpty() );
+					assertEquals( "and only one", 1, m.buffs( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.class ).size() );
 					assertTrue( "elite experience " + m.EXP, m.EXP >= 3 );
 				}
 			}

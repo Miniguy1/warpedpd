@@ -71,7 +71,7 @@ public class Elite extends Buff {
 		return m.alignment == Char.Alignment.ENEMY && !(m instanceof NPC)
 				&& !Char.hasProp( m, Char.Property.BOSS ) && !Char.hasProp( m, Char.Property.MINIBOSS )
 				&& !Char.hasProp( m, Char.Property.IMMOVABLE )
-				&& m.buff( ChampionEnemy.class ) == null && m.buff( Bounty.class ) == null && m.buff( Elite.class ) == null;
+				&& m.buffs( ChampionEnemy.class ).isEmpty() && m.buff( Bounty.class ) == null && m.buff( Elite.class ) == null;
 	}
 
 	/** make some of a new floor's enemies elite */
