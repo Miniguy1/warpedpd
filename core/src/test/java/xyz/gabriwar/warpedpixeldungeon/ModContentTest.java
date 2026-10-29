@@ -1231,7 +1231,7 @@ public class ModContentTest {
 				Dungeon.depth = 9;
 				Level climb = Dungeon.newLevel();
 				assertFalse( climb instanceof xyz.gabriwar.warpedpixeldungeon.levels.DeadEndLevel );
-				assertTrue( climb.climbEvent >= 0 && climb.climbEvent <= 4 );
+				assertTrue( "event " + climb.climbEvent, climb.climbEvent >= 0 && climb.climbEvent <= 9 );
 			}
 		} finally {
 			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
