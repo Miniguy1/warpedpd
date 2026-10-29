@@ -1349,7 +1349,7 @@ public class ModContentTest {
 					for (int i = 0; i < 300; i++) {
 						Item n = Reforge.rerollPiece( start );
 						assertNotSame( start.getClass(), n.getClass() );
-						assertEquals( "the same set", GearSets.setOf( start.getClass() ), GearSets.setOf( n.getClass() ) );
+						assertEquals( "the same set", xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( start.getClass() ), xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( n.getClass() ) );
 						assertEquals( "the same tier", tier, ((SetTier)n).setTier() );
 						assertEquals( "the same level", 4, n.level() );
 						assertFalse( n.cursed );
