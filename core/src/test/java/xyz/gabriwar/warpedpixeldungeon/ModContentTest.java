@@ -599,7 +599,13 @@ public class ModContentTest {
 				assertTrue( order[i] + ": about 30% of rolls are its own set, got " + mine + "/6000", mine > 1400 && mine < 2200 );
 			}
 			Set<Class<?>> yog = new HashSet<>();
-			for (int k = 0; k < 3000; k++) yog.add( EndgameLoot.rollYog().getClass() );
+			int cy = Cycle.number;
+			Cycle.number = 1;
+			try {
+				for (int k = 0; k < 3000; k++) yog.add( EndgameLoot.rollYog().getClass() );
+			} finally {
+				Cycle.number = cy;
+			}
 			assertEquals( new HashSet<>( java.util.Arrays.asList( xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( xyz.gabriwar.warpedpixeldungeon.items.GearSets.YOG ) ) ), yog );
 		} finally {
 			h.heroClass = keep;
@@ -860,6 +866,16 @@ public class ModContentTest {
 
 	@Test
 	public void eachRatingDropsItsTierAndEachTierItsLevels() {
+		int cycleKeep = Cycle.number;
+		Cycle.number = 2;   //every tier open
+		try {
+			eachRatingBody();
+		} finally {
+			Cycle.number = cycleKeep;
+		}
+	}
+
+	private void eachRatingBody() {
 		int[] n = new int[10];
 		for (int i = 0; i < 20000; i++) n[EndgameLoot.tierOfRating( 7.4f )]++;
 		assertEquals( 0, n[6] ); assertEquals( 0, n[8] + n[9] - n[8] );
@@ -979,6 +995,8 @@ public class ModContentTest {
 		//richer: the Vault's and the ice floors hold tier 8 pieces (and nothing higher or lower in the class sets)
 		Set<String> tier8 = new HashSet<>( java.util.Arrays.asList( TIER8_ITEMS ) );
 		int found8 = 0, wrong = 0, floors = 0;
+		int cycleKeepB = Cycle.number;
+		Cycle.number = 1;   //tier 8 is a new cycle's
 		Dungeon.generatedLevels.clear();
 		try {
 			int[][] stages = { { 1, 16 }, { 1, 17 }, { 1, 18 }, { 1, 19 }, { 2, 21 }, { 2, 22 }, { 2, 23 }, { 2, 24 } };
@@ -998,6 +1016,7 @@ public class ModContentTest {
 				}
 			}
 		} finally {
+			Cycle.number = cycleKeepB;
 			Dungeon.branch = bk; Dungeon.depth = dk;
 			Dungeon.generatedLevels.clear();
 		}
@@ -1211,6 +1230,90 @@ public class ModContentTest {
 			Dungeon.level = lvKeep;
 			Dungeon.ascentRebuilds.clear();
 			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void theHigherTiersWaitForNewGamePlus() throws Exception {
+		int keep = Cycle.number;
+		Hero h = Dungeon.hero;
+		Set<String> yogNames = new HashSet<>(), t8 = new HashSet<>(), t9 = new HashSet<>(), t7 = new HashSet<>();
+		for (String n : YOG_ITEMS) yogNames.add( P + n );
+		for (String n : TIER7_ITEMS) t7.add( P + n );
+		for (String n : TIER8_ITEMS) t8.add( P + n );
+		for (String n : TIER9_ITEMS) t9.add( P + n );
+		try {
+			//the cap by cycle
+			Cycle.number = 0; assertEquals( 7, EndgameLoot.maxTier() );
+			Cycle.number = 1; assertEquals( 8, EndgameLoot.maxTier() );
+			Cycle.number = 2; assertEquals( 9, EndgameLoot.maxTier() );
+			Cycle.number = 7; assertEquals( 9, EndgameLoot.maxTier() );
+
+			//the bonus levels for a rating over the cap
+			Cycle.number = 0;
+			assertEquals( 0, EndgameLoot.excessLevels( 7.0f ) );
+			assertEquals( 0, EndgameLoot.excessLevels( 6.0f ) );
+			assertEquals( 1, EndgameLoot.excessLevels( 7.4f ) );
+			assertEquals( 2, EndgameLoot.excessLevels( 8.0f ) );
+			assertEquals( 4, EndgameLoot.excessLevels( 9.0f ) );
+			Cycle.number = 1;
+			assertEquals( 0, EndgameLoot.excessLevels( 8.0f ) );
+			assertEquals( 2, EndgameLoot.excessLevels( 9.0f ) );
+			Cycle.number = 2;
+			assertEquals( 0, EndgameLoot.excessLevels( 9.0f ) );
+
+			//no rating, however high, drops past the cap
+			for (int c = 0; c <= 2; c++) {
+				Cycle.number = c;
+				for (float r = 5f; r <= 12f; r += 0.5f) {
+					for (int i = 0; i < 300; i++) assertTrue( "cycle " + c + " rating " + r, EndgameLoot.tierOfRating( r ) <= 7 + c );
+				}
+				for (int i = 0; i < 100; i++) assertEquals( 7 + c, EndgameLoot.tierOfRating( 9.5f ) );
+			}
+
+			//the first run: tier 7 at most, no Yog-Forged, and a rich place's pieces start higher
+			Cycle.number = 0;
+			int t7found = 0;
+			for (int i = 0; i < 20000; i++) {
+				Item it = EndgameLoot.rollRated( 9.0f );
+				String n = it.getClass().getName();
+				assertFalse( "tier 8 in the first run: " + n, t8.contains( n ) );
+				assertFalse( "tier 9 in the first run: " + n, t9.contains( n ) );
+				assertFalse( "Yog-Forged in the first run: " + n, yogNames.contains( n ) );
+				if (t7.contains( n )) {
+					t7found++;
+					if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) assertTrue( "+4 over the cap: level " + it.level(), it.level() >= 6 && it.level() <= 8 );
+				}
+			}
+			assertTrue( "tier 7 pieces dropped: " + t7found, t7found > 1000 );
+			for (int i = 0; i < 400; i++) assertFalse( yogNames.contains( EndgameLoot.rollYog().getClass().getName() ) );
+
+			//the first new cycle opens tier 8 (and Yog-Forged), not 9
+			Cycle.number = 1;
+			int t8found = 0;
+			for (int i = 0; i < 20000; i++) {
+				String n = EndgameLoot.rollRated( 9.0f ).getClass().getName();
+				assertFalse( "tier 9 in the first new cycle: " + n, t9.contains( n ) );
+				if (t8.contains( n )) t8found++;
+			}
+			assertTrue( "tier 8 pieces dropped: " + t8found, t8found > 1000 );
+			boolean yog = false;
+			for (int i = 0; i < 400; i++) if (yogNames.contains( EndgameLoot.rollYog().getClass().getName() )) yog = true;
+			assertTrue( "Yog-Forged in a new cycle", yog );
+
+			//the second opens tier 9
+			Cycle.number = 2;
+			int t9found = 0;
+			for (int i = 0; i < 20000; i++) if (t9.contains( EndgameLoot.rollRated( 9.0f ).getClass().getName() )) t9found++;
+			assertTrue( "tier 9 pieces dropped: " + t9found, t9found > 1000 );
+
+			//the descriptions say so
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate().desc().contains( "New Game+" ) );
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate().desc().contains( "second new cycle" ) );
+			assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate().desc().contains( "New Game+" ) );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate().desc().contains( "New Game+" ) );
+		} finally {
+			Cycle.number = keep;
 		}
 	}
 

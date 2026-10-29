@@ -28,7 +28,8 @@ import xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot;
 
 /**
  * The bonus stages hanging off the main dungeon: the Vault (the city's branch, depths 16 to 19) and the
- * Frozen region (depths 21 to 24, and its boss on 25). They pay tier 8 loot (rating 8) and are
+ * Frozen region (depths 21 to 24, and its boss on 25). They pay rating 8 loot: tier 8 in a new cycle, and in
+ * the first run the best it allows (tier 7) with bonus levels for the rest (EndgameLoot.maxTier). They are
  * made harder to match: every enemy there has more health and hits harder than the floor of the same
  * depth in the main dungeon, a little more with each floor, and the Frozen region more than the Vault.
  * The factor rides on the shared enemy-strength function (AscensionChallenge.statModifier).

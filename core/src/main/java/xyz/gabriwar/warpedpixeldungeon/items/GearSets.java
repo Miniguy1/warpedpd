@@ -401,7 +401,11 @@ public class GearSets {
 		int s = setOf( item.getClass() );
 		if (s < 0) return "";
 		int have = Dungeon.hero == null ? 0 : pieceCounts( Dungeon.hero )[s];
+		String where = "";
+		int tier = item instanceof SetTier ? ((SetTier)item).setTier() : 6;
+		if (tier == 8 || s == YOG) where = "\n\nOnly found in a new cycle (New Game+).";
+		else if (tier == 9) where = "\n\nOnly found from the second new cycle (cycle 2) on.";
 		return "\n\n_Set: " + NAMES[s] + "_ (" + have + "/" + PIECES[s].length + " owned). Each piece beyond the first: "
-				+ PER_TIER[s] + ". " + EXTRA[s];
+				+ PER_TIER[s] + ". " + EXTRA[s] + where;
 	}
 }

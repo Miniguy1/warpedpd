@@ -21,6 +21,7 @@
 
 package xyz.gabriwar.warpedpixeldungeon.items;
 
+import xyz.gabriwar.warpedpixeldungeon.Cycle;
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass;
@@ -78,12 +79,27 @@ public class EndgameLoot {
 	/** the rating of the floors rebuilt on the climb with the cursed amulet */
 	public static final float ASCENT_RATING = 7.0f;
 
-	/** the tier a rating drops on this roll: its whole part, or the next one up with the fraction's chance */
+	/** the highest tier the loot can be: 7 in the first run through the dungeon, 8 from the first new cycle
+	 *  (New Game+), 9 from the second. The top tiers are the new cycles' reward. */
+	public static int maxTier() {
+		return 7 + Math.min( 2, Math.max( 0, Cycle.number ) );
+	}
+
+	/** the tier a rating drops on this roll: its whole part, or the next one up with the fraction's
+	 *  chance, and never past the highest tier the cycle allows */
 	public static int tierOfRating( float rating ) {
-		float r = Math.max( 6f, Math.min( 9f, rating ) );
+		int cap = maxTier();
+		float r = Math.max( 6f, Math.min( (float)cap, rating ) );
 		int t = (int)Math.floor( r );
-		if (t < 9 && Random.Float() < r - t) t++;
+		if (t < cap && Random.Float() < r - t) t++;
 		return t;
+	}
+
+	/** a place whose rating is past what the cycle allows still pays for it: two bonus levels on a piece
+	 *  for each whole tier of the rating over the cap (up to four) */
+	public static int excessLevels( float rating ) {
+		float over = Math.min( 9f, rating ) - maxTier();
+		return over > 0f ? Math.min( 4, Math.round( over * 2f ) ) : 0;
 	}
 
 	/** the rating of a plaza zone's loot: the zone's own, and half a tier more for each time it has been cleared */
@@ -102,13 +118,18 @@ public class EndgameLoot {
 	public static Item rollRated( float rating ) {
 		Hero h = Dungeon.hero;
 		if (h != null && h.heroClass != null && Random.Float() < CLASS_SHARE) {
-			return rollClassSet( h.heroClass, tierOfRating( rating ) );
+			return rollClassSet( h.heroClass, tierOfRating( rating ), excessLevels( rating ) );
 		}
 		return rollGeneral();
 	}
 
 	/** one piece of a class's own set, of tier 6, 7, 8 or 9 */
 	public static Item rollClassSet( HeroClass cls, int tier ) {
+		return rollClassSet( cls, tier, 0 );
+	}
+
+	/** the same, with bonus levels on top */
+	public static Item rollClassSet( HeroClass cls, int tier, int extraLevels ) {
 		int family;
 		switch (cls) {
 			case WARRIOR: default: family = 0; break;
@@ -119,18 +140,22 @@ public class EndgameLoot {
 			case CLERIC:   family = 5; break;
 		}
 		int first = tier >= 9 ? GearSets.FIRST_T9 : tier == 8 ? GearSets.FIRST_T8 : tier == 7 ? GearSets.FIRST_T7 : 6;
-		return fromSet( first + family );
+		return fromSet( first + family, extraLevels );
 	}
 
 	/** identified, never cursed; armor, weapons and rings at a small bonus level */
 	static Item prepare( Item item ) {
+		return prepare( item, 0 );
+	}
+
+	static Item prepare( Item item, int extra ) {
 		int tier = item instanceof SetTier ? ((SetTier)item).setTier() : 6;
 		//a higher tier starts at a higher level too: 7 at +2 to +4, 8 at +4 to +6, 9 at +6 to +8
 		int bonus = tier <= 6 ? 0 : 2 * (tier - 6);
 		if (item instanceof Armor || (item instanceof MeleeWeapon && !(item instanceof MagesStaff))) {
-			item.level( bonus + Random.IntRange( 1, 3 ) - (tier > 6 ? 1 : 0) );
+			item.level( extra + bonus + Random.IntRange( 1, 3 ) - (tier > 6 ? 1 : 0) );
 		} else if (item instanceof Ring) {
-			item.level( bonus + Random.IntRange( 0, 2 ) );
+			item.level( extra + bonus + Random.IntRange( 0, 2 ) );
 		}
 		item.cursed = false;
 		item.identify();
@@ -138,9 +163,13 @@ public class EndgameLoot {
 	}
 
 	private static Item fromSet( int set ) {
+		return fromSet( set, 0 );
+	}
+
+	private static Item fromSet( int set, int extra ) {
 		Class<?>[] pieces = GearSets.piecesOf( set );
 		Item item = (Item)Reflection.newInstance( pieces[Random.Int( pieces.length )] );
-		return item == null ? rollGeneral() : prepare( item );
+		return item == null ? rollGeneral() : prepare( item, extra );
 	}
 
 	/** one piece of a class's own set */
@@ -157,6 +186,12 @@ public class EndgameLoot {
 
 	/** one piece of the Yog-Forged set */
 	public static Item rollYog() {
+		//the Yog-Forged set is a new cycle's reward: in the first run the same place pays the best the run can
+		//offer, a tier 7 piece of the hero's own set with two bonus levels
+		if (Cycle.number < 1) {
+			Hero h = Dungeon.hero;
+			return h != null && h.heroClass != null ? rollClassSet( h.heroClass, 7, 2 ) : rollGeneral();
+		}
 		return fromSet( GearSets.YOG );
 	}
 
