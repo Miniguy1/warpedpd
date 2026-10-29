@@ -107,7 +107,7 @@ public class BossMutation extends Buff {
 			if (pos == -1) continue;
 			m.pos = pos;
 			GameScene.add( m );
-			if (Dungeon.hero != null) m.beckon( Dungeon.hero.pos );
+			if (Dungeon.hero != null && m.sprite != null) m.beckon( Dungeon.hero.pos );
 			made++;
 		}
 		return made;

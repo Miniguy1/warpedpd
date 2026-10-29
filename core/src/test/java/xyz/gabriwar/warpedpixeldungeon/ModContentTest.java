@@ -1142,6 +1142,12 @@ public class ModContentTest {
 		}
 	}
 
+	private static int emptyCell( Level level ) {
+		int c;
+		do { c = level.randomDestination( null ); } while (level.heaps.get( c ) != null);
+		return c;
+	}
+
 	@Test
 	public void theClimbEventsBuildAndPay() {
 		//the odds add up to a hundred, and an event of each kind comes up
@@ -1210,14 +1216,14 @@ public class ModContentTest {
 			Dungeon.depth = 5;
 			level.climbEvent = 0;
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
-			goo.pos = level.randomDestination( null );
+			goo.pos = emptyCell( level );
 			Cycle.onDeath( goo );
 			xyz.gabriwar.warpedpixeldungeon.items.Heap bossHoard = level.heaps.get( goo.pos );
 			assertNotNull( "a later cycle's boss pays", bossHoard );
 			assertTrue( "three items, got " + bossHoard.items.size(), bossHoard.items.size() >= 3 );
 			Cycle.number = 0;
 			int heapsB = level.heaps.valueList().size();
-			goo.pos = level.randomDestination( null );
+			goo.pos = emptyCell( level );
 			Cycle.onDeath( goo );
 			org.junit.Assert.assertNull( "cycle 0 boss pays nothing extra", level.heaps.get( goo.pos ) );
 			Cycle.number = 1;
@@ -1512,7 +1518,7 @@ public class ModContentTest {
 			//the summoning and the vengeance
 			Cycle.number = 1;
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo boss = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
-			boss.pos = level.randomDestination( null );
+			boss.pos = emptyCell( level );
 			level.mobs.add( boss );
 			int before = level.mobs.size();
 			assertEquals( 2, BossMutation.summon( boss, 2 ) );
