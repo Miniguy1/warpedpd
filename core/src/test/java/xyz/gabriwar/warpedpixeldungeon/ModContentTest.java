@@ -1163,9 +1163,9 @@ public class ModContentTest {
 			assertTrue( "pack of " + (level.mobs.size() - before), level.mobs.size() - before >= 4 );
 
 			//a cache: loot lying about
-			int heapsBefore = level.heaps.size();
+			int heapsBefore = level.heaps.valueList().size();
 			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.CACHE );
-			assertTrue( "the cache's items", level.heaps.size() > heapsBefore );
+			assertTrue( "the cache's items", level.heaps.valueList().size() > heapsBefore );
 
 			//a blood moon: 30% on top of the cycle
 			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BLOOD_MOON );
@@ -1192,7 +1192,7 @@ public class ModContentTest {
 			assertNotNull( "a later cycle's boss pays", bossHoard );
 			assertTrue( "three items, got " + bossHoard.items.size(), bossHoard.items.size() >= 3 );
 			Cycle.number = 0;
-			int heapsB = level.heaps.size();
+			int heapsB = level.heaps.valueList().size();
 			goo.pos = level.randomDestination( null );
 			Cycle.onDeath( goo );
 			assertNull( "cycle 0's boss pays nothing extra", level.heaps.get( goo.pos ) );
