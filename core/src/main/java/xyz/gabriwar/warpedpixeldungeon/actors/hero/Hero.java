@@ -431,7 +431,7 @@ public class Hero extends Char {
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
 		
-		HT = 20 + 5*(lvl-1) + HTBoost;
+		HT = 20 + 5*(lvl-1) + HTBoost + xyz.gabriwar.warpedpixeldungeon.Legacy.bonusHP();
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 		
@@ -825,6 +825,7 @@ public class Hero extends Char {
 		float accuracy = 1;
 		accuracy *= EndTalents.accuracyMultiplier( this );
 		accuracy *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.accuracyMultiplier( this );
+		accuracy *= xyz.gabriwar.warpedpixeldungeon.Legacy.accuracyMultiplier();
 		accuracy *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.HuntersFang.accuracyMultiplier();
 		accuracy *= DamageLedger.statFactor( this, RingOfAccuracy.class, RingOfAccuracy.accuracyMultiplier( this ) );
 		accuracy *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.ACCURACY ) );
@@ -957,6 +958,7 @@ public class Hero extends Char {
 		float evasion = defenseSkill;
 		evasion *= EndTalents.evasionMultiplier( this );
 		evasion *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.evasionMultiplier( this );
+		evasion *= xyz.gabriwar.warpedpixeldungeon.Legacy.evasionMultiplier();
 		
 		evasion *= DamageLedger.statFactor( this, RingOfEvasion.class, RingOfEvasion.evasionMultiplier( this ) );
 		evasion *= DamageLedger.statFactor( this, DamageLedger.GEAR, 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus( this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.EVASION ) );
@@ -1176,6 +1178,7 @@ public class Hero extends Char {
 		speed *= RingOfHaste.speedMultiplier(this);
 		speed *= EndTalents.speedMultiplier(this);
 		speed *= xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier(this);
+		speed *= xyz.gabriwar.warpedpixeldungeon.Legacy.speedMultiplier();
 		speed *= xyz.gabriwar.warpedpixeldungeon.items.trinkets.WayfarersBoots.speedMultiplier();
 		speed *= 1f + xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.heroBonus(this, xyz.gabriwar.warpedpixeldungeon.items.rarity.GearPerk.Stat.SPEED);
 		
@@ -2921,6 +2924,8 @@ public class Hero extends Char {
 
 		//matching sets of the new items
 		damage = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( this, enemy, damage );
+		//legacy points: critical hits
+		damage = xyz.gabriwar.warpedpixeldungeon.Legacy.outgoing( this, damage );
 
 		//Ring of Cruelty: every blow you land hits harder
 		{
@@ -3322,6 +3327,7 @@ public class Hero extends Char {
 
 		//matching sets of the new items
 		dmg = xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( this, dmg, src );
+		dmg = xyz.gabriwar.warpedpixeldungeon.Legacy.incoming( dmg );
 
 		//Ring of Retribution: whoever struck you takes a share of it back
 		if (src instanceof Char && src != this && dmg > 0) {

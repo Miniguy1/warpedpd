@@ -173,6 +173,7 @@ public class SewerLevel extends RegularLevel {
 			//lifts the ascent's curse and wakes the world's sealed barrows (Delves)
 			if (hero.belongings.getItem( Amulet.class ) != null && !Statistics.ascended) {
 				Statistics.ascended = true;
+				xyz.gabriwar.warpedpixeldungeon.Legacy.award();
 				Badges.validateHappyEnd();
 				Badges.saveGlobal();
 				AscensionChallenge ascent = hero.buff( AscensionChallenge.class );

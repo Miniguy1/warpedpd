@@ -1528,7 +1528,7 @@ public class OverworldLevel extends Level {
 			LevelTransition transition ){
 		int gx = worldX + transition.cell() % width(), gy = worldY + transition.cell() / width();
 		//the dungeon's front door, once the climb is done: enter as it is, or begin a new cycle
-		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_DUNGEON_GATE ) && xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset()){
+		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_DUNGEON_GATE ) && (xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset() || xyz.gabriwar.warpedpixeldungeon.Legacy.earned() > 0)){
 			return enterDungeonDoor( hero, transition );
 		}
 		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_MINE_GATE )){
@@ -1550,27 +1550,42 @@ public class OverworldLevel extends Level {
 		return super.activateTransition( hero, transition );
 	}
 
-	//the dungeon's door after the climb: the way in as it is, or a new cycle (Cycle): the dungeon wiped and
-	//every enemy in it stronger. A new cycle asks twice.
-	private boolean enterDungeonDoor( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero, LevelTransition transition ){
+	//the dungeon's door once the climb is done (or a legacy point is earned): the way in as it is, a new
+	//cycle (Cycle), and the legacy points (Legacy). A new cycle asks twice.
+	private boolean enterDungeonDoor( final xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero, final LevelTransition transition ){
+		final boolean canReset = xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset();
+		final boolean legacy = xyz.gabriwar.warpedpixeldungeon.Legacy.earned() > 0;
 		final int next = xyz.gabriwar.warpedpixeldungeon.Cycle.number + 1;
 		final int factor = next + 1;
-		String message = "You climbed out with the amulet and the curse is gone. The dungeon waits below.\n\n"
-				+ "_Enter_: go in as it is" + (next > 1 ? " (cycle " + xyz.gabriwar.warpedpixeldungeon.Cycle.number + ")" : "") + ".\n\n"
-				+ "_Begin cycle " + next + "_: the whole dungeon is wiped and rebuilt, the amulet goes back to its heart, and every enemy in the dungeon and its branches is " + factor
-				+ " times as strong. Loot and bosses pay better, and the climb holds bounties and events. You keep your hero, your gear, the town and the world.";
+		final java.util.ArrayList<String> labels = new java.util.ArrayList<>();
+		final java.util.ArrayList<Integer> kinds = new java.util.ArrayList<>();
+		StringBuilder msg = new StringBuilder();
+		if (canReset) msg.append( "You climbed out with the amulet and the curse is gone. The dungeon waits below.\n\n" );
+		msg.append( "_Enter_: go in as it is" ).append( xyz.gabriwar.warpedpixeldungeon.Cycle.number > 0 ? " (cycle " + xyz.gabriwar.warpedpixeldungeon.Cycle.number + ")" : "" ).append( ".\n" );
+		labels.add( "Enter" ); kinds.add( 0 );
+		if (canReset){
+			msg.append( "\n_Begin cycle " ).append( next ).append( "_: the whole dungeon is wiped and rebuilt, the amulet goes back to its heart, and every enemy in the dungeon and its branches is " )
+					.append( factor ).append( " times as strong. Bosses mutate, loot and bosses pay better, and the climb holds bounties and events. You keep your hero, your gear, the town and the world.\n" );
+			labels.add( "Begin cycle " + next + " (x" + factor + ")" ); kinds.add( 1 );
+		}
+		if (legacy){
+			msg.append( "\n_Legacy_: " ).append( xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() ).append( " points to spend on permanent bonuses.\n" );
+			labels.add( "Legacy (" + xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() + ")" ); kinds.add( 2 );
+		}
+		labels.add( "Not now" ); kinds.add( -1 );
+		final String message = msg.toString();
 		com.watabou.noosa.Game.runOnRenderThread( () ->
 			xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
 					new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
 							new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
 									xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
-							"The dungeon's door", message,
-							"Enter", "Begin cycle " + next + " (x" + factor + ")", "Not now" ){
+							"The dungeon's door", message, labels.toArray( new String[0] ) ){
 				@Override
 				protected void onSelect( int index ){
-					if (index == 0){
+					int kind = kinds.get( index );
+					if (kind == 0){
 						OverworldLevel.super.activateTransition( hero, transition );
-					} else if (index == 1){
+					} else if (kind == 1){
 						xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
 								new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
 										new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
@@ -1586,10 +1601,37 @@ public class OverworldLevel extends Level {
 								}
 							}
 						} );
+					} else if (kind == 2){
+						showLegacy();
 					}
 				}
 			} ) );
 		return false;
+	}
+
+	//the legacy points: a point on a stat each tap, until they run out
+	private void showLegacy(){
+		final xyz.gabriwar.warpedpixeldungeon.Legacy.Stat[] stats = xyz.gabriwar.warpedpixeldungeon.Legacy.Stat.values();
+		String[] labels = new String[stats.length + 1];
+		for (int i = 0; i < stats.length; i++){
+			labels[i] = stats[i].label + " " + xyz.gabriwar.warpedpixeldungeon.Legacy.points( stats[i] ) + "/" + xyz.gabriwar.warpedpixeldungeon.Legacy.MAX_PER_STAT + " (" + stats[i].per + ")";
+		}
+		labels[stats.length] = "Done";
+		xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+				new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+						new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+								xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
+						"Legacy", "You have " + xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() + " points to spend. They are yours for good, in every cycle.", labels ){
+			@Override
+			protected void onSelect( int index ){
+				if (index >= stats.length) return;
+				if (xyz.gabriwar.warpedpixeldungeon.Legacy.spend( stats[index] )){
+					showLegacy();
+				} else {
+					xyz.gabriwar.warpedpixeldungeon.utils.GLog.w( xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() <= 0 ? "No points left." : "That one is at its limit." );
+				}
+			}
+		} );
 	}
 
 	//the plaza staircase: four ways down. The dark mines (while they are open) and the three zones

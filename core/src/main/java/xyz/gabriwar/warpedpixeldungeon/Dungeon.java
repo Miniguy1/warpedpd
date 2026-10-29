@@ -294,12 +294,14 @@ public class Dungeon {
 		for (int d : ascentSession) sessionArr[si++] = d;
 		bundle.put( ASCENT_SESSION, sessionArr );
 		bundle.put( "cycle", Cycle.number );
+		Legacy.store( bundle );
 	}
 
 	public static void restoreAscentState( Bundle bundle ){
 		ascentRebuilds.clear();
 		ascentSession.clear();
 		Cycle.number = bundle.contains( "cycle" ) ? bundle.getInt( "cycle" ) : 0;
+		Legacy.restore( bundle );
 		if (bundle.contains( ASCENT_REBUILDS )){
 			int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
 			for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
@@ -469,6 +471,7 @@ public class Dungeon {
 		ascentRebuilds.clear();
 		ascentSession.clear();
 		Cycle.number = 0;
+		Legacy.reset();
 
 		gold = 0;
 		bullet = 0;
@@ -826,6 +829,8 @@ public class Dungeon {
 				xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level, 0.30f, 0.08f, Cycle.lootRating( Cycle.number, depth ) );
 			}
 			if (branch == 0 && rebuildCount( depth ) > 0) xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.roll( level );
+			//the bosses of a later cycle are mutated
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.assign( level );
 		}
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){

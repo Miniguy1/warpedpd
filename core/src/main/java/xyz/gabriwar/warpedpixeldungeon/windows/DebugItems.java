@@ -1026,6 +1026,7 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.items.rings.GodforgedSaintsHalo.class,
         xyz.gabriwar.warpedpixeldungeon.items.GodforgedSaintsChalice.class,
         xyz.gabriwar.warpedpixeldungeon.items.GodforgedSaintsRelic.class,
+        xyz.gabriwar.warpedpixeldungeon.items.CycleShard.class,
     };
     private DebugItems() {}
 }

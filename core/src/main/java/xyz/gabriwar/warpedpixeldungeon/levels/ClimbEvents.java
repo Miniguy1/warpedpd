@@ -91,6 +91,8 @@ public final class ClimbEvents {
 			case CACHE:
 				EndgameLoot.populate( level, 1f, 1f, rating + 0.5f );
 				EndgameLoot.populate( level, 1f, 0.5f, rating + 0.5f );
+				int shardCell = level.randomDestination( null );
+				if (shardCell != -1) level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( 2 + Cycle.number ), shardCell );
 				break;
 			default:
 		}

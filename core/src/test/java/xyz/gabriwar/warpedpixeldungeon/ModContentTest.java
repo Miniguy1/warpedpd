@@ -24,6 +24,10 @@ package xyz.gabriwar.warpedpixeldungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.EndTalents;
+import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
+import xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation;
+import xyz.gabriwar.warpedpixeldungeon.items.Reforge;
+import xyz.gabriwar.warpedpixeldungeon.items.SetTier;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent;
@@ -46,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -1314,6 +1319,218 @@ public class ModContentTest {
 			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate().desc().contains( "New Game+" ) );
 		} finally {
 			Cycle.number = keep;
+		}
+	}
+
+	@Test
+	public void shardsReforgeTheHighTiers() throws Exception {
+		int keep = Cycle.number;
+		Hero h = Dungeon.hero;
+		int packSize = h.belongings.backpack.items.size();
+		try {
+			//what can be reforged
+			assertTrue( Reforge.eligible( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
+			assertTrue( Reforge.eligible( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate() ) );
+			assertTrue( "Yog-Forged too", Reforge.eligible( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate() ) );
+			assertFalse( "tier 6 is not high enough", Reforge.eligible( new xyz.gabriwar.warpedpixeldungeon.items.armor.WarlordsPlate() ) );
+			assertFalse( Reforge.eligible( new xyz.gabriwar.warpedpixeldungeon.items.wands.WandOfFreeze() ) );
+			assertEquals( 9, Reforge.tierOf( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate() ) );
+			//costs rise with the tier
+			assertTrue( Reforge.costPiece( 7 ) < Reforge.costPiece( 8 ) && Reforge.costPiece( 8 ) < Reforge.costPiece( 9 ) );
+			assertTrue( Reforge.costAwaken( 7 ) < Reforge.costAwaken( 8 ) );
+
+			//reroll piece: another piece of the same set and tier, at the same level, over every piece
+			for (int tier = 7; tier <= 9; tier++) {
+				String[] list = tier == 7 ? TIER7_ITEMS : tier == 8 ? TIER8_ITEMS : TIER9_ITEMS;
+				for (int base = 0; base < 30; base += 5) {
+					Item start = (Item)Class.forName( P + list[base] ).getDeclaredConstructor().newInstance();
+					start.level( 4 );
+					Set<Class<?>> got = new HashSet<>();
+					for (int i = 0; i < 300; i++) {
+						Item n = Reforge.rerollPiece( start );
+						assertNotSame( start.getClass(), n.getClass() );
+						assertEquals( "the same set", GearSets.setOf( start.getClass() ), GearSets.setOf( n.getClass() ) );
+						assertEquals( "the same tier", tier, ((SetTier)n).setTier() );
+						assertEquals( "the same level", 4, n.level() );
+						assertFalse( n.cursed );
+						got.add( n.getClass() );
+					}
+					assertEquals( "all four other pieces turn up", 4, got.size() );
+				}
+			}
+
+			//awaken: the same piece, a tier up, only as far as the cycle allows
+			Cycle.number = 0;
+			assertFalse( "tier 8 does not exist yet", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
+			Cycle.number = 1;
+			assertTrue( Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate() ) );
+			assertFalse( "tier 9 waits for the second cycle", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate() ) );
+			Cycle.number = 2;
+			assertTrue( Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate() ) );
+			assertFalse( "nothing above tier 9", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate() ) );
+			assertFalse( "Yog-Forged does not awaken", Reforge.canAwaken( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate() ) );
+			for (int i = 0; i < 30; i++) {
+				Item t7 = (Item)Class.forName( P + TIER7_ITEMS[i] ).getDeclaredConstructor().newInstance();
+				t7.level( 6 );
+				Item t8 = Reforge.awaken( t7 );
+				assertEquals( "its twin one tier up", P + TIER8_ITEMS[i], t8.getClass().getName() );
+				assertEquals( 6, t8.level() );
+				Item t9 = Reforge.awaken( t8 );
+				assertEquals( P + TIER9_ITEMS[i], t9.getClass().getName() );
+			}
+
+			//affix and temper
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword sword = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword();
+			assertTrue( Reforge.canAffix( sword ) );
+			assertTrue( Reforge.rerollAffix( sword ) );
+			assertNotNull( sword.enchantment );
+			xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate plate = new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate();
+			assertTrue( Reforge.rerollAffix( plate ) );
+			assertNotNull( plate.glyph );
+			assertFalse( "a ring has no affix", Reforge.canAffix( new xyz.gabriwar.warpedpixeldungeon.items.rings.AscendedWarlordsSignet() ) );
+			assertFalse( "nor a relic", Reforge.canAffix( new xyz.gabriwar.warpedpixeldungeon.items.AscendedWarlordsBanner() ) );
+			Item tp = new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate();
+			tp.level( 3 );
+			for (int i = 0; i < 40 && Reforge.canTemper( tp ); i++) {
+				int before = tp.level();
+				assertTrue( Reforge.temper( tp ) );
+				int gain = tp.level() - before;
+				assertTrue( "tempered by " + gain, gain >= 1 && gain <= 2 );
+			}
+			assertEquals( "tempering stops at the cap", Reforge.TEMPER_CAP, tp.level() );
+			assertFalse( Reforge.temper( tp ) );
+
+			//swapping a piece in the pack
+			Item old = new xyz.gabriwar.warpedpixeldungeon.items.AscendedWarlordsBanner();
+			old.collect( h.belongings.backpack );
+			Item neu = new xyz.gabriwar.warpedpixeldungeon.items.AscendedWarlordsCrest();
+			Reforge.swap( h, old, neu );
+			assertFalse( h.belongings.backpack.items.contains( old ) );
+			assertTrue( h.belongings.backpack.items.contains( neu ) );
+		} finally {
+			Cycle.number = keep;
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
+		}
+	}
+
+	@Test
+	public void legacyPointsAreEarnedSpentAndSaved() {
+		Hero h = Dungeon.hero;
+		int hpKeep = h.HT;
+		Legacy.reset();
+		try {
+			assertEquals( 0, Legacy.unspent() );
+			assertFalse( "nothing to spend", Legacy.spend( Legacy.Stat.SPEED ) );
+			assertEquals( 1f, Legacy.speedMultiplier(), 0f );
+			assertEquals( 0, Legacy.bonusHP() );
+			for (int i = 0; i < 20; i++) Legacy.award();
+			assertEquals( 20, Legacy.unspent() );
+			assertEquals( 20, Legacy.earned() );
+			for (int i = 0; i < 3; i++) assertTrue( Legacy.spend( Legacy.Stat.SPEED ) );
+			assertEquals( 17, Legacy.unspent() );
+			assertEquals( 1.06f, Legacy.speedMultiplier(), 0.0001f );
+			for (int i = 0; i < 5; i++) Legacy.spend( Legacy.Stat.ACCURACY );
+			assertEquals( 1.15f, Legacy.accuracyMultiplier(), 0.0001f );
+			for (int i = 0; i < 4; i++) Legacy.spend( Legacy.Stat.EVASION );
+			assertEquals( 1.12f, Legacy.evasionMultiplier(), 0.0001f );
+			for (int i = 0; i < 2; i++) Legacy.spend( Legacy.Stat.RESISTANCE );
+			assertEquals( 0.03f, Legacy.resistance(), 0.0001f );
+			assertEquals( 97, Legacy.incoming( 100 ) );
+			assertEquals( "never to nothing", 1, Legacy.incoming( 1 ) );
+			for (int i = 0; i < 2; i++) Legacy.spend( Legacy.Stat.HEALTH );
+			assertEquals( 8, Legacy.bonusHP() );
+			assertEquals( "the hero's health follows", 5 * (h.lvl - 1) + 20 + h.HTBoost + 8, h.HT );
+			//a stat stops at its limit
+			Legacy.reset();
+			for (int i = 0; i < 40; i++) Legacy.award();
+			int spentOnCrit = 0;
+			for (int i = 0; i < 40; i++) if (Legacy.spend( Legacy.Stat.CRIT_CHANCE )) spentOnCrit++;
+			assertEquals( Legacy.MAX_PER_STAT, spentOnCrit );
+			assertEquals( 0.30f, Legacy.critChance(), 0.0001f );
+			assertEquals( 25, Legacy.unspent() );
+			//critical hits: about three in ten, for half as much again
+			int crits = 0;
+			for (int i = 0; i < 10000; i++) {
+				int d = Legacy.outgoing( null, 100 );
+				if (d != 100) { crits++; assertEquals( 150, d ); }
+			}
+			assertEquals( "crit rate", 0.30, crits / 10000.0, 0.03 );
+			for (int i = 0; i < 5; i++) Legacy.spend( Legacy.Stat.CRIT_DAMAGE );
+			assertEquals( 2.0f, Legacy.critMultiplier(), 0.0001f );
+
+			//saved with the run, and an old save has none
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			Dungeon.storeAscentState( b );
+			Legacy.reset();
+			assertEquals( 0, Legacy.earned() );
+			Dungeon.restoreAscentState( b );
+			assertEquals( 40, Legacy.earned() );
+			assertEquals( 20, Legacy.unspent() );
+			assertEquals( 15, Legacy.points( Legacy.Stat.CRIT_CHANCE ) );
+			assertEquals( 5, Legacy.points( Legacy.Stat.CRIT_DAMAGE ) );
+			Dungeon.restoreAscentState( new com.watabou.utils.Bundle() );
+			assertEquals( 0, Legacy.earned() );
+			assertEquals( 0, Legacy.points( Legacy.Stat.CRIT_CHANCE ) );
+		} finally {
+			Legacy.reset();
+			h.updateHT( false );
+			h.HT = Math.max( h.HT, 1 );
+		}
+	}
+
+	@Test
+	public void bossesMutateInNewCycles() {
+		assertEquals( 0, BossMutation.count( 0 ) );
+		assertEquals( 1, BossMutation.count( 1 ) );
+		assertEquals( 2, BossMutation.count( 2 ) );
+		assertEquals( 3, BossMutation.count( 3 ) );
+		assertEquals( 3, BossMutation.count( 9 ) );
+		assertEquals( "Summoner, Frenzy", BossMutation.describe( BossMutation.SUMMONER | BossMutation.FRENZY ) );
+		int keep = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Dungeon.generatedLevels.clear();
+		try {
+			Dungeon.branch = 0; Dungeon.depth = 5;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			for (int cycle = 0; cycle <= 4; cycle++) {
+				Cycle.number = cycle;
+				xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
+				goo.pos = level.randomDestination( null );
+				level.mobs.add( goo );
+				BossMutation.assign( level );
+				BossMutation m = goo.buff( BossMutation.class );
+				if (cycle == 0) {
+					assertNull( "cycle 0 bosses do not mutate", m );
+				} else {
+					assertNotNull( m );
+					assertTrue( "every mutated boss summons", m.has( BossMutation.SUMMONER ) );
+					assertEquals( "cycle " + cycle + " mutations", Math.min( 3, cycle ), Integer.bitCount( m.mask ) );
+				}
+				level.mobs.remove( goo );
+			}
+			//the summoning and the vengeance
+			Cycle.number = 1;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo boss = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
+			boss.pos = level.randomDestination( null );
+			level.mobs.add( boss );
+			int before = level.mobs.size();
+			assertEquals( 2, BossMutation.summon( boss, 2 ) );
+			assertEquals( before + 2, level.mobs.size() );
+			Buff.affect( boss, BossMutation.class ).mask = BossMutation.VENGEFUL;
+			before = level.mobs.size();
+			Cycle.onDeath( boss );
+			assertEquals( "three spring up where it fell", before + 3, level.mobs.size() );
+			//and it pays shards
+			xyz.gabriwar.warpedpixeldungeon.items.Heap hoard = level.heaps.get( boss.pos );
+			assertNotNull( hoard );
+			boolean shards = false;
+			for (Item it : hoard.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard) shards = it.quantity() >= 3;
+			assertTrue( "a boss of a new cycle pays shards", shards );
+		} finally {
+			Cycle.number = keep; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
 		}
 	}
 

@@ -192,6 +192,12 @@ public final class Cycle {
 		if (mob == null || Dungeon.level == null || Dungeon.hero == null) return;
 		boolean bounty = mob.buff( Bounty.class ) != null;
 		boolean boss = Char.hasProp( mob, Char.Property.BOSS ) && !Char.hasProp( mob, Char.Property.MINIBOSS );
+		//a vengeful boss does not fall alone
+		xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation mut = mob.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.class );
+		if (mut != null && mut.has( xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.VENGEFUL )){
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.summon( mob, 3 );
+			GLog.n( "The " + mob.name() + " does not fall alone: its death calls up more." );
+		}
 		if (!bounty && !(boss && number > 0 && affects( Dungeon.branch, Dungeon.depth ))) return;
 		float rating = lootRating( number, Dungeon.depth ) + (bounty ? 1.5f : 1.0f);
 		int items = bounty ? 3 : 2;
@@ -201,6 +207,8 @@ public final class Cycle {
 		if (Dungeon.hero.heroClass != null){
 			Dungeon.level.drop( EndgameLoot.rollClassSet( Dungeon.hero.heroClass, EndgameLoot.tierOfRating( rating ) ), mob.pos );
 		}
+		//shards for reforging (items/CycleShard)
+		Dungeon.level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( (bounty ? 3 : 2) + number ), mob.pos );
 		if (bounty){
 			int gold = Random.NormalIntRange( 150, 250 ) * Math.max( 1, number ) + 30 * Dungeon.depth;
 			Dungeon.level.drop( new Gold( gold ), mob.pos );
