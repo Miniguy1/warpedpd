@@ -25,6 +25,13 @@ jobs:
           mkdir -p ~/.android
           cp ci/personal-debug-key.bin ~/.android/debug.keystore
 
+      - name: Put the build number and the signing key's fingerprint in the version name
+        run: |
+          FP=$(keytool -list -v -keystore ~/.android/debug.keystore -storepass android 2>/dev/null | grep -m1 'SHA256:' | awk '{print $2}' | tr -d ':' | cut -c1-6)
+          echo "key fingerprint starts $FP"
+          sed -i "s/versionNameSuffix '-INDEV'/versionNameSuffix '-INDEV-b${{ github.run_number }}-k${FP}'/" android/build.gradle
+          grep -n versionNameSuffix android/build.gradle
+
       - name: Stop the app nagging about the original author's releases
         run: sed -i "s#githubDebugImplementation project(':services:updates:githubUpdates')#githubDebugImplementation project(':services:updates:debugUpdates')#" android/build.gradle
 
@@ -40,6 +47,15 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew :android:assembleGithubDebug -PappVersionCode=$((1000 + ${{ github.run_number }})) --stacktrace 2>&1 | tee -a build.log
+
+      - name: Refuse to publish a build signed with the wrong key
+        run: |
+          APK=$(ls android/build/outputs/apk/github/debug/*.apk | head -1)
+          GOT=$(keytool -printcert -jarfile "$APK" | grep -m1 'SHA256:' | awk '{print $2}')
+          WANT=$(cat ci/expected-key-fingerprint.txt | tr -d '[:space:]')
+          echo "APK key : $GOT"
+          echo "expected: $WANT"
+          test "$GOT" = "$WANT"
 
       - name: Save the build errors to the repo so they can be read
         if: failure()
