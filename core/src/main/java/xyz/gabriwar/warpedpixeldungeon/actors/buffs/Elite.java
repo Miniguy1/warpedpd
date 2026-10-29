@@ -68,7 +68,8 @@ public class Elite extends Buff {
 	}
 
 	private static boolean candidate( Mob m ){
-		return m.alignment == Char.Alignment.ENEMY && !(m instanceof NPC)
+		//an enemy that is never meant to pay experience (a summon, a decoy) is not made an elite
+		return m.EXP > 0 && m.alignment == Char.Alignment.ENEMY && !(m instanceof NPC)
 				&& !Char.hasProp( m, Char.Property.BOSS ) && !Char.hasProp( m, Char.Property.MINIBOSS )
 				&& !Char.hasProp( m, Char.Property.IMMOVABLE )
 				&& m.buffs( ChampionEnemy.class ).isEmpty() && m.buff( Bounty.class ) == null && m.buff( Elite.class ) == null;
