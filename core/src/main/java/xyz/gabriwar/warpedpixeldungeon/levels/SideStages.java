@@ -21,6 +21,7 @@
 
 package xyz.gabriwar.warpedpixeldungeon.levels;
 
+import xyz.gabriwar.warpedpixeldungeon.Cycle;
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.Char;
 import xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob;
@@ -42,6 +43,17 @@ public final class SideStages {
 	public static final float RATING = 8.0f;
 	/** the rating of the ice boss's hoard */
 	public static final float BOSS_RATING = 8.6f;
+
+	/** a bonus stage's loot rating: 8, or in a new cycle half a tier above what the cycle's own floors pay
+	 *  there, so a harder cycle's Vault pays more */
+	public static float ratingAt( int cycle, int depth ){
+		return cycle > 0 ? Math.max( RATING, Math.min( 9f, Cycle.lootRating( cycle, depth ) + 0.5f ) ) : RATING;
+	}
+
+	/** the ice boss's hoard: 8.6, or a tier and a half above the cycle's floor there */
+	public static float bossRatingAt( int cycle, int depth ){
+		return cycle > 0 ? Math.max( BOSS_RATING, Math.min( 9f, Cycle.lootRating( cycle, depth ) + 1.5f ) ) : BOSS_RATING;
+	}
 
 	public static boolean isVault( int branch, int depth ){
 		return branch == 1 && depth >= 16 && depth <= 19;
@@ -78,19 +90,19 @@ public final class SideStages {
 	/** a bonus stage's floors hold tier 8 loot (the ice boss pays out when it falls: bossHoard) */
 	public static void afterCreate( Level level ){
 		if (isVault( Dungeon.branch, Dungeon.depth )){
-			EndgameLoot.populate( level, 0.75f, 0.35f, RATING );
+			EndgameLoot.populate( level, 0.75f, 0.35f, ratingAt( Cycle.number, Dungeon.depth ) );
 		} else if (isFrozen( Dungeon.branch, Dungeon.depth ) && Dungeon.depth < 25){
-			EndgameLoot.populate( level, 0.65f, 0.30f, RATING );
+			EndgameLoot.populate( level, 0.65f, 0.30f, ratingAt( Cycle.number, Dungeon.depth ) );
 		}
 	}
 
 	/** the ice boss's hoard: three new items, tier 8 and sometimes 9, and a piece of the hero's own set */
 	public static void bossHoard( Level level, int cell ){
 		for (int i = 0; i < 3; i++){
-			level.drop( EndgameLoot.rollRated( BOSS_RATING ), cell );
+			level.drop( EndgameLoot.rollRated( bossRatingAt( Cycle.number, Dungeon.depth ) ), cell );
 		}
 		if (Dungeon.hero != null && Dungeon.hero.heroClass != null){
-			level.drop( EndgameLoot.rollClassSet( Dungeon.hero.heroClass, EndgameLoot.tierOfRating( BOSS_RATING ) ), cell );
+			level.drop( EndgameLoot.rollClassSet( Dungeon.hero.heroClass, EndgameLoot.tierOfRating( bossRatingAt( Cycle.number, Dungeon.depth ) ) ), cell );
 		}
 	}
 }

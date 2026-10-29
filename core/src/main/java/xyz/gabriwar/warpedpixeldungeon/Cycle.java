@@ -76,10 +76,11 @@ public final class Cycle {
 	static float typicalExp( float d ){ return 1f + 0.75f * d; }
 
 	/** the depth whose enemies a floor's enemies match in a cycle. The first floor of the first new cycle
-	 *  matches the bottom floor of the last run (24), each floor after it is 0.8 deeper, and each later
-	 *  cycle starts 2.5 deeper: they do not fall back when the dungeon resets, and they grow slowly. */
+	 *  matches the bottom floor of the last run (24), and every floor after it is 0.8 deeper, on into the
+	 *  next cycle: a cycle's first floor is where the last cycle's last floor left off. They never fall back
+	 *  when the dungeon resets, and they grow slowly. */
 	public static float effectiveDepth( int cycle, int depth ){
-		return 24f + 0.8f * (Math.max( 1, depth ) - 1) + 2.5f * (cycle - 1);
+		return 24f + 0.8f * ((Math.max( 1, cycle ) - 1) * 25 + (Math.max( 1, depth ) - 1));
 	}
 
 	/** the health / damage factor of an enemy on this floor in this cycle: its native strength brought up to that of the matching depth */
@@ -122,9 +123,12 @@ public final class Cycle {
 		return scaled( ch ) ? skillAt( number, Dungeon.branch, Dungeon.depth ) : 1f;
 	}
 
-	/** the rating of a floor's loot in this cycle: 6 at cycle 0 on the first floor, up with the cycle and the depth */
+	/** the rating of a floor's loot in a cycle, from the same ramp as its enemies: 7 (tier 7, what the last
+	 *  run's climb paid) where the enemies match the old bottom floor, a tier more for every 16 depths of
+	 *  strength after it. It carries on across cycles, so a new cycle never pays less than the last ended on. */
 	public static float lootRating( int cycle, int depth ){
-		return Math.min( 9f, 6f + 0.9f * cycle + depth / 26f );
+		if (cycle <= 0) return Math.min( 9f, 6f + depth / 26f );
+		return Math.min( 9f, 7f + (effectiveDepth( cycle, depth ) - 24f) / 16f );
 	}
 
 	/** is the door's new-cycle offer open? Only once the climb is done and the curse lifted. */

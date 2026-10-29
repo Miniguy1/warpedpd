@@ -1055,7 +1055,9 @@ public class ModContentTest {
 		assertEquals( "not the extra stages past the bottom", 1f, Cycle.powerAt( 3, 0, 28 ), 0f );
 		assertEquals( 1f, Cycle.skillAt( 0, 0, 8 ), 0f );
 		assertEquals( 1f, Cycle.expFactorAt( 0, 0, 8 ), 0f );
-		assertEquals( 7.9f, Cycle.lootRating( 1, 26 ), 0.01f );
+		assertEquals( "the first floor of cycle 1 pays what the last run's climb did", 7.0f, Cycle.lootRating( 1, 1 ), 0.01f );
+		assertEquals( 8.25f, Cycle.lootRating( 1, 26 ), 0.01f );
+		assertEquals( "cycle 2 starts where cycle 1 ended", Cycle.lootRating( 1, 26 ), Cycle.lootRating( 2, 1 ), 0.01f );
 		assertTrue( Cycle.lootRating( 1, 5 ) < Cycle.lootRating( 1, 20 ) );
 		assertTrue( Cycle.lootRating( 2, 5 ) > Cycle.lootRating( 1, 5 ) );
 		assertEquals( 9f, Cycle.lootRating( 9, 26 ), 0f );
@@ -1826,7 +1828,12 @@ public class ModContentTest {
 			assertTrue( "cycle 2 over cycle 1 at floor " + d, Cycle.powerAt( 2, 0, d ) * (6f + 3.6f * d) > Cycle.powerAt( 1, 0, d ) * (6f + 3.6f * d) );
 			assertTrue( Cycle.powerAt( 3, 0, d ) > Cycle.powerAt( 2, 0, d ) );
 		}
-		assertEquals( "cycle 2 floor 1 matches depth 26.5", 6f + 3.6f * 26.5f, (6f + 3.6f * 1f) * Cycle.powerAt( 2, 0, 1 ), 0.01f );
+		assertEquals( "cycle 2 floor 1 matches depth 44, just past where cycle 1 ended", 6f + 3.6f * 44f, (6f + 3.6f * 1f) * Cycle.powerAt( 2, 0, 1 ), 0.01f );
+		for (int c = 1; c <= 6; c++) {
+			assertTrue( "cycle " + (c + 1) + " must not start weaker than cycle " + c + " ended",
+					(6f + 3.6f * 1f) * Cycle.powerAt( c + 1, 0, 1 ) >= (6f + 3.6f * 24f) * Cycle.powerAt( c, 0, 24 ) );
+			assertTrue( Cycle.lootRating( c + 1, 1 ) >= Cycle.lootRating( c, 24 ) );
+		}
 		//accuracy and experience follow
 		assertEquals( 9f + 0.9f * 24f, (9f + 0.9f * 1f) * Cycle.skillAt( 1, 0, 1 ), 0.01f );
 		assertTrue( "a rat's experience is brought up: " + Math.round( 1 * Cycle.expFactorAt( 1, 0, 1 ) ), Math.round( 1 * Cycle.expFactorAt( 1, 0, 1 ) ) >= 10 );
@@ -1957,6 +1964,41 @@ public class ModContentTest {
 			checked++;
 		}
 		assertTrue( "weapons and armors checked: " + checked, checked >= 69 );
+	}
+
+	@Test
+	public void lootTiersFollowTheDifficultyAcrossCycles() {
+		int keep = Cycle.number;
+		try {
+			//cycle 1: tier 7 where the enemies match the old bottom floor, tier 8 by the end
+			Cycle.number = 1;
+			for (int i = 0; i < 300; i++) assertEquals( 7, EndgameLoot.tierOfRating( Cycle.lootRating( 1, 1 ) ) );
+			for (int i = 0; i < 300; i++) assertEquals( 8, EndgameLoot.tierOfRating( Cycle.lootRating( 1, 26 ) ) );
+			int t8 = 0;
+			for (int i = 0; i < 6000; i++) if (EndgameLoot.tierOfRating( Cycle.lootRating( 1, 13 ) ) == 8) t8++;
+			assertEquals( "mid-cycle 1 is a mix of 7 and 8", 0.5, t8 / 6000.0, 0.1 );
+			//cycle 2 opens tier 9, and starts no lower than cycle 1 ended
+			Cycle.number = 2;
+			int t9 = 0, below8 = 0;
+			for (int i = 0; i < 8000; i++) {
+				int t = EndgameLoot.tierOfRating( Cycle.lootRating( 2, 1 ) );
+				if (t == 9) t9++;
+				if (t < 8) below8++;
+			}
+			assertEquals( "no tier 7 at the start of cycle 2", 0, below8 );
+			assertEquals( "cycle 2 floor 1 is 3 in 4 tier 8, 1 in 4 tier 9", 0.25, t9 / 8000.0, 0.04 );
+			for (int i = 0; i < 300; i++) assertEquals( 9, EndgameLoot.tierOfRating( Cycle.lootRating( 2, 26 ) ) );
+			//the bonus stages pay more in a harder cycle, and never less than before
+			assertEquals( 8.0f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 0, 16 ), 0f );
+			assertEquals( 8.6f, xyz.gabriwar.warpedpixeldungeon.levels.SideStages.bossRatingAt( 0, 25 ), 0f );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 16 ) >= 8.0f );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 2, 16 ) > xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 16 ) );
+			assertEquals( "cycle 2's Vault pays tier 9", 9, EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 2, 16 ) ) );
+			Cycle.number = 1;
+			assertEquals( "cycle 1's Vault pays tier 8, never 9", 8, EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.levels.SideStages.ratingAt( 1, 19 ) ) );
+		} finally {
+			Cycle.number = keep;
+		}
 	}
 
 	@Test
