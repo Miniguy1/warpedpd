@@ -1527,6 +1527,10 @@ public class OverworldLevel extends Level {
 	public boolean activateTransition( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero,
 			LevelTransition transition ){
 		int gx = worldX + transition.cell() % width(), gy = worldY + transition.cell() / width();
+		//the dungeon's front door, once the climb is done: enter as it is, or begin a new cycle
+		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_DUNGEON_GATE ) && xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset()){
+			return enterDungeonDoor( hero, transition );
+		}
 		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_MINE_GATE )){
 			return enterPlazaStairs( hero, transition );
 		}
@@ -1544,6 +1548,48 @@ public class OverworldLevel extends Level {
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.enteredMainDungeonByTheGate();
 		}
 		return super.activateTransition( hero, transition );
+	}
+
+	//the dungeon's door after the climb: the way in as it is, or a new cycle (Cycle): the dungeon wiped and
+	//every enemy in it stronger. A new cycle asks twice.
+	private boolean enterDungeonDoor( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero, LevelTransition transition ){
+		final int next = xyz.gabriwar.warpedpixeldungeon.Cycle.number + 1;
+		final int factor = next + 1;
+		String message = "You climbed out with the amulet and the curse is gone. The dungeon waits below.\n\n"
+				+ "_Enter_: go in as it is" + (next > 1 ? " (cycle " + xyz.gabriwar.warpedpixeldungeon.Cycle.number + ")" : "") + ".\n\n"
+				+ "_Begin cycle " + next + "_: the whole dungeon is wiped and rebuilt, the amulet goes back to its heart, and every enemy in the dungeon and its branches is " + factor
+				+ " times as strong. Loot and bosses pay better, and the climb holds bounties and events. You keep your hero, your gear, the town and the world.";
+		com.watabou.noosa.Game.runOnRenderThread( () ->
+			xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+					new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+							new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+									xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
+							"The dungeon's door", message,
+							"Enter", "Begin cycle " + next + " (x" + factor + ")", "Not now" ){
+				@Override
+				protected void onSelect( int index ){
+					if (index == 0){
+						OverworldLevel.super.activateTransition( hero, transition );
+					} else if (index == 1){
+						xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+								new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+										new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+												xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
+										"Begin cycle " + next + "?",
+										"The dungeon's floors, quests and drops are wiped for good and the amulet is taken back. Every enemy in the dungeon will be " + factor + " times as strong. This cannot be undone.",
+										"Yes, begin it", "No" ){
+							@Override
+							protected void onSelect( int idx ){
+								if (idx == 0){
+									xyz.gabriwar.warpedpixeldungeon.Cycle.begin( hero );
+									OverworldLevel.super.activateTransition( hero, transition );
+								}
+							}
+						} );
+					}
+				}
+			} ) );
+		return false;
 	}
 
 	//the plaza staircase: four ways down. The dark mines (while they are open) and the three zones

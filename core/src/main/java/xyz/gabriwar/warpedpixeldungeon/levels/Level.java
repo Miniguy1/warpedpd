@@ -252,6 +252,8 @@ public abstract class Level implements Bundlable {
 	private static final String TRANSITIONS	= "transitions";
 	private static final String LOCKED      = "locked";
 	private static final String FIRST_VISIT = "firstVisit";
+	private static final String CLIMB_EVENT = "climbEvent";
+	private static final String CLIMB_ANNOUNCED = "climbEventAnnounced";
 	private static final String CLEARED     = "cleared";
 	private static final String SEALEDLEVEL = "sealedlevel";
 	private static final String HEAPS		= "heaps";
@@ -499,6 +501,8 @@ public abstract class Level implements Bundlable {
 
 		locked      = bundle.getBoolean( LOCKED );
 		firstVisit  = bundle.getBoolean( FIRST_VISIT );
+		climbEvent = bundle.getInt( CLIMB_EVENT );
+		climbEventAnnounced = bundle.getBoolean( CLIMB_ANNOUNCED );
 		cleared     = bundle.getBoolean( CLEARED );
 		sealedlevel = bundle.getBoolean( SEALEDLEVEL );
 
@@ -647,6 +651,8 @@ public abstract class Level implements Bundlable {
 		bundle.put( TRANSITIONS, transitions );
 		bundle.put( LOCKED, locked );
 		bundle.put( FIRST_VISIT, firstVisit );
+		bundle.put( CLIMB_EVENT, climbEvent );
+		bundle.put( CLIMB_ANNOUNCED, climbEventAnnounced );
 		bundle.put( CLEARED, cleared );
 		bundle.put( SEALEDLEVEL, sealedlevel );
 		bundle.put( HEAPS, heaps.valueList() );
@@ -1122,6 +1128,10 @@ public abstract class Level implements Bundlable {
 		return waterNeighbors >= 5;
 	}
 	
+	/** the event of a climb floor in a cycle (levels/ClimbEvents) and whether the hero has been told */
+	public int climbEvent = 0;
+	public boolean climbEventAnnounced = false;
+
 	public int randomRespawnCell( Char ch ) {
 		int cell;
 		int count = 0;

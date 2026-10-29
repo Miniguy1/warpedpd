@@ -293,11 +293,13 @@ public class Dungeon {
 		int si = 0;
 		for (int d : ascentSession) sessionArr[si++] = d;
 		bundle.put( ASCENT_SESSION, sessionArr );
+		bundle.put( "cycle", Cycle.number );
 	}
 
 	public static void restoreAscentState( Bundle bundle ){
 		ascentRebuilds.clear();
 		ascentSession.clear();
+		Cycle.number = bundle.contains( "cycle" ) ? bundle.getInt( "cycle" ) : 0;
 		if (bundle.contains( ASCENT_REBUILDS )){
 			int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
 			for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
@@ -466,6 +468,7 @@ public class Dungeon {
 		generatedLevels.clear();
 		ascentRebuilds.clear();
 		ascentSession.clear();
+		Cycle.number = 0;
 
 		gold = 0;
 		bullet = 0;
@@ -817,6 +820,13 @@ public class Dungeon {
 		}
 		//the Vault and the ice region pay tier 8 loot (and are harder: SideStages)
 		xyz.gabriwar.warpedpixeldungeon.levels.SideStages.afterCreate( level );
+		//a later cycle: the dungeon's floors hold tiered loot, and the climb's floors hold events
+		if (Cycle.number > 0 && Cycle.affects( branch, depth )){
+			if (branch == 0 && !level.locked){
+				xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.populate( level, 0.30f, 0.08f, Cycle.lootRating( Cycle.number, depth ) );
+			}
+			if (branch == 0 && rebuildCount( depth ) > 0) xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.roll( level );
+		}
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.afterCreate( level );
@@ -954,6 +964,10 @@ public class Dungeon {
 		int rebuilt = branch == 0 ? rebuildCount( depth ) : 0;
 		if (rebuilt > 0){
 			result ^= rebuilt * 0x9E3779B97F4A7C15L;
+		}
+		//and so is every floor of a later cycle
+		if (Cycle.number > 0 && Cycle.affects( branch, depth )){
+			result ^= Cycle.number * 0xD1B54A32D192ED03L;
 		}
 		return result;
 	}
@@ -1100,6 +1114,8 @@ public class Dungeon {
 		xyz.gabriwar.warpedpixeldungeon.levels.features.FallenMob.land( level );
 		//and the black market's collector, for a hero who has drawn too much heat
 		xyz.gabriwar.warpedpixeldungeon.levels.rooms.warped.WarpedRooms.onArrive( level );
+		//a climb floor's event, the first time the hero is on it
+		xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
 		//first steps somewhere new write its pages into the Descent Guide
 		xyz.gabriwar.warpedpixeldungeon.journal.GuideGraph.onArrive( depth, branch );
 

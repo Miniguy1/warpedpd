@@ -1021,6 +1021,200 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theCycleMakesTheDungeonStrongerAndNothingElse() {
+		//cycle 0 is the dungeon as it always was
+		assertEquals( 1f, Cycle.powerAt( 0, 0, 12 ), 0f );
+		assertEquals( 2f, Cycle.powerAt( 1, 0, 5 ), 0f );
+		assertEquals( 3f, Cycle.powerAt( 2, 0, 26 ), 0f );
+		assertEquals( "a side branch of the dungeon too", 2f, Cycle.powerAt( 1, 2, 22 ), 0f );
+		assertEquals( "but not the mines (depth 56+)", 1f, Cycle.powerAt( 1, 0, 60 ), 0f );
+		assertEquals( "not the surface", 1f, Cycle.powerAt( 5, 0, 97 ), 0f );
+		assertEquals( "not a plaza zone", 1f, Cycle.powerAt( 3, 105, 12 ), 0f );
+		assertEquals( "not the extra stages past the bottom", 1f, Cycle.powerAt( 3, 0, 28 ), 0f );
+		assertEquals( 1.5f, Cycle.skillAt( 1, 0, 8 ), 0f );
+		assertEquals( 2.0f, Cycle.skillAt( 2, 0, 8 ), 0f );
+		assertEquals( 6.9f, Cycle.lootRating( 1, 26 ), 0.2f );
+		assertTrue( Cycle.lootRating( 1, 5 ) < Cycle.lootRating( 1, 20 ) );
+		assertTrue( Cycle.lootRating( 2, 5 ) > Cycle.lootRating( 1, 5 ) );
+		assertEquals( 9f, Cycle.lootRating( 9, 26 ), 0f );
+
+		//the shared enemy-strength function carries it
+		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		try {
+			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 8;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( 2f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0.0001f );
+			assertEquals( 1.5f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.skillModifier( rat ), 0.0001f );
+			Cycle.number = 0;
+			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0f );
+		} finally {
+			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
+		}
+	}
+
+	@Test
+	public void beginningACycleWipesTheDungeonAndKeepsTheHero() {
+		Hero h = Dungeon.hero;
+		int nk = Cycle.number;
+		java.util.ArrayList<Integer> genKeep = new java.util.ArrayList<>( Dungeon.generatedLevels );
+		int packSize = h.belongings.backpack.items.size();
+		try {
+			Cycle.number = 0;
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.Amulet() );
+			Statistics.ascended = true;
+			Statistics.amuletObtained = true;
+			Statistics.highestAscent = 25;
+			Dungeon.ascentRebuilds.put( 7, 1 );
+			Dungeon.ascentSession.add( 7 );
+			Dungeon.generatedLevels.clear();
+			for (int d : new int[]{ 1, 5, 12, 26 }) Dungeon.generatedLevels.add( d );                 //the dungeon
+			Dungeon.generatedLevels.add( 16 + 1000 );                                               //the Vault
+			Dungeon.generatedLevels.add( 97 );                                                       //the surface
+			Dungeon.generatedLevels.add( 60 );                                                       //a dark mine floor
+			Dungeon.generatedLevels.add( 12 + 1000 * 105 );                                          //a plaza zone
+			Dungeon.tengukilled = true; Dungeon.crabkingkilled = true; Dungeon.templeCompleted = true;
+			Dungeon.chapters.add( 3 );
+			int levelBefore = h.lvl;
+			assertTrue( Cycle.offersReset() );
+
+			Cycle.number++;
+			Cycle.resetDungeonState( h );
+
+			assertEquals( 1, Cycle.number );
+			assertFalse( "the curse's mark is gone", Statistics.ascended );
+			assertFalse( Statistics.amuletObtained );
+			assertEquals( 0, Statistics.highestAscent );
+			assertFalse( "the amulet goes back to its heart", h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.Amulet.class ) != null );
+			assertTrue( Dungeon.ascentRebuilds.isEmpty() );
+			assertTrue( Dungeon.ascentSession.isEmpty() );
+			for (int d : new int[]{ 1, 5, 12, 26, 1016 }) assertFalse( "floor " + d + " must be unvisited", Dungeon.generatedLevels.contains( d ) );
+			assertTrue( "the surface stays", Dungeon.generatedLevels.contains( 97 ) );
+			assertTrue( "the mines stay", Dungeon.generatedLevels.contains( 60 ) );
+			assertTrue( "a plaza zone stays", Dungeon.generatedLevels.contains( 12 + 1000 * 105 ) );
+			assertFalse( Dungeon.tengukilled );
+			assertFalse( Dungeon.crabkingkilled );
+			assertFalse( Dungeon.templeCompleted );
+			assertTrue( Dungeon.chapters.isEmpty() );
+			assertEquals( "the hero keeps their level", levelBefore, h.lvl );
+			assertFalse( "the offer is closed until the next climb", Cycle.offersReset() );
+
+			//the cycle survives a save, and an old save is cycle 0
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			Cycle.number = 3;
+			Dungeon.storeAscentState( b );
+			Cycle.number = 0;
+			Dungeon.restoreAscentState( b );
+			assertEquals( 3, Cycle.number );
+			Dungeon.restoreAscentState( new com.watabou.utils.Bundle() );
+			assertEquals( 0, Cycle.number );
+		} finally {
+			Cycle.number = nk;
+			Dungeon.generatedLevels.clear();
+			Dungeon.generatedLevels.addAll( genKeep );
+			Dungeon.ascentRebuilds.clear();
+			Dungeon.ascentSession.clear();
+			Statistics.ascended = false;
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
+		}
+	}
+
+	@Test
+	public void theClimbEventsBuildAndPay() {
+		//the odds add up to a hundred, and an event of each kind comes up
+		int[] counts = new int[5];
+		for (int i = 0; i < 20000; i++) counts[xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.pick()]++;
+		assertEquals( 0.45, counts[0] / 20000.0, 0.03 );
+		assertEquals( 0.20, counts[1] / 20000.0, 0.03 );
+		assertEquals( 0.12, counts[2] / 20000.0, 0.03 );
+		assertEquals( 0.11, counts[3] / 20000.0, 0.03 );
+		assertEquals( 0.12, counts[4] / 20000.0, 0.03 );
+
+		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Dungeon.generatedLevels.clear();
+		try {
+			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 7;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			int mobsBefore = level.mobs.size();
+
+			//a bounty: one hunter, four times the health, marked and a champion
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BOUNTY );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BOUNTY, level.climbEvent );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob hunter = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty.class ) != null) hunter = m;
+			assertNotNull( "the bounty's hunter", hunter );
+			assertEquals( mobsBefore + 1, level.mobs.size() );
+			assertEquals( hunter.HT, hunter.HP );
+			assertNotNull( hunter.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.Giant.class ) );
+
+			//its fall pays a hoard: three items, a piece of the hero's set, and gold
+			Cycle.onDeath( hunter );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap hoard = level.heaps.get( hunter.pos );
+			assertNotNull( hoard );
+			boolean gold = false;
+			for (Item it : hoard.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true;
+			assertTrue( "the bounty pays gold", gold );
+			assertTrue( "and trophies: " + hoard.items.size(), hoard.items.size() >= 5 );
+
+			//a hunted floor: a pack of five
+			int before = level.mobs.size();
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.HUNTED );
+			assertTrue( "pack of " + (level.mobs.size() - before), level.mobs.size() - before >= 4 );
+
+			//a cache: loot lying about
+			int heapsBefore = level.heaps.size();
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.CACHE );
+			assertTrue( "the cache's items", level.heaps.size() > heapsBefore );
+
+			//a blood moon: 30% on top of the cycle
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BLOOD_MOON );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( 2f * 1.3f, Cycle.power( rat ), 0.0001f );
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE );
+			assertEquals( 2f, Cycle.power( rat ), 0.0001f );
+
+			//a floor's event is saved with the floor
+			level.climbEvent = xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.HUNTED;
+			level.climbEventAnnounced = true;
+			com.watabou.utils.Bundle lb = new com.watabou.utils.Bundle();
+			level.storeInBundle( lb );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.HUNTED, lb.getInt( "climbEvent" ) );
+			assertTrue( lb.getBoolean( "climbEventAnnounced" ) );
+
+			//a boss of a later cycle pays too: Goo, on floor 5
+			Dungeon.depth = 5;
+			level.climbEvent = 0;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
+			goo.pos = level.randomDestination( null );
+			Cycle.onDeath( goo );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap bossHoard = level.heaps.get( goo.pos );
+			assertNotNull( "a later cycle's boss pays", bossHoard );
+			assertTrue( "three items, got " + bossHoard.items.size(), bossHoard.items.size() >= 3 );
+			Cycle.number = 0;
+			int heapsB = level.heaps.size();
+			goo.pos = level.randomDestination( null );
+			Cycle.onDeath( goo );
+			assertNull( "cycle 0's boss pays nothing extra", level.heaps.get( goo.pos ) );
+			Cycle.number = 1;
+
+			//many climb floors in a row build without trouble
+			Dungeon.ascentRebuilds.put( 9, 1 );
+			for (int i = 0; i < 12; i++) {
+				Dungeon.depth = 9;
+				Level climb = Dungeon.newLevel();
+				assertFalse( climb instanceof xyz.gabriwar.warpedpixeldungeon.levels.DeadEndLevel );
+				assertTrue( climb.climbEvent >= 0 && climb.climbEvent <= 4 );
+			}
+		} finally {
+			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.ascentRebuilds.clear();
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

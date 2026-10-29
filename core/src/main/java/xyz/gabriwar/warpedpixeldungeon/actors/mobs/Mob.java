@@ -1352,7 +1352,7 @@ public abstract class Mob extends Char {
 				//a barrow's enemies are never out-levelled: they pay full experience, grown with
 				//their power, however far the hero has gone (summons, maxLvl < 0, still pay none)
 				if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.inDelve() && maxLvl >= 0 && EXP > 0){
-					exp = Math.round( EXP * xyz.gabriwar.warpedpixeldungeon.levels.Delves.power( this ) );
+					exp = Math.round( EXP * xyz.gabriwar.warpedpixeldungeon.levels.Delves.power( this ) * xyz.gabriwar.warpedpixeldungeon.Cycle.power( this ) );
 				}
 
 				//during ascent, under-levelled enemies grant 10 xp each until level 30
@@ -1403,6 +1403,8 @@ public abstract class Mob extends Char {
 		if (Dungeon.hero != null && Dungeon.level != null) xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.onEnemyKilled( this, cause );
 		//a barrow's guardian pays out its hoard and seals the barrow
 		if (Dungeon.level != null) xyz.gabriwar.warpedpixeldungeon.levels.Delves.onDeath( this );
+		//a bounty's hunter, or a boss of a later cycle, pays its hoard
+		xyz.gabriwar.warpedpixeldungeon.Cycle.onDeath( this );
 
 		if (cause == Chasm.class){
 			//50% chance to round up, 50% to round down
