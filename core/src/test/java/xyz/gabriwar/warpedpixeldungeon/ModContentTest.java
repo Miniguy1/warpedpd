@@ -1195,7 +1195,7 @@ public class ModContentTest {
 			int heapsB = level.heaps.valueList().size();
 			goo.pos = level.randomDestination( null );
 			Cycle.onDeath( goo );
-			assertNull( "cycle 0's boss pays nothing extra", level.heaps.get( goo.pos ) );
+			org.junit.Assert.assertNull( "cycle 0 boss pays nothing extra", level.heaps.get( goo.pos ) );
 			Cycle.number = 1;
 
 			//many climb floors in a row build without trouble
