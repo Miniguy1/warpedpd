@@ -1033,7 +1033,7 @@ public class ModContentTest {
 		assertEquals( "not the extra stages past the bottom", 1f, Cycle.powerAt( 3, 0, 28 ), 0f );
 		assertEquals( 1.5f, Cycle.skillAt( 1, 0, 8 ), 0f );
 		assertEquals( 2.0f, Cycle.skillAt( 2, 0, 8 ), 0f );
-		assertEquals( 6.9f, Cycle.lootRating( 1, 26 ), 0.2f );
+		assertEquals( 7.9f, Cycle.lootRating( 1, 26 ), 0.01f );
 		assertTrue( Cycle.lootRating( 1, 5 ) < Cycle.lootRating( 1, 20 ) );
 		assertTrue( Cycle.lootRating( 2, 5 ) > Cycle.lootRating( 1, 5 ) );
 		assertEquals( 9f, Cycle.lootRating( 9, 26 ), 0f );
