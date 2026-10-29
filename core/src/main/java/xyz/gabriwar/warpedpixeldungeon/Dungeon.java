@@ -295,6 +295,7 @@ public class Dungeon {
 		bundle.put( ASCENT_SESSION, sessionArr );
 		bundle.put( "cycle", Cycle.number );
 		Legacy.store( bundle );
+		BountyBoard.store( bundle );
 	}
 
 	public static void restoreAscentState( Bundle bundle ){
@@ -302,6 +303,7 @@ public class Dungeon {
 		ascentSession.clear();
 		Cycle.number = bundle.contains( "cycle" ) ? bundle.getInt( "cycle" ) : 0;
 		Legacy.restore( bundle );
+		BountyBoard.restore( bundle );
 		if (bundle.contains( ASCENT_REBUILDS )){
 			int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
 			for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
@@ -472,6 +474,7 @@ public class Dungeon {
 		ascentSession.clear();
 		Cycle.number = 0;
 		Legacy.reset();
+		BountyBoard.reset();
 
 		gold = 0;
 		bullet = 0;

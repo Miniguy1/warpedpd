@@ -747,6 +747,8 @@ public final class Delves {
 			if (Dungeon.hero != null && Dungeon.hero.heroClass != null){
 				Dungeon.level.drop( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( Dungeon.hero.heroClass, xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.tierOfRating( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.zoneRating( zoneId( e ), zoneTier( e ) ) + 0.5f ) ), mob.pos );
 			}
+			//a plaza zone's guardian is a bounty board's zone contract
+			xyz.gabriwar.warpedpixeldungeon.BountyBoard.onZoneCleared();
 			//a guardian leaves shards for reforging
 			Dungeon.level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( 1 + zoneId( e ) + zoneTier( e ) ), mob.pos );
 			if (zoneId( e ) == 2){

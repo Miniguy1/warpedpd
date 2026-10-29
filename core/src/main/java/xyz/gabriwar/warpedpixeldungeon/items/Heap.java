@@ -93,6 +93,8 @@ public class Heap implements Bundlable {
 	public LinkedList<Item> items = new LinkedList<>();
 	
 	public void open( Hero hero ) {
+		//a cursed chest wakes the floor
+		xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.onChestOpened( this, hero );
 		switch (type) {
 		case TOMB:
 			Wraith.spawnAround( hero.pos );

@@ -1151,13 +1151,10 @@ public class ModContentTest {
 	@Test
 	public void theClimbEventsBuildAndPay() {
 		//the odds add up to a hundred, and an event of each kind comes up
-		int[] counts = new int[5];
-		for (int i = 0; i < 20000; i++) counts[xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.pick()]++;
-		assertEquals( 0.45, counts[0] / 20000.0, 0.03 );
-		assertEquals( 0.20, counts[1] / 20000.0, 0.03 );
-		assertEquals( 0.12, counts[2] / 20000.0, 0.03 );
-		assertEquals( 0.11, counts[3] / 20000.0, 0.03 );
-		assertEquals( 0.12, counts[4] / 20000.0, 0.03 );
+		int[] counts = new int[10];
+		for (int i = 0; i < 40000; i++) counts[xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.pick()]++;
+		double[] want = { 0.30, 0.14, 0.08, 0.08, 0.08, 0.08, 0.07, 0.06, 0.06, 0.05 };
+		for (int e = 0; e < 10; e++) assertEquals( "event " + e, want[e], counts[e] / 40000.0, 0.02 );
 
 		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
 		Level lvKeep = Dungeon.level;
@@ -1537,6 +1534,275 @@ public class ModContentTest {
 			Cycle.number = keep; Dungeon.branch = bk; Dungeon.depth = dk;
 			Dungeon.level = lvKeep;
 			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void theFiveNewClimbEventsWork() {
+		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int posKeep = h.pos, hpKeep = h.HP, htKeep = h.HT, goldKeep = Dungeon.gold;
+		Dungeon.generatedLevels.clear();
+		try {
+			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 7;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = emptyCell( level );
+
+			//the cursed chest: a chest of loot that wakes the floor, once
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.CURSED_CHEST );
+			assertTrue( level.cursedChest != -1 );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap chest = level.heaps.get( level.cursedChest );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST, chest.type );
+			assertTrue( "chest items " + chest.items.size(), chest.items.size() >= 4 );
+			com.watabou.utils.Bundle lb = new com.watabou.utils.Bundle();
+			level.storeInBundle( lb );
+			assertEquals( "saved with the floor", level.cursedChest, lb.getInt( "cursedChest" ) );
+			int before = level.mobs.size();
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.onChestOpened( chest, h );
+			assertEquals( -1, level.cursedChest );
+			assertTrue( "the floor wakes: " + (level.mobs.size() - before), level.mobs.size() - before >= 4 );
+			int after = level.mobs.size();
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.onChestOpened( chest, h );
+			assertEquals( "only once", after, level.mobs.size() );
+
+			//lockdown: sealed, three waves, then the doors open and the floor pays
+			h.pos = emptyCell( level );
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.LOCKDOWN );
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
+			assertTrue( "the stairs are sealed", level.locked );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown lock = h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class );
+			assertNotNull( lock );
+			int m0 = level.mobs.size();
+			lock.act();
+			assertEquals( 1, lock.wave );
+			assertTrue( "wave 1: " + (level.mobs.size() - m0), level.mobs.size() - m0 >= 3 );
+			for (int i = 0; i < xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.GAP - 1; i++) lock.act();
+			assertEquals( "not yet the second wave", 1, lock.wave );
+			lock.act();
+			assertEquals( 2, lock.wave );
+			for (int i = 0; i < xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.GAP; i++) lock.act();
+			assertEquals( 3, lock.wave );
+			assertTrue( "still sealed while the third wave lives", level.locked );
+			assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.waveSize( 1 ) );
+			assertEquals( 6, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.waveSize( 3 ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : new java.util.ArrayList<>( level.mobs )) {
+				if (m.alignment == xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ENEMY) level.mobs.remove( m );
+			}
+			lock.act();
+			assertFalse( "the doors unseal", level.locked );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE, level.climbEvent );
+			assertNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class ) );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap spoils = level.heaps.get( h.pos );
+			assertNotNull( spoils );
+			assertTrue( "spoils " + spoils.items.size(), spoils.items.size() >= 4 );
+
+			//a floor still sealed when the hero returns takes up the waves again
+			level.climbEvent = xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.LOCKDOWN;
+			level.locked = true;
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class ) );
+			h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class ).detach();
+			level.locked = false;
+			level.climbEvent = xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE;
+
+			//the rematch: an echo with eight times the health, a boss's mutations and a double payout
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.REMATCH );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob echo = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) {
+				xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty bb = m.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty.class );
+				if (bb != null && bb.boost == 2) echo = m;
+			}
+			assertNotNull( "the rematch's echo", echo );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation mut = echo.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.class );
+			assertNotNull( mut );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.SUMMONER | xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.WARDED, mut.mask );
+			assertNotNull( echo.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.ChampionEnemy.Giant.class ) );
+			echo.pos = emptyCell( level );
+			Cycle.onDeath( echo );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap pay = level.heaps.get( echo.pos );
+			assertNotNull( pay );
+			int shards = 0;
+			for (Item it : pay.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard) shards += it.quantity();
+			assertTrue( "a rematch pays 3 + cycle + 3 shards, got " + shards, shards >= 7 );
+			assertTrue( "and five items and more: " + pay.items.size(), pay.items.size() >= 6 );
+
+			//the blessing shrine: a boon with a bane
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BLESSING );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine shrine = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine) shrine = (xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine)m;
+			assertNotNull( shrine );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.BLESSING, shrine.kind );
+			h.HT = 100; h.HP = 100;
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.bless( h, 0 ) );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Haste.class ) );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Vulnerable.class ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.bless( h, 1 ) );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Weakness.class ) );
+			assertTrue( "a barrier of 40%", h.shielding() >= 40 );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.bless( h, 2 ) );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bless.class ) );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Cripple.class ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.bless( h, 5 ) );
+			for (Class<? extends xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff> bc : java.util.Arrays.<Class<? extends xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff>>asList(
+					xyz.gabriwar.warpedpixeldungeon.actors.buffs.Haste.class, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Vulnerable.class, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Weakness.class,
+					xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bless.class, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Cripple.class, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class )) {
+				if (h.buff( bc ) != null) h.buff( bc ).detach();
+			}
+			//a shrine keeps what it was and whether it is spent
+			shrine.used = true;
+			com.watabou.utils.Bundle sb = new com.watabou.utils.Bundle();
+			shrine.storeInBundle( sb );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine back = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine();
+			back.restoreFromBundle( sb );
+			assertTrue( back.used );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.BLESSING, back.kind );
+
+			//the cursed shrine: blood, gold or a fight, for a reward at the hero's feet
+			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.CURSED_SHRINE );
+			boolean cursedShrine = false;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine && ((xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine)m).kind == xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.CURSED) cursedShrine = true;
+			assertTrue( cursedShrine );
+			h.HT = 50; h.HP = 50;
+			h.pos = emptyCell( level );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 0, level ) );
+			assertEquals( "30% of the blood", 35, h.HP );
+			assertTrue( "two rewards: " + level.heaps.get( h.pos ).items.size(), level.heaps.get( h.pos ).items.size() >= 2 );
+			h.HP = 3;
+			h.pos = emptyCell( level );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 0, level ) );
+			assertTrue( "the shrine never kills", h.HP >= 1 );
+			h.HP = 1;
+			assertFalse( "no blood to spare", xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 0, level ) );
+			assertEquals( 1, h.HP );
+			Dungeon.gold = 1000;
+			h.pos = emptyCell( level );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 1, level ) );
+			assertEquals( "half the gold", 500, Dungeon.gold );
+			boolean gotShards = false;
+			for (Item it : level.heaps.get( h.pos ).items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard) gotShards = true;
+			assertTrue( gotShards );
+			Dungeon.gold = 50;
+			assertFalse( "too poor", xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 1, level ) );
+			assertEquals( 50, Dungeon.gold );
+			h.pos = emptyCell( level );
+			int mb = level.mobs.size();
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.curse( h, 2, level ) );
+			assertTrue( "the guardians: " + (level.mobs.size() - mb), level.mobs.size() - mb >= 5 );
+		} finally {
+			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			h.pos = posKeep; h.HT = htKeep; h.HP = hpKeep; Dungeon.gold = goldKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void theBountyBoardPostsTakesAndPays() {
+		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int goldKeep = Dungeon.gold, packSize = h.belongings.backpack.items.size();
+		java.util.Set<BountyBoard.Kind> covered = new java.util.HashSet<>();
+		Dungeon.generatedLevels.clear();
+		try {
+			//no board in the first run
+			Cycle.number = 0;
+			BountyBoard.reset();
+			assertFalse( BountyBoard.available() );
+			assertFalse( BountyBoard.accept( 0 ) );
+			Dungeon.branch = 0; Dungeon.depth = 7;
+			Cycle.number = 1;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			for (int cycle = 1; cycle <= 8; cycle++) {
+				Cycle.number = cycle;
+				BountyBoard.reset();
+				//three different contracts, the same each time they are read
+				java.util.Set<BountyBoard.Kind> kinds = new java.util.HashSet<>();
+				for (int s = 0; s < 3; s++) {
+					BountyBoard.Contract c = BountyBoard.current( s );
+					BountyBoard.Contract again = BountyBoard.contract( Dungeon.seed, cycle, s );
+					assertEquals( c.kind, again.kind );
+					assertEquals( c.need, again.need );
+					assertEquals( c.depth, again.depth );
+					kinds.add( c.kind );
+					if (c.kind == BountyBoard.Kind.BOSS) assertTrue( "boss floor " + c.depth, c.depth % 5 == 0 && c.depth >= 5 && c.depth <= 25 );
+					assertTrue( c.shards > 0 && c.gold > 0 );
+				}
+				assertEquals( "three different kinds", 3, kinds.size() );
+
+				for (int s = 0; s < 3; s++) {
+					BountyBoard.Contract c = BountyBoard.current( s );
+					covered.add( c.kind );
+					assertTrue( BountyBoard.accept( s ) );
+					assertFalse( "not twice", BountyBoard.accept( s ) );
+					assertFalse( "not done yet", BountyBoard.isReady( s ) );
+					assertFalse( "nothing to claim yet", BountyBoard.claim( h, s ) );
+					Dungeon.branch = 0; Dungeon.depth = 7;
+					switch (c.kind) {
+						case HUNTERS:
+							for (int i = 0; i < c.need; i++) {
+								BountyBoard.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );   //an ordinary enemy does not count
+							}
+							assertEquals( 0, BountyBoard.progressOf( s ) );
+							for (int i = 0; i < c.need; i++) {
+								xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat hunter = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+								xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( hunter, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bounty.class );
+								BountyBoard.onKill( hunter );
+							}
+							break;
+						case BOSS:
+							Dungeon.depth = (c.depth == 5 ? 10 : 5);
+							BountyBoard.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo() );   //the wrong floor
+							assertEquals( 0, BountyBoard.progressOf( s ) );
+							Dungeon.depth = c.depth;
+							BountyBoard.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo() );
+							break;
+						case SLAYER:
+							for (int i = 0; i < c.need; i++) BountyBoard.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+							break;
+						default:
+							BountyBoard.onZoneCleared();
+					}
+					assertTrue( c.kind + " done", BountyBoard.isReady( s ) );
+					int gold = Dungeon.gold;
+					assertTrue( BountyBoard.claim( h, s ) );
+					assertEquals( c.gold, Dungeon.gold - gold );
+					assertTrue( BountyBoard.isClaimed( s ) );
+					assertFalse( "claimed once", BountyBoard.claim( h, s ) );
+					assertFalse( BountyBoard.isReady( s ) );
+				}
+				//a new cycle posts new contracts
+				Cycle.number = cycle + 1;
+				assertFalse( BountyBoard.isAccepted( 0 ) );
+				assertFalse( BountyBoard.isClaimed( 0 ) );
+			}
+			assertEquals( "every kind of contract was posted and paid", 4, covered.size() );
+			int shards = 0;
+			for (Item it : h.belongings.backpack.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard) shards += it.quantity();
+			assertTrue( "the pay includes shards: " + shards, shards > 0 );
+
+			//the board is saved with the run
+			Cycle.number = 2;
+			BountyBoard.reset();
+			assertTrue( BountyBoard.accept( 1 ) );
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			Dungeon.storeAscentState( b );
+			BountyBoard.reset();
+			assertFalse( BountyBoard.isAccepted( 1 ) );
+			Dungeon.restoreAscentState( b );
+			assertEquals( 2, Cycle.number );
+			assertTrue( BountyBoard.isAccepted( 1 ) );
+			assertFalse( BountyBoard.isAccepted( 0 ) );
+		} finally {
+			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.gold = goldKeep;
+			BountyBoard.reset();
+			Dungeon.generatedLevels.clear();
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
 		}
 	}
 

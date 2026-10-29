@@ -254,6 +254,7 @@ public abstract class Level implements Bundlable {
 	private static final String FIRST_VISIT = "firstVisit";
 	private static final String CLIMB_EVENT = "climbEvent";
 	private static final String CLIMB_ANNOUNCED = "climbEventAnnounced";
+	private static final String CURSED_CHEST = "cursedChest";
 	private static final String CLEARED     = "cleared";
 	private static final String SEALEDLEVEL = "sealedlevel";
 	private static final String HEAPS		= "heaps";
@@ -503,6 +504,7 @@ public abstract class Level implements Bundlable {
 		firstVisit  = bundle.getBoolean( FIRST_VISIT );
 		climbEvent = bundle.getInt( CLIMB_EVENT );
 		climbEventAnnounced = bundle.getBoolean( CLIMB_ANNOUNCED );
+		cursedChest = bundle.contains( CURSED_CHEST ) ? bundle.getInt( CURSED_CHEST ) : -1;
 		cleared     = bundle.getBoolean( CLEARED );
 		sealedlevel = bundle.getBoolean( SEALEDLEVEL );
 
@@ -653,6 +655,7 @@ public abstract class Level implements Bundlable {
 		bundle.put( FIRST_VISIT, firstVisit );
 		bundle.put( CLIMB_EVENT, climbEvent );
 		bundle.put( CLIMB_ANNOUNCED, climbEventAnnounced );
+		bundle.put( CURSED_CHEST, cursedChest );
 		bundle.put( CLEARED, cleared );
 		bundle.put( SEALEDLEVEL, sealedlevel );
 		bundle.put( HEAPS, heaps.valueList() );
@@ -1131,6 +1134,8 @@ public abstract class Level implements Bundlable {
 	/** the event of a climb floor in a cycle (levels/ClimbEvents) and whether the hero has been told */
 	public int climbEvent = 0;
 	public boolean climbEventAnnounced = false;
+	/** the cell of a cursed chest (ClimbEvents.CURSED_CHEST), -1 for none */
+	public int cursedChest = -1;
 
 	public int randomRespawnCell( Char ch ) {
 		int cell;

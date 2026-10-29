@@ -1528,7 +1528,7 @@ public class OverworldLevel extends Level {
 			LevelTransition transition ){
 		int gx = worldX + transition.cell() % width(), gy = worldY + transition.cell() / width();
 		//the dungeon's front door, once the climb is done: enter as it is, or begin a new cycle
-		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_DUNGEON_GATE ) && (xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset() || xyz.gabriwar.warpedpixeldungeon.Legacy.earned() > 0)){
+		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_DUNGEON_GATE ) && (xyz.gabriwar.warpedpixeldungeon.Cycle.offersReset() || xyz.gabriwar.warpedpixeldungeon.Legacy.earned() > 0 || xyz.gabriwar.warpedpixeldungeon.BountyBoard.available())){
 			return enterDungeonDoor( hero, transition );
 		}
 		if (altitude == 0 && transition.cell() == localTownCell( WorldStructures.TOWN_MINE_GATE )){
@@ -1572,6 +1572,10 @@ public class OverworldLevel extends Level {
 			msg.append( "\n_Legacy_: " ).append( xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() ).append( " points to spend on permanent bonuses.\n" );
 			labels.add( "Legacy (" + xyz.gabriwar.warpedpixeldungeon.Legacy.unspent() + ")" ); kinds.add( 2 );
 		}
+		if (xyz.gabriwar.warpedpixeldungeon.BountyBoard.available()){
+			msg.append( "\n_Bounty board_: three contracts for this cycle, paid in shards, gold and gear.\n" );
+			labels.add( "Bounty board" ); kinds.add( 3 );
+		}
 		labels.add( "Not now" ); kinds.add( -1 );
 		final String message = msg.toString();
 		com.watabou.noosa.Game.runOnRenderThread( () ->
@@ -1603,10 +1607,45 @@ public class OverworldLevel extends Level {
 						} );
 					} else if (kind == 2){
 						showLegacy();
+					} else if (kind == 3){
+						showBoard( hero );
 					}
 				}
 			} ) );
 		return false;
+	}
+
+	//the bounty board: take a contract, then claim it when it is done
+	private void showBoard( final xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero ){
+		final int n = xyz.gabriwar.warpedpixeldungeon.BountyBoard.SLOTS;
+		String[] labels = new String[n + 1];
+		StringBuilder msg = new StringBuilder( "Contracts for cycle " + xyz.gabriwar.warpedpixeldungeon.Cycle.number + ". Tap one to take it, tap it again when it is done to claim the pay.\n" );
+		for (int i = 0; i < n; i++){
+			xyz.gabriwar.warpedpixeldungeon.BountyBoard.Contract c = xyz.gabriwar.warpedpixeldungeon.BountyBoard.current( i );
+			String state = xyz.gabriwar.warpedpixeldungeon.BountyBoard.isClaimed( i ) ? "claimed"
+					: xyz.gabriwar.warpedpixeldungeon.BountyBoard.isReady( i ) ? "done: claim it"
+					: xyz.gabriwar.warpedpixeldungeon.BountyBoard.isAccepted( i ) ? "taken " + xyz.gabriwar.warpedpixeldungeon.BountyBoard.progressOf( i ) + "/" + c.need
+					: "open";
+			labels[i] = (i + 1) + ". " + state;
+			msg.append( "\n" ).append( i + 1 ).append( ". " ).append( c.text() ).append( " (" ).append( c.shards ).append( " shards, " ).append( c.gold ).append( " gold and a trophy)" );
+		}
+		labels[n] = "Done";
+		xyz.gabriwar.warpedpixeldungeon.scenes.GameScene.show(
+				new xyz.gabriwar.warpedpixeldungeon.windows.WndOptions(
+						new xyz.gabriwar.warpedpixeldungeon.sprites.ItemSprite(
+								xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet.AMULET ),
+						"Bounty board", msg.toString(), labels ){
+			@Override
+			protected void onSelect( int index ){
+				if (index >= n) return;
+				if (xyz.gabriwar.warpedpixeldungeon.BountyBoard.isReady( index )){
+					xyz.gabriwar.warpedpixeldungeon.BountyBoard.claim( hero, index );
+				} else if (!xyz.gabriwar.warpedpixeldungeon.BountyBoard.isAccepted( index ) && !xyz.gabriwar.warpedpixeldungeon.BountyBoard.isClaimed( index )){
+					xyz.gabriwar.warpedpixeldungeon.BountyBoard.accept( index );
+				}
+				showBoard( hero );
+			}
+		} );
 	}
 
 	//the legacy points: a point on a stat each tap, until they run out

@@ -30,6 +30,8 @@ import com.watabou.utils.Bundle;
 public class Bounty extends Buff {
 
 	private boolean announced = false;
+	/** 1 for a bounty, 2 for a boss rematch: the payout grows with it */
+	public int boost = 1;
 
 	{
 		type = buffType.NEUTRAL;
@@ -52,11 +54,13 @@ public class Bounty extends Buff {
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
 		bundle.put( ANNOUNCED, announced );
+		bundle.put( "boost", boost );
 	}
 
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle( bundle );
 		announced = bundle.getBoolean( ANNOUNCED );
+		boost = bundle.contains( "boost" ) ? bundle.getInt( "boost" ) : 1;
 	}
 }

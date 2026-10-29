@@ -52,12 +52,13 @@ public final class ClimbEvents {
 
 	private ClimbEvents(){}
 
-	public static final int NONE = 0, BOUNTY = 1, BLOOD_MOON = 2, HUNTED = 3, CACHE = 4;
+	public static final int NONE = 0, BOUNTY = 1, BLOOD_MOON = 2, HUNTED = 3, CACHE = 4,
+			CURSED_CHEST = 5, LOCKDOWN = 6, REMATCH = 7, BLESSING = 8, CURSED_SHRINE = 9;
 
 	public static final float BLOOD_MOON_POWER = 1.3f;
 
-	//out of 100: nothing, bounty, blood moon, hunted, cache
-	static final int[] WEIGHTS = { 45, 20, 12, 11, 12 };
+	//out of 100: nothing, bounty, blood moon, hunted, cache, cursed chest, lockdown, rematch, blessing, cursed shrine
+	static final int[] WEIGHTS = { 30, 14, 8, 8, 8, 8, 7, 6, 6, 5 };
 
 	public static int pick(){
 		int r = Random.Int( 100 );
@@ -94,8 +95,74 @@ public final class ClimbEvents {
 				int shardCell = level.randomDestination( null );
 				if (shardCell != -1) level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( 2 + Cycle.number ), shardCell );
 				break;
+			case CURSED_CHEST:
+				placeCursedChest( level, rating + 1f );
+				break;
+			case REMATCH:
+				spawnRematch( level );
+				break;
+			case BLESSING:
+				spawnShrine( level, xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.BLESSING );
+				break;
+			case CURSED_SHRINE:
+				spawnShrine( level, xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine.CURSED );
+				break;
 			default:
 		}
+	}
+
+	/** a chest of tiered loot that wakes the floor when it is opened (Heap.open -> onChestOpened) */
+	static void placeCursedChest( Level level, float rating ){
+		int cell = -1;
+		for (int tries = 0; tries < 30; tries++){
+			cell = level.randomDestination( null );
+			if (cell != -1 && level.heaps.get( cell ) == null) break;
+		}
+		if (cell == -1) return;
+		xyz.gabriwar.warpedpixeldungeon.items.Heap heap = null;
+		for (int i = 0; i < 3; i++) heap = level.drop( EndgameLoot.rollRated( rating ), cell );
+		if (Dungeon.hero != null && Dungeon.hero.heroClass != null){
+			heap = level.drop( EndgameLoot.rollClassSet( Dungeon.hero.heroClass, EndgameLoot.tierOfRating( rating ) ), cell );
+		}
+		heap = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.CycleShard().quantity( 2 + Cycle.number ), cell );
+		heap.type = xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST;
+		level.cursedChest = cell;
+	}
+
+	/** the cursed chest is opened: the floor wakes and comes for the hero */
+	public static void onChestOpened( xyz.gabriwar.warpedpixeldungeon.items.Heap heap, xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero ){
+		Level lv = Dungeon.level;
+		if (lv == null || heap == null || lv.cursedChest != heap.pos) return;
+		lv.cursedChest = -1;
+		GLog.n( "The chest was cursed! The floor wakes around you." );
+		xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.summon( hero, 5 );
+	}
+
+	/** an echo of the region's guardian: eight times the health, summoning and warded, and paying a rematch's hoard */
+	static void spawnRematch( Level level ){
+		ArrayList<Class<? extends Mob>> rotation = MobSpawner.getMobRotation( Dungeon.depth );
+		if (rotation == null || rotation.isEmpty()) return;
+		Mob m = Reflection.newInstance( rotation.get( rotation.size() - 1 ) );
+		if (m == null) return;
+		m.pos = level.randomRespawnCell( m );
+		if (m.pos == -1) return;
+		m.HT = m.HT * 8;
+		m.HP = m.HT;
+		Buff.affect( m, ChampionEnemy.Giant.class );
+		Bounty b = Buff.affect( m, Bounty.class );
+		b.boost = 2;
+		Buff.affect( m, xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.class ).mask =
+				xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.SUMMONER | xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.WARDED;
+		level.mobs.add( m );
+	}
+
+	/** a shrine, away from the entrance */
+	static void spawnShrine( Level level, int kind ){
+		xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine s = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.ClimbShrine();
+		s.kind = kind;
+		s.pos = level.randomRespawnCell( s );
+		if (s.pos == -1) return;
+		level.mobs.add( s );
 	}
 
 	/** one enemy native to this depth, placed away from the entrance; a bounty's is made into a hunter */
@@ -118,7 +185,12 @@ public final class ClimbEvents {
 
 	/** the first arrival on an event floor: the hero is told, and a hunted floor comes for them */
 	public static void announce( Level level ){
-		if (level.climbEvent == NONE || level.climbEventAnnounced || Dungeon.hero == null) return;
+		if (Dungeon.hero == null) return;
+		//a lockdown left unfinished (the hero fell away and came back): the waves carry on
+		if (level.climbEvent == LOCKDOWN && level.locked && Dungeon.hero.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class ) == null){
+			Buff.affect( Dungeon.hero, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class );
+		}
+		if (level.climbEvent == NONE || level.climbEventAnnounced) return;
 		level.climbEventAnnounced = true;
 		switch (level.climbEvent){
 			case BOUNTY:
@@ -135,6 +207,22 @@ public final class ClimbEvents {
 				break;
 			case CACHE:
 				GLog.p( "A forgotten cache lies somewhere on this floor." );
+				break;
+			case CURSED_CHEST:
+				GLog.w( "A chest sits on this floor. It looks too good to be true." );
+				break;
+			case LOCKDOWN:
+				level.locked = true;
+				Buff.affect( Dungeon.hero, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Lockdown.class );
+				break;
+			case REMATCH:
+				GLog.n( "An echo of this region's guardian walks this floor, and it remembers you." );
+				break;
+			case BLESSING:
+				GLog.p( "A shrine of blessing stands on this floor. It gives, and it takes." );
+				break;
+			case CURSED_SHRINE:
+				GLog.n( "A cursed shrine stands on this floor. It offers a great deal, for a price." );
 				break;
 			default:
 		}
