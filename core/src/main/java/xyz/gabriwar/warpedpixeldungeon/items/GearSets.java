@@ -97,6 +97,57 @@ public class GearSets {
 		}
 	}
 
+	// ---------------------------------------------------------------- tier and strength
+	//
+	//Every piece of the new gear has a tier from 6 to 9 (the general sets and the first class sets are 6,
+	//Ascended 7, Mythic 8, Godforged and Yog-Forged 9), and it is what the item's text says and what
+	//its Strength requirement follows: a weapon asks 18, 20, 22 or 24, an armor 17, 19, 21 or 23, less
+	//the usual small reduction for the item's level.
+
+	private static final Class<?>[] EXTRA_GEAR = { HollowwoodStaff.class, IronboundStaff.class, WyrmboneStaff.class };
+
+	public static int tierOfSet( int set ) {
+		if (set == YOG) return 9;
+		if (set < FIRST_T7) return 6;
+		if (set < FIRST_T8) return 7;
+		if (set < FIRST_T9) return 8;
+		return 9;
+	}
+
+	/** the class a gear piece counts as: a class armor made from a set piece is still that piece */
+	public static Class<?> pieceClass( Object it ) {
+		if (it instanceof ClassArmor && ((ClassArmor)it).origin != null) return ((ClassArmor)it).origin;
+		return it == null ? null : it.getClass();
+	}
+
+	/** the tier (6 to 9) of a piece of the new gear, or -1 for anything else */
+	public static int gearTier( Item it ) {
+		if (it == null) return -1;
+		Class<?> c = pieceClass( it );
+		int s = setOf( c );
+		if (s >= 0) return tierOfSet( s );
+		for (Class<?> x : EXTRA_GEAR) if (x == c) return 6;
+		return -1;
+	}
+
+	/** the tier an item's text shows: its own set tier if it has one, otherwise what it always showed */
+	public static int tierLabel( Item it, int fallback ) {
+		int t = gearTier( it );
+		return t > 0 ? t : fallback;
+	}
+
+	/** the Strength an item of level lvl lowers its requirement by: one at +1, two at +3, three at +6, and so on */
+	public static int levelReduction( int lvl ) {
+		return (int)(Math.sqrt( 8 * Math.max( 0, lvl ) + 1 ) - 1) / 2;
+	}
+
+	public static int strengthFor( Item it, int lvl ) {
+		int t = gearTier( it );
+		int base = (it instanceof Armor ? 17 : 18) + 2 * (t - 6);
+		if (pieceClass( it ) == Duskplate.class) base -= 2;   //the lighter plate
+		return Math.max( 8, base - levelReduction( lvl ) );
+	}
+
 	public static final int GENERIC_SETS = 6;
 	public static final int YOG = 12;
 
@@ -265,7 +316,8 @@ public class GearSets {
 		int[] n = new int[PIECES.length];
 		if (h == null || h.belongings == null) return n;
 		Set<Class<?>> seen = new HashSet<>();
-		count( h.belongings.armor(), seen );
+		Class<?> wornClass = pieceClass( h.belongings.armor() );
+		if (wornClass != null) seen.add( wornClass );
 		count( h.belongings.ring(), seen );
 		count( h.belongings.misc(), seen );
 		count( h.belongings.artifact(), seen );
@@ -398,14 +450,14 @@ public class GearSets {
 
 	/** the line an item's description carries when it belongs to a set (empty otherwise) */
 	public static String describe( Item item ) {
-		int s = setOf( item.getClass() );
+		int s = setOf( pieceClass( item ) );
 		if (s < 0) return "";
 		int have = Dungeon.hero == null ? 0 : pieceCounts( Dungeon.hero )[s];
 		String where = "";
 		int tier = item instanceof SetTier ? ((SetTier)item).setTier() : 6;
 		if (tier == 8 || s == YOG) where = "\n\nOnly found in a new cycle (New Game+).";
 		else if (tier == 9) where = "\n\nOnly found from the second new cycle (cycle 2) on.";
-		return "\n\n_Set: " + NAMES[s] + "_ (" + have + "/" + PIECES[s].length + " owned). Each piece beyond the first: "
+		return "\n\n_Set: " + NAMES[s] + "_ (" + have + "/" + PIECES[s].length + " owned), a tier " + tierOfSet( s ) + " piece. Each piece beyond the first: "
 				+ PER_TIER[s] + ". " + EXTRA[s] + where;
 	}
 }

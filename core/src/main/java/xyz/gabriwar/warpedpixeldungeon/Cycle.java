@@ -68,14 +68,40 @@ public final class Cycle {
 		return (branch == 0 && depth >= 1 && depth <= 26) || (branch >= 1 && branch <= 5);
 	}
 
-	/** the health / damage factor of an enemy on this floor in this cycle */
-	public static float powerAt( int cycle, int branch, int depth ){
-		return cycle > 0 && affects( branch, depth ) ? 1f + cycle : 1f;
+	//What the main dungeon's own enemies come to at a depth d: health 6 + 3.6 d, damage likewise,
+	//accuracy 9 + 0.9 d, and the experience they pay 1 + 0.75 d. A cycle's enemies are brought up to
+	//what the enemies of a deeper floor are, whatever they are native to.
+	static float typicalHealth( float d ){ return 6f + 3.6f * d; }
+	static float typicalSkill( float d ){ return 9f + 0.9f * d; }
+	static float typicalExp( float d ){ return 1f + 0.75f * d; }
+
+	/** the depth whose enemies a floor's enemies match in a cycle. The first floor of the first new cycle
+	 *  matches the bottom floor of the last run (24), each floor after it is 0.8 deeper, and each later
+	 *  cycle starts 2.5 deeper: they do not fall back when the dungeon resets, and they grow slowly. */
+	public static float effectiveDepth( int cycle, int depth ){
+		return 24f + 0.8f * (Math.max( 1, depth ) - 1) + 2.5f * (cycle - 1);
 	}
 
-	/** accuracy / evasion grow at half the rate */
+	/** the health / damage factor of an enemy on this floor in this cycle: its native strength brought up to that of the matching depth */
+	public static float powerAt( int cycle, int branch, int depth ){
+		if (cycle <= 0 || !affects( branch, depth )) return 1f;
+		return typicalHealth( effectiveDepth( cycle, depth ) ) / typicalHealth( Math.max( 1, depth ) );
+	}
+
+	/** accuracy / evasion, the same way */
 	public static float skillAt( int cycle, int branch, int depth ){
-		return cycle > 0 && affects( branch, depth ) ? 1f + 0.5f * cycle : 1f;
+		if (cycle <= 0 || !affects( branch, depth )) return 1f;
+		return typicalSkill( effectiveDepth( cycle, depth ) ) / typicalSkill( Math.max( 1, depth ) );
+	}
+
+	/** the experience an enemy pays, grown the same way */
+	public static float expFactorAt( int cycle, int branch, int depth ){
+		if (cycle <= 0 || !affects( branch, depth )) return 1f;
+		return typicalExp( effectiveDepth( cycle, depth ) ) / typicalExp( Math.max( 1, depth ) );
+	}
+
+	public static float expFactor( Char ch ){
+		return scaled( ch ) ? expFactorAt( number, Dungeon.branch, Dungeon.depth ) : 1f;
 	}
 
 	private static boolean scaled( Char ch ){

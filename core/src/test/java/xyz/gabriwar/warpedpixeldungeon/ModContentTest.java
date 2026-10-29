@@ -1048,15 +1048,13 @@ public class ModContentTest {
 	public void theCycleMakesTheDungeonStrongerAndNothingElse() {
 		//cycle 0 is the dungeon as it always was
 		assertEquals( 1f, Cycle.powerAt( 0, 0, 12 ), 0f );
-		assertEquals( 2f, Cycle.powerAt( 1, 0, 5 ), 0f );
-		assertEquals( 3f, Cycle.powerAt( 2, 0, 26 ), 0f );
-		assertEquals( "a side branch of the dungeon too", 2f, Cycle.powerAt( 1, 2, 22 ), 0f );
+		assertTrue( "a side branch of the dungeon too", Cycle.powerAt( 1, 2, 22 ) > 1.5f );
 		assertEquals( "but not the mines (depth 56+)", 1f, Cycle.powerAt( 1, 0, 60 ), 0f );
 		assertEquals( "not the surface", 1f, Cycle.powerAt( 5, 0, 97 ), 0f );
 		assertEquals( "not a plaza zone", 1f, Cycle.powerAt( 3, 105, 12 ), 0f );
 		assertEquals( "not the extra stages past the bottom", 1f, Cycle.powerAt( 3, 0, 28 ), 0f );
-		assertEquals( 1.5f, Cycle.skillAt( 1, 0, 8 ), 0f );
-		assertEquals( 2.0f, Cycle.skillAt( 2, 0, 8 ), 0f );
+		assertEquals( 1f, Cycle.skillAt( 0, 0, 8 ), 0f );
+		assertEquals( 1f, Cycle.expFactorAt( 0, 0, 8 ), 0f );
 		assertEquals( 7.9f, Cycle.lootRating( 1, 26 ), 0.01f );
 		assertTrue( Cycle.lootRating( 1, 5 ) < Cycle.lootRating( 1, 20 ) );
 		assertTrue( Cycle.lootRating( 2, 5 ) > Cycle.lootRating( 1, 5 ) );
@@ -1067,8 +1065,8 @@ public class ModContentTest {
 		try {
 			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 8;
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
-			assertEquals( 2f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0.0001f );
-			assertEquals( 1.5f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.skillModifier( rat ), 0.0001f );
+			assertEquals( Cycle.powerAt( 1, 0, 8 ), xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0.0001f );
+			assertEquals( Cycle.skillAt( 1, 0, 8 ), xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.skillModifier( rat ), 0.0001f );
 			Cycle.number = 0;
 			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.buffs.AscensionChallenge.statModifier( rat ), 0f );
 		} finally {
@@ -1197,9 +1195,9 @@ public class ModContentTest {
 			//a blood moon: 30% on top of the cycle
 			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.BLOOD_MOON );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
-			assertEquals( 2f * 1.3f, Cycle.power( rat ), 0.0001f );
+			assertEquals( Cycle.powerAt( 1, 0, 7 ) * 1.3f, Cycle.power( rat ), 0.0001f );
 			xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE );
-			assertEquals( 2f, Cycle.power( rat ), 0.0001f );
+			assertEquals( Cycle.powerAt( 1, 0, 7 ), Cycle.power( rat ), 0.0001f );
 
 			//a floor's event is saved with the floor
 			level.climbEvent = xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.HUNTED;
@@ -1804,6 +1802,159 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
 		}
+	}
+
+	@Test
+	public void newCycleEnemiesStartAtTheOldBottomAndGrowSlowly() {
+		float[] typical = new float[1];
+		//floor 1 of the first new cycle matches floor 24 of the last run: a rat of 6 + 3.6 x 1 is brought up to 6 + 3.6 x 24
+		assertEquals( 6f + 3.6f * 24f, (6f + 3.6f * 1f) * Cycle.powerAt( 1, 0, 1 ), 0.01f );
+		assertEquals( 9.6f, Cycle.powerAt( 1, 0, 1 ), 0.1f );
+		//from there they only get stronger, and slowly: every floor a little more than the last
+		float last = 0f;
+		for (int d = 1; d <= 26; d++) {
+			float strength = (6f + 3.6f * d) * Cycle.powerAt( 1, 0, d );
+			assertTrue( "floor " + d + " is stronger than " + (d - 1), strength > last );
+			if (d > 1) assertTrue( "floor " + d + " is a small step: " + (strength / last), strength / last < 1.08f );
+			last = strength;
+		}
+		//the last floor of the first new cycle is above the old bottom, but not far
+		float top = (6f + 3.6f * 24f) * Cycle.powerAt( 1, 0, 24 );
+		assertTrue( "floor 24 of cycle 1 is " + (top / (6f + 3.6f * 24f)) + " times the old one", top > 1.5f * (6f + 3.6f * 24f) && top < 2.2f * (6f + 3.6f * 24f) );
+		//the next cycle starts higher than the last one did, and never falls back to a low start
+		for (int d = 1; d <= 26; d++) {
+			assertTrue( "cycle 2 over cycle 1 at floor " + d, Cycle.powerAt( 2, 0, d ) * (6f + 3.6f * d) > Cycle.powerAt( 1, 0, d ) * (6f + 3.6f * d) );
+			assertTrue( Cycle.powerAt( 3, 0, d ) > Cycle.powerAt( 2, 0, d ) );
+		}
+		assertEquals( "cycle 2 floor 1 matches depth 26.5", 6f + 3.6f * 26.5f, (6f + 3.6f * 1f) * Cycle.powerAt( 2, 0, 1 ), 0.01f );
+		//accuracy and experience follow
+		assertEquals( 9f + 0.9f * 24f, (9f + 0.9f * 1f) * Cycle.skillAt( 1, 0, 1 ), 0.01f );
+		assertTrue( "a rat's experience is brought up: " + Math.round( 1 * Cycle.expFactorAt( 1, 0, 1 ) ), Math.round( 1 * Cycle.expFactorAt( 1, 0, 1 ) ) >= 10 );
+		assertTrue( Cycle.expFactorAt( 1, 0, 1 ) > Cycle.expFactorAt( 1, 0, 24 ) );
+		assertTrue( Cycle.expFactorAt( 1, 0, 24 ) > 1f );
+		//and the mob sees the factor for its own floor
+		int nk = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		try {
+			Cycle.number = 1; Dungeon.branch = 0; Dungeon.depth = 1;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( Cycle.expFactorAt( 1, 0, 1 ), Cycle.expFactor( rat ), 0.0001f );
+			Dungeon.branch = 0; Dungeon.depth = 40;
+			assertEquals( 1f, Cycle.expFactor( rat ), 0f );
+		} finally {
+			Cycle.number = nk; Dungeon.branch = bk; Dungeon.depth = dk;
+		}
+	}
+
+	@Test
+	public void aCrownedArmorKeepsTheSpecialEffects() throws Exception {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.armor.Armor keep = h.belongings.armor;
+		try {
+			xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire robe = new xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire();
+			robe.level( 5 );
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor crowned = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, robe );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire.class, crowned.origin );
+			h.belongings.armor = crowned;
+			assertTrue( "still proof against fire", h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Burning.class ) );
+			assertFalse( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
+			assertEquals( "its armor bonus carries", robe.DRMax( 5 ), crowned.DRMax( 5 ) );
+			assertEquals( "and its Strength", robe.STRReq( 5 ), crowned.STRReq( 5 ) );
+			//the other special armors
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor bleed = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, new xyz.gabriwar.warpedpixeldungeon.items.armor.BleedingArmor() );
+			h.belongings.armor = bleed;
+			assertTrue( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
+			assertFalse( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Burning.class ) );
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor shatter = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, new xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfShattering() );
+			h.belongings.armor = shatter;
+			assertTrue( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Frost.class ) );
+			assertTrue( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Chill.class ) );
+			//the thorns and the rest carry as the armor's own effect, still there to be run
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor thorn = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, new xyz.gabriwar.warpedpixeldungeon.items.armor.Thornmail() );
+			assertTrue( thorn.proto() instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Thornmail );
+
+			//a crowned tier 7 piece still counts toward its set, and still shows and asks for its tier
+			xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate t7 = new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate();
+			t7.level( 3 );
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor c7 = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, t7 );
+			h.belongings.armor = c7;
+			assertEquals( "the set still counts it", 1, xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h )[xyz.gabriwar.warpedpixeldungeon.items.GearSets.FIRST_T7] );
+			assertEquals( 7, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( c7, 3 ) );
+			assertEquals( t7.STRReq( 3 ), c7.STRReq( 3 ) );
+			assertEquals( t7.DRMax( 3 ), c7.DRMax( 3 ) );
+			assertTrue( c7.desc().contains( "Ascended Warlord's Regalia" ) );
+
+			//it saves and loads with its origin
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			c7.storeInBundle( b );
+			xyz.gabriwar.warpedpixeldungeon.items.armor.WarriorArmor back = new xyz.gabriwar.warpedpixeldungeon.items.armor.WarriorArmor();
+			back.restoreFromBundle( b );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate.class, back.origin );
+
+			//an ordinary armor made into class armor has no origin and no effects
+			xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor plain = xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, new xyz.gabriwar.warpedpixeldungeon.items.armor.ClothArmor() );
+			assertNull( plain.origin );
+			h.belongings.armor = plain;
+			assertFalse( h.isImmune( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Burning.class ) );
+		} finally {
+			h.belongings.armor = keep;
+		}
+	}
+
+	@Test
+	public void theNewGearAsksForStrengthByItsTier() throws Exception {
+		//weapons 18, 20, 22, 24: armors 17, 19, 21, 23
+		assertEquals( 18, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().STRReq( 0 ) );
+		assertEquals( 20, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword().STRReq( 0 ) );
+		assertEquals( 22, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MythicWarlordsGreatsword().STRReq( 0 ) );
+		assertEquals( 24, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.GodforgedWarlordsGreatsword().STRReq( 0 ) );
+		assertEquals( 24, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.YogForgedBlade().STRReq( 0 ) );
+		assertEquals( 17, new xyz.gabriwar.warpedpixeldungeon.items.armor.WarlordsPlate().STRReq( 0 ) );
+		assertEquals( 19, new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedWarlordsPlate().STRReq( 0 ) );
+		assertEquals( 21, new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate().STRReq( 0 ) );
+		assertEquals( 23, new xyz.gabriwar.warpedpixeldungeon.items.armor.GodforgedWarlordsPlate().STRReq( 0 ) );
+		assertEquals( 23, new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate().STRReq( 0 ) );
+		assertEquals( "a mage's staff too", 18, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.ArchmagesStaff().STRReq( 0 ) );
+		assertEquals( 24, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.GodforgedArchmagesStaff().STRReq( 0 ) );
+		assertEquals( "the general pool is tier 6", 18, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dawnbreaker().STRReq( 0 ) );
+		assertEquals( 17, new xyz.gabriwar.warpedpixeldungeon.items.armor.RobeOfFire().STRReq( 0 ) );
+		assertEquals( "the lighter plate", 15, new xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate().STRReq( 0 ) );
+		//a level still lowers it, as it always did
+		assertEquals( 15, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().STRReq( 6 ) );
+		//and a higher tier piece at its starting level still asks for more than a lower tier one at its own
+		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword().STRReq( 4 ) > new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword().STRReq( 2 ) );
+		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.GodforgedWarlordsGreatsword().STRReq( 8 ) > new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MythicWarlordsGreatsword().STRReq( 6 ) );
+
+		//the tier the text shows
+		assertEquals( 6, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.WarlordsGreatsword(), 5 ) );
+		assertEquals( 7, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword(), 5 ) );
+		assertEquals( 8, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate(), 5 ) );
+		assertEquals( 9, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( new xyz.gabriwar.warpedpixeldungeon.items.armor.YogForgedPlate(), 5 ) );
+		assertEquals( "anything else keeps its own", 3, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Sword(), 3 ) );
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword g = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.AscendedWarlordsGreatsword();
+		g.identify();
+		assertTrue( g.info(), g.info().contains( "tier-7" ) );
+		xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate p = new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicWarlordsPlate();
+		p.identify();
+		assertTrue( p.info(), p.info().contains( "tier-8" ) );
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Sword s = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Sword();
+		s.identify();
+		assertTrue( s.info().contains( "tier-3" ) );
+
+		//and every weapon and armor of the new gear follows the rule, with none left behind
+		int checked = 0;
+		for (String name : all()) {
+			Object o = Class.forName( P + name ).getDeclaredConstructor().newInstance();
+			if (!(o instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) && !(o instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon)) continue;
+			Item it = (Item)o;
+			int tier = xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( it );
+			assertTrue( name + " has no tier", tier >= 6 && tier <= 9 );
+			int want = (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ? 17 : 18) + 2 * (tier - 6);
+			if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Duskplate) want -= 2;
+			int got = it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ? ((xyz.gabriwar.warpedpixeldungeon.items.armor.Armor)it).STRReq( 0 ) : ((xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon)it).STRReq( 0 );
+			assertEquals( name + " (tier " + tier + ")", want, got );
+			checked++;
+		}
+		assertTrue( "weapons and armors checked: " + checked, checked >= 70 );
 	}
 
 	@Test

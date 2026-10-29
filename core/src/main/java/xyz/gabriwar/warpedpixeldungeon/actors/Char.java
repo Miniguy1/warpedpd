@@ -1866,10 +1866,8 @@ public abstract class Char extends Actor {
 		//the end-game robes: whatever the worn one is proof against
 		if (this instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero){
 			xyz.gabriwar.warpedpixeldungeon.items.armor.Armor worn = ((xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero)this).belongings.armor();
-			if (worn instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.EndgameArmor){
-				for (Class c : ((xyz.gabriwar.warpedpixeldungeon.items.armor.EndgameArmor)worn).grantedImmunities()){
-					immunes.add(c);
-				}
+			for (Class c : xyz.gabriwar.warpedpixeldungeon.items.armor.EndgameArmor.grantedBy( worn )){
+				immunes.add(c);
 			}
 		}
 		

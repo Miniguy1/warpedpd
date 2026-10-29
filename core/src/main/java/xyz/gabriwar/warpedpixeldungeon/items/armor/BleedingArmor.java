@@ -45,8 +45,7 @@ public class BleedingArmor extends EndgameArmor {
 	}
 
 	@Override
-	public int proc( Char attacker, Char defender, int damage ) {
-		damage = super.proc( attacker, defender, damage );
+	public int specialProc( Char attacker, Char defender, int damage ) {
 		if (attacker != null && attacker.isAlive() && damage > 0) {
 			Buff.affect( attacker, Bleeding.class ).set( Math.max( 3f, damage * 0.25f ) );
 		}

@@ -680,13 +680,13 @@ public class Armor extends EquipableItem {
 		
 		if (levelKnown) {
 
-			info += "\n\n" + Messages.get(Armor.class, "curr_absorb", tier, DRMin(), DRMax(), STRReq());
+			info += "\n\n" + Messages.get(Armor.class, "curr_absorb", xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( this, tier ), DRMin(), DRMax(), STRReq());
 			
 			if (Dungeon.hero != null && STRReq() > Dungeon.hero.STR()) {
 				info += " " + Messages.get(Armor.class, "too_heavy");
 			}
 		} else {
-			info += "\n\n" + Messages.get(Armor.class, "avg_absorb", tier, DRMin(0), DRMax(0), STRReq(0));
+			info += "\n\n" + Messages.get(Armor.class, "avg_absorb", xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( this, tier ), DRMin(0), DRMax(0), STRReq(0));
 
 			if (Dungeon.hero != null && STRReq(0) > Dungeon.hero.STR()) {
 				info += " " + Messages.get(Armor.class, "probably_too_heavy");
@@ -806,6 +806,8 @@ public class Armor extends EquipableItem {
 
 	public int STRReq(int lvl){
 		int req = STRReq(tier, lvl);
+		//the new gear asks for strength by its own tier (items/GearSets)
+		if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( this ) > 0) req = xyz.gabriwar.warpedpixeldungeon.items.GearSets.strengthFor( this, lvl );
 		if (masteryPotionBonus){
 			req -= 2;
 		}

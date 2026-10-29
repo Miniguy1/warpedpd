@@ -46,8 +46,7 @@ public class RobeOfShattering extends EndgameArmor {
 	}
 
 	@Override
-	public int proc( Char attacker, Char defender, int damage ) {
-		damage = super.proc( attacker, defender, damage );
+	public int specialProc( Char attacker, Char defender, int damage ) {
 		if (attacker != null && attacker.isAlive() && damage > 0 && Random.Int( 5 ) == 0) {
 			Buff.affect( attacker, Chill.class, 4f );
 		}

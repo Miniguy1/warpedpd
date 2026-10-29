@@ -1355,6 +1355,11 @@ public abstract class Mob extends Char {
 					exp = Math.round( EXP * xyz.gabriwar.warpedpixeldungeon.levels.Delves.power( this ) * xyz.gabriwar.warpedpixeldungeon.Cycle.power( this ) );
 				}
 
+				//a later cycle's enemies are never out-levelled either: they pay what an enemy of their strength is worth
+				if (xyz.gabriwar.warpedpixeldungeon.Cycle.number > 0 && xyz.gabriwar.warpedpixeldungeon.Cycle.affects( Dungeon.branch, Dungeon.depth ) && maxLvl >= 0 && EXP > 0){
+					exp = Math.round( EXP * xyz.gabriwar.warpedpixeldungeon.Cycle.expFactor( this ) );
+				}
+
 				//during ascent, under-levelled enemies grant 10 xp each until level 30
 				// after this enemy kills which reduce the amulet curse still grant 10 effective xp
 				// for the purposes of on-exp effects, see AscensionChallenge.processEnemyKill

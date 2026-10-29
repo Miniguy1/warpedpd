@@ -34,12 +34,31 @@ public abstract class EndgameArmor extends Armor {
 	public abstract Class[] grantedImmunities();
 
 	@Override
-	public int STRReq( int lvl ) {
-		return Math.max( 8, super.STRReq( lvl ) - 3 );
+	public int DRMax( int lvl ) {
+		return super.DRMax( lvl ) + 2;
+	}
+
+	/** what this armor does to whoever strikes the wearer, on top of an armor's usual glyph (none by default).
+	 *  A class armor made from it carries this on. */
+	public int specialProc( xyz.gabriwar.warpedpixeldungeon.actors.Char attacker, xyz.gabriwar.warpedpixeldungeon.actors.Char defender, int damage ) {
+		return damage;
 	}
 
 	@Override
-	public int DRMax( int lvl ) {
-		return super.DRMax( lvl ) + 2;
+	public int proc( xyz.gabriwar.warpedpixeldungeon.actors.Char attacker, xyz.gabriwar.warpedpixeldungeon.actors.Char defender, int damage ) {
+		damage = super.proc( attacker, defender, damage );
+		return specialProc( attacker, defender, damage );
+	}
+
+	private static final Class[] NONE = new Class[0];
+
+	/** what the worn armor is proof against: an end-game robe's own, or the one a class armor was made from */
+	public static Class[] grantedBy( Armor worn ) {
+		if (worn instanceof EndgameArmor) return ((EndgameArmor)worn).grantedImmunities();
+		if (worn instanceof ClassArmor) {
+			Armor p = ((ClassArmor)worn).proto();
+			if (p instanceof EndgameArmor) return ((EndgameArmor)p).grantedImmunities();
+		}
+		return NONE;
 	}
 }

@@ -300,6 +300,8 @@ public class MeleeWeapon extends Weapon {
 
 	public int STRReq(int lvl){
 		int req = STRReq(tier, lvl);
+		//the new gear asks for strength by its own tier (items/GearSets)
+		if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( this ) > 0) req = xyz.gabriwar.warpedpixeldungeon.items.GearSets.strengthFor( this, lvl );
 		if (masteryPotionBonus){
 			req -= 2;
 		}
@@ -353,7 +355,7 @@ public class MeleeWeapon extends Weapon {
 		String info = super.info();
 
 		if (levelKnown) {
-			info += "\n\n" + Messages.get(MeleeWeapon.class, "stats_known", tier, augment.damageFactor(min()), augment.damageFactor(max()), STRReq());
+			info += "\n\n" + Messages.get(MeleeWeapon.class, "stats_known", xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( this, tier ), augment.damageFactor(min()), augment.damageFactor(max()), STRReq());
 			if (Dungeon.hero != null) {
 				if (STRReq() > Dungeon.hero.STR()) {
 					info += " " + Messages.get(Weapon.class, "too_heavy");
@@ -362,7 +364,7 @@ public class MeleeWeapon extends Weapon {
 				}
 			}
 		} else {
-			info += "\n\n" + Messages.get(MeleeWeapon.class, "stats_unknown", tier, min(0), max(0), STRReq(0));
+			info += "\n\n" + Messages.get(MeleeWeapon.class, "stats_unknown", xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierLabel( this, tier ), min(0), max(0), STRReq(0));
 			if (Dungeon.hero != null && STRReq(0) > Dungeon.hero.STR()) {
 				info += " " + Messages.get(MeleeWeapon.class, "probably_too_heavy");
 			}

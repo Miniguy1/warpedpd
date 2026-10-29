@@ -40,8 +40,4 @@ public class Duskplate extends EndgameArmor {
 		return new Class[0];
 	}
 
-	@Override
-	public int STRReq( int lvl ) {
-		return Math.max( 8, super.STRReq( lvl ) - 2 );   //-3 from EndgameArmor, -2 more
-	}
 }

@@ -50,6 +50,37 @@ import java.util.ArrayList;
 
 abstract public class ClassArmor extends Armor {
 
+	//the armor this one was made from, if it was one of the new gear: its immunities, its effect on
+	//attackers, its armor bonus, its Strength and its place in a set all carry on
+	public Class<? extends Armor> origin = null;
+	private Armor protoCache;
+
+	/** a plain copy of the original, for what only its class knows (null if there is none) */
+	public Armor proto() {
+		if (origin == null) return null;
+		if (protoCache == null) {
+			protoCache = com.watabou.utils.Reflection.newInstance( origin );
+			if (protoCache == null) { origin = null; return null; }
+		}
+		protoCache.tier = tier;
+		protoCache.augment = augment;
+		return protoCache;
+	}
+
+	@Override
+	public int DRMax( int lvl ) {
+		Armor p = proto();
+		return p != null ? p.DRMax( lvl ) : super.DRMax( lvl );
+	}
+
+	@Override
+	public int proc( Char attacker, Char defender, int damage ) {
+		damage = super.proc( attacker, defender, damage );
+		Armor p = proto();
+		if (p instanceof EndgameArmor) damage = ((EndgameArmor)p).specialProc( attacker, defender, damage );
+		return damage;
+	}
+
 	private static final String AC_ABILITY = "ABILITY";
 	private static final String AC_TRANSFER = "TRANSFER";
 	
@@ -122,6 +153,7 @@ abstract public class ClassArmor extends Armor {
 		
 		classArmor.level(armor.trueLevel());
 		classArmor.tier = armor.tier;
+		if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( armor ) > 0 || armor instanceof EndgameArmor) classArmor.origin = armor.getClass();
 		classArmor.augment = armor.augment;
 		classArmor.inscribe(armor.glyph);
 		classArmor.glyph2 = armor.glyph2;
@@ -157,6 +189,7 @@ abstract public class ClassArmor extends Armor {
 		super.storeInBundle( bundle );
 		bundle.put( ARMOR_TIER, tier );
 		bundle.put( CHARGE, charge );
+		if (origin != null) bundle.put( "origin", origin.getName() );
 	}
 
 	@Override
@@ -164,6 +197,15 @@ abstract public class ClassArmor extends Armor {
 		super.restoreFromBundle( bundle );
 		tier = bundle.getInt( ARMOR_TIER );
 		charge = bundle.getFloat(CHARGE);
+		origin = null;
+		protoCache = null;
+		if (bundle.contains( "origin" )) {
+			try {
+				origin = (Class<? extends Armor>)Class.forName( bundle.getString( "origin" ) );
+			} catch (Exception e) {
+				origin = null;
+			}
+		}
 	}
 	
 	@Override
