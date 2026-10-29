@@ -1,0 +1,102 @@
+> Task :core:compileTestJava FAILED
+-----
+24-
+25-> Task :core:compileTestJava
+26:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1166: error: cannot find symbol
+27-			int heapsBefore = level.heaps.size();
+28-			                             ^
+29-  symbol:   method size()
+30-  location: variable heaps of type SparseArray<Heap>
+31:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1168: error: cannot find symbol
+32-			assertTrue( "the cache's items", level.heaps.size() > heapsBefore );
+33-			                                            ^
+34-  symbol:   method size()
+35-  location: variable heaps of type SparseArray<Heap>
+36:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1195: error: cannot find symbol
+37-			int heapsB = level.heaps.size();
+38-			                        ^
+39-  symbol:   method size()
+40-  location: variable heaps of type SparseArray<Heap>
+41:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1198: error: cannot find symbol
+42-			assertNull( "cycle 0's boss pays nothing extra", level.heaps.get( goo.pos ) );
+43-			^
+44-  symbol:   method assertNull(String,Heap)
+45-  location: class ModContentTest
+46-Note: Some input files use or override a deprecated API.
+47-Note: Recompile with -Xlint:deprecation for details.
+48-Note: Some input files use unchecked or unsafe operations.
+49-Note: Recompile with -Xlint:unchecked for details.
+--
+57-FAILURE: Build failed with an exception.
+58-
+59:* What went wrong:
+60-Execution failed for task ':core:compileTestJava'.
+61-> Compilation failed; see the compiler output below.
+62-  Note: Recompile with -Xlint:deprecation for details.
+63-  Note: Recompile with -Xlint:unchecked for details.
+64-  Note: Some input files use or override a deprecated API.
+65-  Note: Some input files use unchecked or unsafe operations.
+66:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1166: error: cannot find symbol
+67-  			int heapsBefore = level.heaps.size();
+68-  			                             ^
+69-    symbol:   method size()
+70-    location: variable heaps of type SparseArray<Heap>
+71:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1168: error: cannot find symbol
+72-  			assertTrue( "the cache's items", level.heaps.size() > heapsBefore );
+73-  			                                            ^
+74-    symbol:   method size()
+75-    location: variable heaps of type SparseArray<Heap>
+76:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1195: error: cannot find symbol
+77-  			int heapsB = level.heaps.size();
+78-  			                        ^
+79-    symbol:   method size()
+80-    location: variable heaps of type SparseArray<Heap>
+81:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:1198: error: cannot find symbol
+82-  			assertNull( "cycle 0's boss pays nothing extra", level.heaps.get( goo.pos ) );
+83-  			^
+84-    symbol:   method assertNull(String,Heap)
+85-    location: class ModContentTest
+86-  4 errors
+87-
+88-* Try:
+89-> Check your code and dependencies to fix the compilation error(s)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 35s
+6 actionable tasks: 6 executed
