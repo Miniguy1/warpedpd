@@ -2368,7 +2368,7 @@ public class ModContentTest {
 			//Dead Calm: only the first shot after a full reload
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill calm = sk.passiveASkills.get( 3 );
 			calm.level = 3;
-			r.manualReload( 9, true );
+			r.quickReload();
 			assertTrue( r.round() >= r.maxRound() );
 			assertEquals( 1.9f, calm.rangedDamageModifier(), 0.001f );
 			assertTrue( calm.sureHit( null ) );
