@@ -111,7 +111,7 @@ public final class GunTalents {
 		if (nerves > 0) Buff.affect( h, Barrier.class ).incShield( 3 * nerves );
 		int casings = pts( Talent.SPENT_CASINGS );
 		if (casings > 0) Dungeon.bullet += casings;
-		int bounty = pts( Talent.BOUNTY_HUNTER );
+		int bounty = pts( Talent.BLOOD_MONEY );
 		if (bounty > 0) Dungeon.gold += Math.round( (5 + Dungeon.depth) * bounty * Random.Float( 0.8f, 1.2f ) );
 	}
 

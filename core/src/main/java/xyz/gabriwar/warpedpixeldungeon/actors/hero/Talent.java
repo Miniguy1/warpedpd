@@ -218,7 +218,7 @@ public enum Talent {
 	CALLED_SHOTS(103, 3), OVERCHARGE_ROUNDS(105, 3),
 	DEAD_TO_RIGHTS(84, 3), GUNSMOKE(83, 3), LEGEND_OF_THE_WEST(137, 3), LAST_BULLET(138, 3),
 	//Outlaw and Demolitionist T3
-	TRIGGER_HAPPY(129, 3), BOUNTY_HUNTER(130, 3), DESPERADO(131, 3),
+	TRIGGER_HAPPY(129, 3), BLOOD_MONEY(130, 3), DESPERADO(131, 3),
 	BIGGER_BANG(132, 3), SHRAPNEL_VEST(133, 3), SPENT_CASINGS(134, 3),
 	//Barrage, Smoke and Mirrors and Hail of Lead T4
 	LONG_BURST(145, 4), PIERCING_FIRE(146, 4), FOCUSED_VOLLEY(147, 4),
@@ -1239,7 +1239,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, VARIED_CHARGE, TWIN_UPGRADES, COMBINED_LETHALITY);
 				break;
 			case OUTLAW:
-				Collections.addAll(tierTalents, TRIGGER_HAPPY, BOUNTY_HUNTER, DESPERADO);
+				Collections.addAll(tierTalents, TRIGGER_HAPPY, BLOOD_MONEY, DESPERADO);
 				break;
 			case MONK:
 				Collections.addAll(tierTalents, UNENCUMBERED_SPIRIT, MONASTIC_VIGOR, COMBINED_ENERGY);
