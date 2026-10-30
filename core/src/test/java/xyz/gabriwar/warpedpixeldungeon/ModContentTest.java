@@ -2193,7 +2193,7 @@ public class ModContentTest {
 
 			//an old save may still hold a stack: dropping it still lets go of one candle only
 			xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle stack = new xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle();
-			stack.quantity = 4;
+			stack.quantity( 4 );
 			h.belongings.backpack.items.add( stack );
 			Item one2 = stack.takeOne( h );
 			assertEquals( "one candle comes off the stack", 1, one2.quantity() );
