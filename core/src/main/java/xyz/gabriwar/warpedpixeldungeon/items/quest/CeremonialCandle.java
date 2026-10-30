@@ -56,7 +56,14 @@ public class CeremonialCandle extends Item {
 		defaultAction = AC_THROW;
 
 		unique = true;
-		stackable = true;
+		//each candle is its own item: the ritual wants one on each of four tiles, and a stack
+		//dropped all at once would land on a single tile
+		stackable = false;
+	}
+
+	/** takes exactly one candle out of the pack: this one, or one off an old stack from a save made before candles stopped stacking */
+	public Item takeOne( Hero hero ) {
+		return quantity > 1 ? detach( hero.belongings.backpack ) : detachAll( hero.belongings.backpack );
 	}
 
 	@Override
@@ -71,7 +78,10 @@ public class CeremonialCandle extends Item {
 
 	@Override
 	public void doDrop(Hero hero) {
-		super.doDrop(hero);
+		//one candle at a time, so each can go on its own tile
+		hero.spendAndNext(TIME_TO_DROP);
+		int pos = hero.pos;
+		Dungeon.level.drop(takeOne(hero), pos).sprite.drop(pos);
 		aflame = false;
 		checkCandles();
 	}
