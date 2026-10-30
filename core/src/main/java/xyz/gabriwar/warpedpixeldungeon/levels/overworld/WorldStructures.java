@@ -54,6 +54,7 @@ public class WorldStructures {
 
 	//layout cells with a fixed meaning (see TownLevel history)
 	public static final int TOWN_PLAZA      = 752;  //where you arrive (new game, journal, beacon): two south of the plaza guards, on the town's axis
+	public static final int TOWN_MONUMENT      = 817;  //the monument of the descent: two south of where you arrive, on open ground
 	public static final int TOWN_MINE_GATE     = 899;  //the plaza staircase, down into the kupua mines
 	public static final int TOWN_DUNGEON_GATE  = 141;  //the north gate: the dungeon's front door (floor 1)
 	public static final int TOWN_TEMPLE_DOOR = 412;

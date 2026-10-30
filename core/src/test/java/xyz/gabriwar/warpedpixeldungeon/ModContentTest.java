@@ -2243,6 +2243,40 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theMonumentStandsOnOpenGroundNearTheArrival() {
+		int cell = xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_MONUMENT;
+		int arrival = xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_PLAZA;
+		int[] grid = xyz.gabriwar.warpedpixeldungeon.levels.TownLayouts.TOWN_LAYOUT_REMIXED;
+		assertTrue( cell >= 0 && cell < 1024 );
+		int dx = Math.abs( cell % 32 - arrival % 32 ), dy = Math.abs( cell / 32 - arrival / 32 );
+		assertTrue( "within a few steps of where you arrive: " + dx + "," + dy, Math.max( dx, dy ) >= 2 && Math.max( dx, dy ) <= 4 );
+		assertTrue( "on ground you can reach", (xyz.gabriwar.warpedpixeldungeon.levels.Terrain.flags[grid[cell]] & xyz.gabriwar.warpedpixeldungeon.levels.Terrain.PASSABLE) != 0 );
+		//open all round, so it never blocks a path or walls anything in
+		for (int ddy = -1; ddy <= 1; ddy++) for (int ddx = -1; ddx <= 1; ddx++) {
+			int c = cell + ddx + ddy * 32;
+			assertTrue( "neighbour " + ddx + "," + ddy, (xyz.gabriwar.warpedpixeldungeon.levels.Terrain.flags[grid[c]] & xyz.gabriwar.warpedpixeldungeon.levels.Terrain.PASSABLE) != 0 );
+		}
+		//and on nothing else the town already uses
+		int[] taken = { arrival, xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_MINE_GATE, xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_DUNGEON_GATE,
+				564, 523, 176, 324, 366, 247, 687, 689, 174, 172, 525, 357, 214, 756,
+				131, 197, 107, 289, 283, 732, 891, 740, 1022 };
+		for (int c : taken) assertNotEquals( "taken by " + c, c, cell );
+		for (int d : xyz.gabriwar.warpedpixeldungeon.levels.overworld.WorldStructures.TOWN_DOORS) assertNotEquals( "a door", d, cell );
+
+		//what it is
+		xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.PlazaMonument m = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.PlazaMonument();
+		assertEquals( xyz.gabriwar.warpedpixeldungeon.sprites.MonumentSprite.class, m.spriteClass );
+		assertTrue( m.properties().contains( xyz.gabriwar.warpedpixeldungeon.actors.Char.Property.IMMOVABLE ) );
+		assertTrue( m.name().contains( "monument" ) );
+		assertTrue( m.description().contains( "Frostbound Vault" ) && m.description().contains( "dark mines" ) );
+		assertTrue( "it stays through a level reset", m.reset() );
+		int hp = m.HP;
+		m.damage( 500, null );
+		assertEquals( "nothing harms it", hp, m.HP );
+		assertTrue( m.isAlive() );
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

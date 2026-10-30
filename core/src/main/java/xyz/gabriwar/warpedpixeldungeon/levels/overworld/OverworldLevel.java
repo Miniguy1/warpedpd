@@ -1367,6 +1367,27 @@ public class OverworldLevel extends Level {
 		}
 	}
 
+	//the monument of the descent stands on the plaza whenever the window holds it (also in a save made before it
+	//existed): it is only added if neither the level nor the parked folk already hold one
+	private void ensureMonument(){
+		int cell = localTownCell( WorldStructures.TOWN_MONUMENT );
+		if (cell == -1) return;
+		for (Mob m : mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.PlazaMonument) return;
+		for (Mob m : parkedMobs.values()) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.PlazaMonument) return;
+		addFolk( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.PlazaMonument(), cell );
+	}
+
+	/** the monument's menu: the same as the plaza staircase's (the dark mines and the three zones) */
+	public void openPlazaMenu( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero ){
+		int gate = localTownCell( WorldStructures.TOWN_MINE_GATE );
+		LevelTransition t = gate == -1 ? null : getTransition( gate );
+		if (t == null){
+			xyz.gabriwar.warpedpixeldungeon.utils.GLog.w( "The monument is silent." );
+			return;
+		}
+		enterPlazaStairs( hero, t );
+	}
+
 	private void addFolk( Mob m, int cell ){
 		m.pos = cell;
 		if (Dungeon.level == this
@@ -2582,6 +2603,7 @@ public class OverworldLevel extends Level {
 			townSpawned.add( layout );
 			addFolk( (Mob) com.watabou.utils.Reflection.newInstance( (Class<?>) f[0] ), cell );
 		}
+		ensureMonument();
 		for (int layout : TOWN_CHESTS){
 			int cell = localTownCell( layout );
 			if (cell == -1 || townSpawned.contains( layout )) continue;
