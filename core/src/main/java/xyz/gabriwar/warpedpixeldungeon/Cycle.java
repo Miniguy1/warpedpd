@@ -155,6 +155,17 @@ public final class Cycle {
 
 	// ------------------------------------------------------------------ the reset
 
+	/** the one-of-a-kind items that are never found twice: the ancient keys that open the bonus stages and the bags.
+	 *  The hero keeps them from the last run, so a new cycle does not drop them again (the potions, scrolls and
+	 *  other limited drops all do come back). */
+	public static final Dungeon.LimitedDrops[] ONCE_ONLY = {
+			Dungeon.LimitedDrops.SEWER_KEY, Dungeon.LimitedDrops.PRISON_KEY, Dungeon.LimitedDrops.CAVES_KEY,
+			Dungeon.LimitedDrops.CITY_KEY, Dungeon.LimitedDrops.HALLS_KEY, Dungeon.LimitedDrops.TENGU_KEY,
+			Dungeon.LimitedDrops.KEY_RING, Dungeon.LimitedDrops.VELVET_POUCH, Dungeon.LimitedDrops.SCROLL_HOLDER,
+			Dungeon.LimitedDrops.POTION_BANDOLIER, Dungeon.LimitedDrops.MAGICAL_HOLSTER, Dungeon.LimitedDrops.ANKH_CHAIN,
+			Dungeon.LimitedDrops.FOOD_POUCH, Dungeon.LimitedDrops.ARCHERS_QUIVER
+	};
+
 	/** Starts the next cycle: the dungeon forgets everything, the hero keeps everything else. */
 	public static void begin( Hero hero ){
 		number++;
@@ -186,7 +197,11 @@ public final class Cycle {
 		Dungeon.droppedItems = new SparseArray<>();
 		Dungeon.fallenMobs = new SparseArray<>();
 		Dungeon.chapters = new HashSet<>();
+		//everything limited comes back, except what was found once and is kept for good
+		boolean[] kept = new boolean[ONCE_ONLY.length];
+		for (int i = 0; i < ONCE_ONLY.length; i++) kept[i] = ONCE_ONLY[i].dropped();
 		Dungeon.LimitedDrops.reset();
+		for (int i = 0; i < ONCE_ONLY.length; i++) if (kept[i]) ONCE_ONLY[i].drop();
 
 		Ghost.Quest.reset();
 		Wandmaker.Quest.reset();

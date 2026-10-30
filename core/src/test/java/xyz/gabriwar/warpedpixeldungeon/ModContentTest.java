@@ -2170,6 +2170,79 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void candlesAreSeparateAndDropOneAtATime() {
+		Hero h = Dungeon.hero;
+		int packSize = h.belongings.backpack.items.size();
+		try {
+			//a new candle does not stack, so four stay four separate items
+			xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle one = new xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle();
+			assertFalse( "candles must not stack", one.stackable );
+			for (int i = 0; i < 4; i++) new xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle().collect( h.belongings.backpack );
+			int candles = 0;
+			for (Item it : h.belongings.backpack.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle) { candles++; assertEquals( 1, it.quantity() ); }
+			assertEquals( "four candles, four items", 4, candles );
+
+			//taking one out of the pack takes just that one
+			xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle first = null;
+			for (Item it : h.belongings.backpack.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle) { first = (xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle)it; break; }
+			Item taken = first.takeOne( h );
+			assertEquals( 1, taken.quantity() );
+			int left = 0;
+			for (Item it : h.belongings.backpack.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle) left++;
+			assertEquals( 3, left );
+
+			//an old save may still hold a stack: dropping it still lets go of one candle only
+			xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle stack = new xyz.gabriwar.warpedpixeldungeon.items.quest.CeremonialCandle();
+			stack.quantity = 4;
+			h.belongings.backpack.items.add( stack );
+			Item one2 = stack.takeOne( h );
+			assertEquals( "one candle comes off the stack", 1, one2.quantity() );
+			assertEquals( "and three stay", 3, stack.quantity() );
+			assertTrue( h.belongings.backpack.items.contains( stack ) );
+		} finally {
+			while (h.belongings.backpack.items.size() > packSize) h.belongings.backpack.items.remove( h.belongings.backpack.items.size() - 1 );
+		}
+	}
+
+	@Test
+	public void newCyclesDoNotDropTheKeysAndBagsAgain() {
+		Hero h = Dungeon.hero;
+		int keep = Cycle.number;
+		Dungeon.LimitedDrops.reset();
+		try {
+			//the keys and bags found in the last run: found, and not to be found again
+			Dungeon.LimitedDrops.SEWER_KEY.drop();
+			Dungeon.LimitedDrops.PRISON_KEY.drop();
+			Dungeon.LimitedDrops.TENGU_KEY.drop();
+			Dungeon.LimitedDrops.KEY_RING.drop();
+			Dungeon.LimitedDrops.ARCHERS_QUIVER.drop();
+			//and some limited drops that should come back
+			Dungeon.LimitedDrops.STRENGTH_POTIONS.drop();
+			Dungeon.LimitedDrops.UPGRADE_SCROLLS.drop();
+			assertFalse( "never found: the caves key", Dungeon.LimitedDrops.CAVES_KEY.dropped() );
+
+			Cycle.number = 1;
+			Cycle.resetDungeonState( h );
+
+			for (Dungeon.LimitedDrops d : new Dungeon.LimitedDrops[]{ Dungeon.LimitedDrops.SEWER_KEY, Dungeon.LimitedDrops.PRISON_KEY,
+					Dungeon.LimitedDrops.TENGU_KEY, Dungeon.LimitedDrops.KEY_RING, Dungeon.LimitedDrops.ARCHERS_QUIVER }) {
+				assertTrue( d + " must not drop again", d.dropped() );
+			}
+			assertFalse( "a key never found can still be found", Dungeon.LimitedDrops.CAVES_KEY.dropped() );
+			assertFalse( "strength potions come back", Dungeon.LimitedDrops.STRENGTH_POTIONS.dropped() );
+			assertFalse( "upgrade scrolls come back", Dungeon.LimitedDrops.UPGRADE_SCROLLS.dropped() );
+			//every key and bag is on the list
+			java.util.Set<Dungeon.LimitedDrops> once = new java.util.HashSet<>( java.util.Arrays.asList( Cycle.ONCE_ONLY ) );
+			for (Dungeon.LimitedDrops d : Dungeon.LimitedDrops.values()) {
+				if (d.name().endsWith( "_KEY" ) || d == Dungeon.LimitedDrops.KEY_RING) assertTrue( d + " is a key", once.contains( d ) );
+			}
+		} finally {
+			Dungeon.LimitedDrops.reset();
+			Cycle.number = keep;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;
