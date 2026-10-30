@@ -222,7 +222,7 @@ public class CurrentSkills {
 				break;
 			}
 
-			case DUELIST: {
+			case DUELIST: case GUNSLINGER: {
 				Skill finesse = new FinesseGrip(), brutal = new BrutalGrip();
 				Skill pirouette = new Pirouette(), bind = new BladeBind();
 				branchPA = new DuelistPassiveA();
@@ -364,10 +364,10 @@ public class CurrentSkills {
 			case WARDEN:
 				Collections.addAll(skills, new Thorns(), new Symbiosis(), new WildCall());
 				break;
-			case CHAMPION:
+			case CHAMPION: case OUTLAW:
 				Collections.addAll(skills, new Banner(), new SecondWind(), new Challenge());
 				break;
-			case MONK:
+			case MONK: case DEMOLITIONIST:
 				Collections.addAll(skills, new PressurePoint(), new InnerPeace(), new DragonKick());
 				break;
 			case PRIEST:

@@ -393,6 +393,7 @@ public class Assets {
 		public static final String ROGUE    = "splashes/rogue.jpg";
 		public static final String HUNTRESS = "splashes/huntress.jpg";
 		public static final String DUELIST  = "splashes/duelist.jpg";
+		public static final String GUNSLINGER  = "splashes/gunslinger.jpg";
 		public static final String CLERIC   = "splashes/cleric.jpg";
 
 		public static final String SEWERS   = "splashes/sewers.jpg";
@@ -443,6 +444,7 @@ public class Assets {
 		public static final String ROGUE    = "sprites/rogue.png";
 		public static final String HUNTRESS = "sprites/huntress.png";
 		public static final String DUELIST  = "sprites/duelist.png";
+		public static final String GUNSLINGER  = "sprites/gunslinger.png";
 		public static final String CLERIC   = "sprites/cleric.png";
 		public static final String AVATARS  = "sprites/avatars.png";
 		public static final String HERO_SKILLS = "sprites/hero_skills.png";

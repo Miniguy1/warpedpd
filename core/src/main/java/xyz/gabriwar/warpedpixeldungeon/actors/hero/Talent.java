@@ -480,7 +480,7 @@ public enum Talent {
 					return 90;
 				case HUNTRESS:
 					return 122;
-				case DUELIST:
+				case DUELIST: case GUNSLINGER:
 					return 154;
 				case CLERIC:
 					return 186;
@@ -1067,7 +1067,7 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, NATURES_BOUNTY, SURVIVALISTS_INTUITION, FOLLOWUP_STRIKE, NATURES_AID);
 				break;
-			case DUELIST:
+			case DUELIST: case GUNSLINGER:
 				Collections.addAll(tierTalents, STRENGTHENING_MEAL, ADVENTURERS_INTUITION, PATIENT_STRIKE, AGGRESSIVE_BARRIER);
 				break;
 			case CLERIC:
@@ -1096,7 +1096,7 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, INVIGORATING_MEAL, LIQUID_NATURE, REJUVENATING_STEPS, HEIGHTENED_SENSES, DURABLE_PROJECTILES);
 				break;
-			case DUELIST:
+			case DUELIST: case GUNSLINGER:
 				Collections.addAll(tierTalents, FOCUSED_MEAL, LIQUID_AGILITY, WEAPON_RECHARGING, LETHAL_HASTE, SWIFT_EQUIP);
 				break;
 			case CLERIC:
@@ -1125,7 +1125,7 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, POINT_BLANK, SEER_SHOT);
 				break;
-			case DUELIST:
+			case DUELIST: case GUNSLINGER:
 				Collections.addAll(tierTalents, PRECISE_ASSAULT, DEADLY_FOLLOWUP);
 				break;
 			case CLERIC:
@@ -1157,7 +1157,7 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, KEEN_EYE, PATHFINDER, APEX_PREDATOR, BRIAR_HIDE);
 				break;
-			case DUELIST:
+			case DUELIST: case GUNSLINGER:
 				Collections.addAll(tierTalents, RIPOSTE_MASTERY, FOOTWORK, BLADE_DANCER, PERFECT_FORM);
 				break;
 			case CLERIC:
@@ -1209,10 +1209,10 @@ public enum Talent {
 			case WARDEN:
 				Collections.addAll(tierTalents, DURABLE_TIPS, BARKSKIN, SHIELDING_DEW);
 				break;
-			case CHAMPION:
+			case CHAMPION: case OUTLAW:
 				Collections.addAll(tierTalents, VARIED_CHARGE, TWIN_UPGRADES, COMBINED_LETHALITY);
 				break;
-			case MONK:
+			case MONK: case DEMOLITIONIST:
 				Collections.addAll(tierTalents, UNENCUMBERED_SPIRIT, MONASTIC_VIGOR, COMBINED_ENERGY);
 				break;
 			case PRIEST:

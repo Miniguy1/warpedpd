@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -2274,6 +2275,49 @@ public class ModContentTest {
 		m.damage( 500, null );
 		assertEquals( "nothing harms it", hp, m.HP );
 		assertTrue( m.isAlive() );
+	}
+
+	@Test
+	public void theGunslingerClassIsWiredIn() {
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass g = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+		assertEquals( "the seventh class", 7, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values().length );
+		assertEquals( "sprites/gunslinger.png", g.spritesheet() );
+		assertEquals( "splashes/gunslinger.jpg", g.splashArt() );
+		assertTrue( "open from the start", g.isUnlocked() );
+		assertArrayEquals( new xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.DEMOLITIONIST }, g.subClasses() );
+		assertEquals( Badges.Badge.MASTERY_GUNSLINGER, g.masteryBadge() );
+		assertEquals( 3, g.armorAbilities().length );
+		//its text
+		assertEquals( "gunslinger", g.title() );
+		assertTrue( g.desc(), g.desc().contains( "revolver" ) );
+		assertEquals( "outlaw", xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW.title() );
+		assertEquals( "demolitionist", xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.DEMOLITIONIST.title() );
+		assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW.desc().contains( "!!!" ) );
+
+		//the revolver: six rounds, loaded, with a name and a description
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+		assertEquals( 6, r.maxRound() );
+		assertEquals( 6, r.round() );
+		assertEquals( "revolver", r.name() );
+		assertTrue( r.desc().contains( "six-round" ) );
+
+		//its coat, its talents and its skill tree
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keep = h.heroClass;
+		try {
+			h.heroClass = g;
+			assertTrue( "its crown armor", xyz.gabriwar.warpedpixeldungeon.items.armor.ClassArmor.upgrade( h, new xyz.gabriwar.warpedpixeldungeon.items.armor.ClothArmor() ) instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.GunslingerArmor );
+			java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> talents = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( g, talents );
+			assertTrue( "talents in tier 1", talents.size() >= 1 && !talents.get( 0 ).isEmpty() );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			assertEquals( g, sk.heroClass );
+			assertFalse( "a skill tree to spend points in", sk.passiveASkills.isEmpty() );
+			assertFalse( sk.passiveBSkills.isEmpty() );
+			assertFalse( sk.activeSkills.isEmpty() );
+		} finally {
+			h.heroClass = keep;
+		}
 	}
 
 	@Test

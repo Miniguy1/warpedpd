@@ -91,7 +91,8 @@ public enum HeroClass {
 	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
 	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
 	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK ),
-	CLERIC( HeroSubClass.PRIEST, HeroSubClass.PALADIN );
+	CLERIC( HeroSubClass.PRIEST, HeroSubClass.PALADIN ),
+	GUNSLINGER( HeroSubClass.OUTLAW, HeroSubClass.DEMOLITIONIST );
 
 	private HeroSubClass[] subClasses;
 
@@ -154,6 +155,10 @@ public enum HeroClass {
 			case CLERIC:
 				initCleric( hero );
 				break;
+
+			case GUNSLINGER:
+				initGunslinger( hero );
+				break;
 		}
 
 		// skill tree: fresh run, fresh points, class-matched tree
@@ -170,6 +175,7 @@ public enum HeroClass {
 			case HUNTRESS: hero.MP = hero.MT = 35; break;
 			case DUELIST:  hero.MP = hero.MT = 25; break;
 			case CLERIC:   hero.MP = hero.MT = 40; break;
+			case GUNSLINGER: hero.MP = hero.MT = 30; break;
 		}
 
 		if (WPDSettings.quickslotWaterskin()) {
@@ -197,6 +203,8 @@ public enum HeroClass {
 				return Badges.Badge.MASTERY_DUELIST;
 			case CLERIC:
 				return Badges.Badge.MASTERY_CLERIC;
+			case GUNSLINGER:
+				return Badges.Badge.MASTERY_GUNSLINGER;
 		}
 		return null;
 	}
@@ -275,6 +283,19 @@ public enum HeroClass {
 		new ScrollOfMirrorImage().identify();
 	}
 
+	private static void initGunslinger( Hero hero ) {
+
+		(hero.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver()).identify();
+		hero.belongings.weapon.activate(hero);
+		//the bullet pool the firearms reload from
+		Dungeon.bullet = 30;
+
+		Dungeon.quickslot.setSlot(0, hero.belongings.weapon);
+
+		new PotionOfHealing().identify();
+		new ScrollOfRage().identify();
+	}
+
 	private static void initCleric( Hero hero ) {
 
 		(hero.belongings.weapon = new Cudgel()).identify();
@@ -317,6 +338,7 @@ public enum HeroClass {
 			case HUNTRESS:
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
 			case DUELIST:
+			case GUNSLINGER:   //(until its own crown abilities)
 				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
 			case CLERIC:
 				return new ArmorAbility[]{new AscendedForm(), new Trinity(), new PowerOfMany()};
@@ -337,6 +359,8 @@ public enum HeroClass {
 				return Assets.Sprites.DUELIST;
 			case CLERIC:
 				return Assets.Sprites.CLERIC;
+			case GUNSLINGER:
+				return Assets.Sprites.GUNSLINGER;
 		}
 	}
 
@@ -354,6 +378,8 @@ public enum HeroClass {
 				return Assets.Splashes.DUELIST;
 			case CLERIC:
 				return Assets.Splashes.CLERIC;
+			case GUNSLINGER:
+				return Assets.Splashes.GUNSLINGER;
 		}
 	}
 	
@@ -374,6 +400,8 @@ public enum HeroClass {
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_DUELIST);
 			case CLERIC:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_CLERIC);
+			case GUNSLINGER:
+				return true;
 		}
 	}
 	

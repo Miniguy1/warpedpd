@@ -602,6 +602,7 @@ public final class ExtraCites {
 				.hero( HeroClass.HUNTRESS, "huntress" )
 				.hero( HeroClass.DUELIST, "duelist" )
 				.hero( HeroClass.CLERIC, "cleric" )
+				.hero( HeroClass.GUNSLINGER, "duelist" )
 				.item( BrokenSeal.class, "Broken Seal" )
 				.item( MagesStaff.class, "staff" )
 				.item( CloakOfShadows.class, "Cloak of Shadows" )
@@ -699,6 +700,7 @@ public final class ExtraCites {
 				.hero( HeroClass.HUNTRESS, "huntress" )
 				.hero( HeroClass.DUELIST, "duelist" )
 				.hero( HeroClass.CLERIC, "cleric" )
+				.hero( HeroClass.GUNSLINGER, "duelist" )
 				.item( KingsCrown.class, "Dwarf King's crown" );
 
 		book.page( "topic_rarity" )
