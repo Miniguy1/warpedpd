@@ -136,7 +136,8 @@ public final class GunTalents {
 
 	/** Trigger Happy: a shot may not use a round */
 	public static boolean sparesRound(){
-		return Random.Float() < 0.05f * pts( Talent.TRIGGER_HAPPY );
+		return Random.Float() < 0.05f * pts( Talent.TRIGGER_HAPPY )
+				|| Random.Float() < xyz.gabriwar.warpedpixeldungeon.items.GearSets.of( Dungeon.hero ).spare;   //and the Gunslinger's Rig
 	}
 
 	/** Gunsmith's Eye: the firearm counts as higher level */

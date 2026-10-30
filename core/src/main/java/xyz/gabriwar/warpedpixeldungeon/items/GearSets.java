@@ -33,6 +33,7 @@ import xyz.gabriwar.warpedpixeldungeon.items.rings.*;
 import xyz.gabriwar.warpedpixeldungeon.items.trinkets.*;
 import xyz.gabriwar.warpedpixeldungeon.items.wands.*;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.*;
+import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.*;
 import com.watabou.utils.Random;
 
 import java.util.HashSet;
@@ -53,7 +54,8 @@ public class GearSets {
 
 	public static final String[] NAMES = { "Emberwrought", "Frostbound", "Bloodbound", "Stonewarden", "Stormcaller", "Wanderer's Vigil",
 			"Warlord's Regalia", "Archmage's Vestments", "Shadowblade's Shroud", "Warden's Hunt", "Duelist's Flourish", "Saint's Raiment",
-			"Yog-Forged", "Ascended Warlord's Regalia", "Ascended Archmage's Vestments", "Ascended Shadowblade's Shroud", "Ascended Warden's Hunt", "Ascended Duelist's Flourish", "Ascended Saint's Raiment", "Mythic Warlord's Regalia", "Mythic Archmage's Vestments", "Mythic Shadowblade's Shroud", "Mythic Warden's Hunt", "Mythic Duelist's Flourish", "Mythic Saint's Raiment", "Godforged Warlord's Regalia", "Godforged Archmage's Vestments", "Godforged Shadowblade's Shroud", "Godforged Warden's Hunt", "Godforged Duelist's Flourish", "Godforged Saint's Raiment" };
+			"Yog-Forged", "Ascended Warlord's Regalia", "Ascended Archmage's Vestments", "Ascended Shadowblade's Shroud", "Ascended Warden's Hunt", "Ascended Duelist's Flourish", "Ascended Saint's Raiment", "Mythic Warlord's Regalia", "Mythic Archmage's Vestments", "Mythic Shadowblade's Shroud", "Mythic Warden's Hunt", "Mythic Duelist's Flourish", "Mythic Saint's Raiment", "Godforged Warlord's Regalia", "Godforged Archmage's Vestments", "Godforged Shadowblade's Shroud", "Godforged Warden's Hunt", "Godforged Duelist's Flourish", "Godforged Saint's Raiment",
+      "Gunslinger's Rig", "Ascended Gunslinger's Rig", "Mythic Gunslinger's Rig", "Godforged Gunslinger's Rig" };
 
 	/** what one tier of each set gives, in words (the item descriptions quote it) */
 	private static final String[] BASE_PER = {
@@ -69,7 +71,8 @@ public class GearSets {
 			"+5% accuracy and +10% damage against enemies at full health",
 			"+4% damage dealt, +3% accuracy and +3% evasion",
 			"-3% damage taken and a slow regeneration that quickens with each tier",
-			"+6% damage dealt, -4% damage taken, heal for 1.5% of the damage you deal, +2% movement speed and +6% experience" };
+			"+6% damage dealt, -4% damage taken, heal for 1.5% of the damage you deal, +2% movement speed and +6% experience",
+      "+5% damage dealt, +4% accuracy and 5% faster reloads" };
 
 	/** what a set keeps back for its later pieces (empty for none) */
 	private static final String[] BASE_EXTRA = {
@@ -81,17 +84,20 @@ public class GearSets {
 			"With four pieces you move 6% faster; with all five 10% of every blow you take is returned to the attacker.",
 			"With all five pieces you deal a further 10% more damage.",
 			"With four pieces a barrier of 3% of your health forms every 20 turns; with all five you also heal for 5% of the damage you deal.",
-			"With the full set of six, once every 300 turns a killing blow leaves you alive and heals you for 30% of your health." };
+			"With the full set of six, once every 300 turns a killing blow leaves you alive and heals you for 30% of your health.",
+      "With four pieces each shot has an 8% chance not to use a round; with all five you also deal a further 10% more damage." };
 
 	//the tier 7, 8 and 9 sets repeat a class set's bonuses, stronger: the same words with the scale
 	public static final float[] TIER_SCALE = { 1f, 1.25f, 1.5f, 2f };
 	public static final int FIRST_T7 = 13, FIRST_T8 = 19, FIRST_T9 = 25;
 
-	public static final String[] PER_TIER = new String[31], EXTRA = new String[31];
+	public static final int GUN_FIRST = 31;   //the Gunslinger's Rig: tier 6 at 31, then 7, 8 and 9
+
+	public static final String[] PER_TIER = new String[35], EXTRA = new String[35];
 	static {
-		for (int i = 0; i < 31; i++) {
-			int base = i < 13 ? i : 6 + (i - 13) % 6;
-			float m = i < 13 ? 1f : TIER_SCALE[(i - 13) / 6 + 1];
+		for (int i = 0; i < 35; i++) {
+			int base = i >= GUN_FIRST ? 13 : i < 13 ? i : 6 + (i - 13) % 6;
+			float m = i >= GUN_FIRST ? TIER_SCALE[i - GUN_FIRST] : i < 13 ? 1f : TIER_SCALE[(i - 13) / 6 + 1];
 			PER_TIER[i] = BASE_PER[base] + (m == 1f ? "" : " (x" + (m == 1.25f ? "1.25" : m == 1.5f ? "1.5" : "2") + ")");
 			EXTRA[i] = BASE_EXTRA[base];
 		}
@@ -107,6 +113,7 @@ public class GearSets {
 	private static final Class<?>[] EXTRA_GEAR = { HollowwoodStaff.class, IronboundStaff.class, WyrmboneStaff.class };
 
 	public static int tierOfSet( int set ) {
+		if (set >= GUN_FIRST) return 6 + (set - GUN_FIRST);   //the Gunslinger's Rig, tiers 6 to 9
 		if (set == YOG) return 9;
 		if (set < GENERIC_SETS) return 5;   //the general sets: tier 5
 		if (set < FIRST_T7) return 6;
@@ -185,6 +192,10 @@ public class GearSets {
 			{ GodforgedWardensHide.class, GodforgedWardensGlaive.class, GodforgedWardensRing.class, GodforgedWardensHorn.class, GodforgedWardensTotem.class },
 			{ GodforgedDuelistsCoat.class, GodforgedDuelistsRapier.class, GodforgedDuelistsSignet.class, GodforgedDuelistsGlove.class, GodforgedDuelistsMedal.class },
 			{ GodforgedSaintsVestment.class, GodforgedSaintsMace.class, GodforgedSaintsHalo.class, GodforgedSaintsChalice.class, GodforgedSaintsRelic.class },
+			{ GunslingersCoat.class, GunslingersPeacemaker.class, GunslingersSignet.class, GunslingersBelt.class, GunslingersLuckyCoin.class },
+			{ AscendedGunslingersCoat.class, AscendedGunslingersPeacemaker.class, AscendedGunslingersSignet.class, AscendedGunslingersBelt.class, AscendedGunslingersLuckyCoin.class },
+			{ MythicGunslingersCoat.class, MythicGunslingersPeacemaker.class, MythicGunslingersSignet.class, MythicGunslingersBelt.class, MythicGunslingersLuckyCoin.class },
+			{ GodforgedGunslingersCoat.class, GodforgedGunslingersPeacemaker.class, GodforgedGunslingersSignet.class, GodforgedGunslingersBelt.class, GodforgedGunslingersLuckyCoin.class },
 	};
 
 	/** the set an item belongs to (an index into NAMES), or -1 */
@@ -208,6 +219,8 @@ public class GearSets {
 	public static class Effects {
 		public float damage = 1f, taken = 1f, evasion = 1f, accuracy = 1f, speed = 1f, exp = 1f;
 		public float lifesteal = 0f, thorns = 0f;
+		/** firearms: the multiplier on a reload's time, and the chance a shot does not use a round */
+		public float reload = 1f, spare = 0f;
 		/** extra damage: while the hero is at 35% health or less / against enemies that have not noticed
 		 *  the hero / at 30% health or less / at full health */
 		public float lowHp = 0f, sneak = 0f, vsWeak = 0f, vsFull = 0f;
@@ -251,6 +264,9 @@ public class GearSets {
 			classSet( e, f, tier( FIRST_T9 + f, p( pieces, FIRST_T9 + f ) ), TIER_SCALE[3] );
 		}
 
+		//the Gunslinger's Rig, in its four tiers
+		for (int k = 0; k < 4; k++) classSet( e, 6, tier( GUN_FIRST + k, p( pieces, GUN_FIRST + k ) ), TIER_SCALE[k] );
+
 		e.damage += 0.06f * yog;
 		e.taken -= 0.04f * yog;
 		e.lifesteal += 0.015f * yog;
@@ -261,7 +277,7 @@ public class GearSets {
 	}
 
 	/** One class set's bonus for this many steps (pieces beyond the first), scaled by m: a class set
-	 *  is family 0 Warrior, 1 Mage, 2 Rogue, 3 Huntress, 4 Duelist, 5 Cleric. */
+	 *  is family 0 Warrior, 1 Mage, 2 Rogue, 3 Huntress, 4 Duelist, 5 Cleric, 6 Gunslinger. */
 	private static void classSet( Effects e, int family, int steps, float m ) {
 		if (steps <= 0) return;
 		switch (family) {
@@ -293,6 +309,13 @@ public class GearSets {
 				e.damage += 0.04f * steps * m;
 				e.accuracy += 0.03f * steps * m;
 				e.evasion += 0.03f * steps * m;
+				if (steps >= 4) e.damage += 0.10f * m;
+				break;
+			case 6:
+				e.damage += 0.05f * steps * m;
+				e.accuracy += 0.04f * steps * m;
+				e.reload -= 0.05f * steps * m;
+				if (steps >= 3) e.spare = Math.max( e.spare, 0.08f * m );
 				if (steps >= 4) e.damage += 0.10f * m;
 				break;
 			default:

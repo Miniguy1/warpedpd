@@ -2219,4 +2219,22 @@ public class ItemSpriteSheet {
 	static {
 		assignItemRect(SADDLE, 15, 13);
 	}
+
+  private static final int OW_GUNS      =                            xy(1, 73);   //16 slots: the Gunslinger's firearms and gear (drawn by script)
+  public static final int DERRINGER           = OW_GUNS+0;
+  public static final int REVOLVER            = OW_GUNS+1;
+  public static final int CARBINE             = OW_GUNS+2;
+  public static final int HUNTING_RIFLE       = OW_GUNS+3;
+  public static final int PEACEMAKER          = OW_GUNS+4;
+  public static final int GUN_BELT            = OW_GUNS+5;
+  public static final int LUCKY_COIN          = OW_GUNS+6;
+  static {
+    assignItemRect(DERRINGER, 13, 14);
+    assignItemRect(REVOLVER, 16, 16);
+    assignItemRect(CARBINE, 16, 16);
+    assignItemRect(HUNTING_RIFLE, 16, 16);
+    assignItemRect(PEACEMAKER, 16, 16);
+    assignItemRect(GUN_BELT, 16, 15);
+    assignItemRect(LUCKY_COIN, 12, 12);
+  }
 }

@@ -23,15 +23,21 @@ package xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun;
 
 import xyz.gabriwar.warpedpixeldungeon.sprites.ItemSpriteSheet;
 
-/** The Gunslinger's own gun: a six-round revolver on the same magazine, reload and bullet-mod system as the other firearms. */
+/** Tier 2: the Gunslinger's own gun: a six-round revolver on the same magazine, reload and bullet-mod system as the other firearms. */
 public class Revolver extends Gun {
 
 	{
-		image = ItemSpriteSheet.SHOOT_GUN;
+		image = ItemSpriteSheet.REVOLVER;
 		tier = 2;
 		max_round = 6;
 		round = max_round;
 		reload_time = 2f;
 		shootingAccuracy = 1.2f;
+	}
+
+	//the same damage as a melee weapon of its tier, spent a round at a time
+	@Override
+	protected int baseBulletMax( int lvl ) {
+		return 5 * (tier() + 1) + lvl * (tier() + 1);
 	}
 }

@@ -2564,6 +2564,115 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theGunsFireRealDamageAndTheGunslingersRigIsComplete() {
+		//the revolver once did no damage at all (the gun base class returns 0 until a gun overrides it): never again
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+		assertTrue( "revolver max " + r.bulletMax(), r.bulletMax() >= 15 );
+		assertEquals( 2, r.bulletMin() );
+		long sum = 0;
+		for (int i = 0; i < 3000; i++) sum += xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.roll( r );
+		assertTrue( "a revolver shot averages " + sum / 3000.0, sum / 3000.0 > 6 && sum / 3000.0 < 12 );
+		//the ladder: four tiers, each stronger, with a magazine of its own
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Gun[] ladder = { new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Derringer(), r, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine(), new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.HuntingRifle() };
+		int[] rounds = { 2, 6, 8, 5 };
+		for (int i = 0; i < 4; i++) {
+			assertEquals( i + 1, ladder[i].tier() );
+			assertEquals( rounds[i], ladder[i].maxRound() );
+			assertEquals( "loaded", rounds[i], ladder[i].round() );
+			assertFalse( ladder[i].name().contains( "!!!" ) );
+			if (i < 3) assertTrue( ladder[i].bulletMax() < ladder[i + 1].bulletMax() );
+		}
+		//they drop with the other weapons of their tier
+		Class<?>[] ladderClasses = { ladder[0].getClass(), ladder[1].getClass(), ladder[2].getClass(), ladder[3].getClass() };
+		xyz.gabriwar.warpedpixeldungeon.items.Generator.Category[] cats = { xyz.gabriwar.warpedpixeldungeon.items.Generator.Category.WEP_T1, xyz.gabriwar.warpedpixeldungeon.items.Generator.Category.WEP_T2, xyz.gabriwar.warpedpixeldungeon.items.Generator.Category.WEP_T3, xyz.gabriwar.warpedpixeldungeon.items.Generator.Category.WEP_T4 };
+		for (int i = 0; i < 4; i++) {
+			boolean found = false;
+			for (Class<?> c : cats[i].classes) if (c == ladderClasses[i]) found = true;
+			assertTrue( ladderClasses[i].getSimpleName() + " drops as a tier " + (i + 1) + " weapon", found );
+			assertEquals( "one probability for each class", cats[i].classes.length, cats[i].defaultProbs.length );
+		}
+
+		//the set: four tiers of five pieces
+		assertEquals( 35, xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES.length );
+		assertEquals( "Gunslinger's Rig", xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[31] );
+		assertEquals( "Godforged Gunslinger's Rig", xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[34] );
+		for (int k = 0; k < 4; k++) {
+			int set = 31 + k;
+			assertEquals( 6 + k, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierOfSet( set ) );
+			Class<?>[] pieces = xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( set );
+			assertEquals( 5, pieces.length );
+			for (Class<?> c : pieces) {
+				assertEquals( c.getSimpleName() + " is in its set", set, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( c ) );
+				Item it = (Item) com.watabou.utils.Reflection.newInstance( c );
+				assertNotNull( it );
+				assertEquals( c.getSimpleName() + " tier", 6 + k, xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( it ) );
+				if (k > 0) assertEquals( 6 + k, ((xyz.gabriwar.warpedpixeldungeon.items.SetTier) it).setTier() );
+				assertFalse( c.getSimpleName() + " has no name", it.name().contains( "!!!" ) );
+				assertTrue( c.getSimpleName() + " describes its set", it.desc().contains( "Gunslinger's Rig" ) );
+				if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) assertEquals( 17 + 2 * k, ((xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) it).STRReq( 0 ) );
+				if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker) assertEquals( 18 + 2 * k, ((xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon) it).STRReq( 0 ) );
+			}
+		}
+		//a stronger tier hits harder
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker base = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker();
+		assertEquals( 8, base.maxRound() );
+		assertEquals( Math.round( base.bulletMax() * 1.25f ), new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.AscendedGunslingersPeacemaker().bulletMax() );
+		assertEquals( Math.round( base.bulletMax() * 1.8f ), new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GodforgedGunslingersPeacemaker().bulletMax() );
+		assertTrue( new xyz.gabriwar.warpedpixeldungeon.items.armor.MythicGunslingersCoat().DRMax( 0 ) > new xyz.gabriwar.warpedpixeldungeon.items.armor.AscendedGunslingersCoat().DRMax( 0 ) );
+
+		//what the pieces add up to
+		int[] have = new int[35];
+		have[31] = 5;
+		xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( have );
+		assertEquals( 1.30f, e.damage, 0.001f );
+		assertEquals( 1.16f, e.accuracy, 0.001f );
+		assertEquals( 0.80f, e.reload, 0.001f );
+		assertEquals( 0.08f, e.spare, 0.001f );
+		have[31] = 0; have[34] = 5;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( have );
+		assertEquals( "tier 9 doubles it", 1.60f, e.damage, 0.001f );
+		assertEquals( 0.60f, e.reload, 0.001f );
+		assertEquals( 0.16f, e.spare, 0.001f );
+		//one piece is worth nothing; the first set does not leak into the others
+		have = new int[35]; have[31] = 1;
+		e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( have );
+		assertEquals( 1f, e.damage, 0.001f );
+		assertEquals( 1f, e.reload, 0.001f );
+		for (int s = 0; s < 31; s++) { have = new int[35]; have[s] = 5; assertEquals( "set " + s + " does not touch reloads", 1f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( have ).reload, 0.001f ); }
+
+		//worn: four pieces slow the reload by 15% and it shows in the gun
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepW = h.belongings.weapon;
+		xyz.gabriwar.warpedpixeldungeon.items.armor.Armor keepA = h.belongings.armor;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		try {
+			h.belongings.weapon = base;
+			h.belongings.armor = new xyz.gabriwar.warpedpixeldungeon.items.armor.GunslingersCoat();
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.GunslingersBelt() );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.GunslingersLuckyCoin() );
+			assertEquals( 0.85f, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.reloadFactor(), 0.001f );
+			assertEquals( 2f * 0.85f, base.reloadTime( h ), 0.001f );
+		} finally {
+			h.belongings.weapon = keepW;
+			h.belongings.armor = keepA;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+		}
+
+		//a Gunslinger is dropped its own set, tier by tier, and nobody else is
+		for (int tier = 6; tier <= 9; tier++) {
+			for (int i = 0; i < 200; i++) {
+				Item it = xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER, tier );
+				assertEquals( "a tier " + tier + " Gunslinger piece: " + it.getClass().getSimpleName(), 31 + tier - 6, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( it.getClass() ) );
+			}
+		}
+		for (xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass c : xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values()) {
+			if (c == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER) continue;
+			for (int i = 0; i < 100; i++) assertTrue( c + " is not dropped the Gunslinger's set", xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( c, 6 ).getClass() ) < 31 );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

@@ -817,9 +817,10 @@ public class Generator {
 				Scalpel.class,
 				Shovel.class,
 				Saber.class,
-				PocketKnife.class
+				PocketKnife.class,
+					xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Derringer.class
 			};
-			WEP_T1.defaultProbs = new float[]{ 2, 0, 2, 2, 2, 2, 1, 1, 1, 2, 1, 1, 1 };
+			WEP_T1.defaultProbs = new float[]{ 2, 0, 2, 2, 2, 2, 1, 1, 1, 2, 1, 1, 1, 1 };
 			WEP_T1.probs = WEP_T1.defaultProbs.clone();
 			
 			WEP_T2.classes = new Class<?>[]{
@@ -837,9 +838,10 @@ public class Generator {
 					DualKnife.class,
 					Flute.class,
 					MirrorDoll.class,
-					Knife.class
+					Knife.class,
+					xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver.class
 			};
-			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, 2, 1, 1, 1, 1, 2 };
+			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, 2, 1, 1, 1, 1, 2, 1 };
 			WEP_T2.probs = WEP_T2.defaultProbs.clone();
 			
 			WEP_T3.classes = new Class<?>[]{
@@ -855,9 +857,10 @@ public class Generator {
 					Wardrum.class,
 					WindBottle.class,
 				Bible.class,
-				Bow.class
+				Bow.class,
+					xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine.class
 			};
-			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2 };
+			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 1 };
 			WEP_T3.probs = WEP_T3.defaultProbs.clone();
 			
 			WEP_T4.classes = new Class<?>[]{
@@ -873,9 +876,10 @@ public class Generator {
 					Trumpet.class,
 					PrayerWheel.class,
 					HandLight.class,
-					DeathSword.class
+					DeathSword.class,
+					xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.HuntingRifle.class
 			};
-			WEP_T4.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1 };
+			WEP_T4.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1 };
 			WEP_T4.probs = WEP_T4.defaultProbs.clone();
 			
 			WEP_T5.classes = new Class<?>[]{

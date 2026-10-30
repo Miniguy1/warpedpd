@@ -136,6 +136,7 @@ public class EndgameLoot {
 
 	/** the same, with bonus levels on top */
 	public static Item rollClassSet( HeroClass cls, int tier, int extraLevels ) {
+		if (cls == HeroClass.GUNSLINGER) return fromSet( GearSets.GUN_FIRST + Math.max( 0, Math.min( 3, tier - 6 ) ), extraLevels );
 		int family;
 		switch (cls) {
 			case WARRIOR: default: family = 0; break;
@@ -187,6 +188,7 @@ public class EndgameLoot {
 			case HUNTRESS: return fromSet( 9 );
 			case DUELIST:  return fromSet( 10 );
 			case CLERIC:   return fromSet( 11 );
+			case GUNSLINGER: return fromSet( GearSets.GUN_FIRST );
 		}
 	}
 

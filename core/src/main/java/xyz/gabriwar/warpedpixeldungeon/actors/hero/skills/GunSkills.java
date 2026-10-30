@@ -76,6 +76,7 @@ public final class GunSkills {
 		int q = lvl( QuickHands.class );
 		float f = q > 0 ? 1f - (0.05f + 0.15f * q) : 1f;
 		if (lvl( LongBarrel.class ) > 0) f *= 1.2f;
+		f *= Math.max( 0.35f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.of( Dungeon.hero ).reload );   //the Gunslinger's Rig
 		return f * xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.reloadFactor();
 	}
 
