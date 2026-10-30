@@ -2512,7 +2512,7 @@ public class ModContentTest {
 			h.talents.get( 1 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.RELOAD_ON_THE_RUN, 2 );
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
 			assertEquals( "reload on the run", 0.5f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.reloadFactor(), 0.001f );
-			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE, 3 );
+			h.talents.get( 4 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE, 3 );   //a level 40 talent
 			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST, 3 );
 			assertEquals( "the vest", 85, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( 100, null ) );
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onReloaded();
@@ -2529,7 +2529,7 @@ public class ModContentTest {
 
 			//Last Bullet: once a floor
 			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LAST_BULLET, 3 );
-			h.talents.get( 5 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE ); h.talents.get( 5 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST );
+			h.talents.get( 4 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE ); h.talents.get( 5 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST );
 			r.useRound();
 			int before = r.round();
 			h.HP = 100;
