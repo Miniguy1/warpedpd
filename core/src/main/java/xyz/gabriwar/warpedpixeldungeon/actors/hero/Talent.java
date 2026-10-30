@@ -212,6 +212,19 @@ public enum Talent {
 	//Cleric T5 (level 40) and T6 (level 60)
 	WARDED_FAITH(163, 3), MERCIFUL_LIGHT(168, 3), AVATARS_GRACE(177, 3), LAST_RITES(178, 3),
 
+	//Gunslinger: T1, T2, T3, T5 (level 40) and T6 (level 60)
+	AMMO_BELT(3, 2), STEADY_HANDS(36, 2), POWDER_HORN(18, 2), STEEL_NERVES(56, 2),
+	COOL_BARREL(44, 2), RELOAD_ON_THE_RUN(70, 2), HAIR_TRIGGER(69, 2), POCKET_ROUNDS(10, 2), GUNSMITHS_EYE(5, 2),
+	CALLED_SHOTS(103, 3), OVERCHARGE_ROUNDS(105, 3),
+	DEAD_TO_RIGHTS(84, 3), GUNSMOKE(83, 3), LEGEND_OF_THE_WEST(137, 3), LAST_BULLET(138, 3),
+	//Outlaw and Demolitionist T3
+	TRIGGER_HAPPY(129, 3), BOUNTY_HUNTER(130, 3), DESPERADO(131, 3),
+	BIGGER_BANG(132, 3), SHRAPNEL_VEST(133, 3), SPENT_CASINGS(134, 3),
+	//Barrage, Smoke and Mirrors and Hail of Lead T4
+	LONG_BURST(145, 4), PIERCING_FIRE(146, 4), FOCUSED_VOLLEY(147, 4),
+	THICK_SMOKE(148, 4), DECOY_SWARM(149, 4), GHOST_STEP(150, 4),
+	STEADY_STREAM(151, 4), HOT_BARRELS(152, 4), COVERING_FIRE(153, 4),
+
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
 	//Ratmogrify T4
@@ -623,6 +636,7 @@ public enum Talent {
 	}
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onFood( hero );   //Ammo Belt
 		if (hero.hasTalent(HEARTY_MEAL)){
 			//15/20/25% of max HP healed (at least 4/6/8), when hero is below 33% health
 			if (hero.HP/(float)hero.HT < 0.334f) {
@@ -1067,8 +1081,11 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, NATURES_BOUNTY, SURVIVALISTS_INTUITION, FOLLOWUP_STRIKE, NATURES_AID);
 				break;
-			case DUELIST: case GUNSLINGER:
+			case DUELIST:
 				Collections.addAll(tierTalents, STRENGTHENING_MEAL, ADVENTURERS_INTUITION, PATIENT_STRIKE, AGGRESSIVE_BARRIER);
+				break;
+			case GUNSLINGER:
+				Collections.addAll(tierTalents, AMMO_BELT, STEADY_HANDS, POWDER_HORN, STEEL_NERVES);
 				break;
 			case CLERIC:
 				Collections.addAll(tierTalents, SATIATED_SPELLS, HOLY_INTUITION, SEARING_LIGHT, SHIELD_OF_LIGHT);
@@ -1096,8 +1113,11 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, INVIGORATING_MEAL, LIQUID_NATURE, REJUVENATING_STEPS, HEIGHTENED_SENSES, DURABLE_PROJECTILES);
 				break;
-			case DUELIST: case GUNSLINGER:
+			case DUELIST:
 				Collections.addAll(tierTalents, FOCUSED_MEAL, LIQUID_AGILITY, WEAPON_RECHARGING, LETHAL_HASTE, SWIFT_EQUIP);
+				break;
+			case GUNSLINGER:
+				Collections.addAll(tierTalents, COOL_BARREL, RELOAD_ON_THE_RUN, HAIR_TRIGGER, POCKET_ROUNDS, GUNSMITHS_EYE);
 				break;
 			case CLERIC:
 				Collections.addAll(tierTalents, ENLIGHTENING_MEAL, RECALL_INSCRIPTION, SUNRAY, DIVINE_SENSE, BLESS);
@@ -1125,8 +1145,11 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, POINT_BLANK, SEER_SHOT);
 				break;
-			case DUELIST: case GUNSLINGER:
+			case DUELIST:
 				Collections.addAll(tierTalents, PRECISE_ASSAULT, DEADLY_FOLLOWUP);
+				break;
+			case GUNSLINGER:
+				Collections.addAll(tierTalents, CALLED_SHOTS, OVERCHARGE_ROUNDS);
 				break;
 			case CLERIC:
 				Collections.addAll(tierTalents, CLEANSE, LIGHT_READING);
@@ -1157,8 +1180,11 @@ public enum Talent {
 			case HUNTRESS:
 				Collections.addAll(tierTalents, KEEN_EYE, PATHFINDER, APEX_PREDATOR, BRIAR_HIDE);
 				break;
-			case DUELIST: case GUNSLINGER:
+			case DUELIST:
 				Collections.addAll(tierTalents, RIPOSTE_MASTERY, FOOTWORK, BLADE_DANCER, PERFECT_FORM);
+				break;
+			case GUNSLINGER:
+				Collections.addAll(tierTalents, DEAD_TO_RIGHTS, GUNSMOKE, LEGEND_OF_THE_WEST, LAST_BULLET);
 				break;
 			case CLERIC:
 				Collections.addAll(tierTalents, WARDED_FAITH, MERCIFUL_LIGHT, AVATARS_GRACE, LAST_RITES);
@@ -1209,11 +1235,17 @@ public enum Talent {
 			case WARDEN:
 				Collections.addAll(tierTalents, DURABLE_TIPS, BARKSKIN, SHIELDING_DEW);
 				break;
-			case CHAMPION: case OUTLAW:
+			case CHAMPION:
 				Collections.addAll(tierTalents, VARIED_CHARGE, TWIN_UPGRADES, COMBINED_LETHALITY);
 				break;
-			case MONK: case DEMOLITIONIST:
+			case OUTLAW:
+				Collections.addAll(tierTalents, TRIGGER_HAPPY, BOUNTY_HUNTER, DESPERADO);
+				break;
+			case MONK:
 				Collections.addAll(tierTalents, UNENCUMBERED_SPIRIT, MONASTIC_VIGOR, COMBINED_ENERGY);
+				break;
+			case DEMOLITIONIST:
+				Collections.addAll(tierTalents, BIGGER_BANG, SHRAPNEL_VEST, SPENT_CASINGS);
 				break;
 			case PRIEST:
 				Collections.addAll(tierTalents, HOLY_LANCE, HALLOWED_GROUND, MNEMONIC_PRAYER);

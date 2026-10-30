@@ -338,8 +338,9 @@ public enum HeroClass {
 			case HUNTRESS:
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
 			case DUELIST:
-			case GUNSLINGER:   //(until its own crown abilities)
 				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
+			case GUNSLINGER:
+				return new ArmorAbility[]{new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.Barrage(), new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.SmokeAndMirrors(), new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead()};
 			case CLERIC:
 				return new ArmorAbility[]{new AscendedForm(), new Trinity(), new PowerOfMany()};
 		}

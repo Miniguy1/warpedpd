@@ -576,10 +576,12 @@ public class CurrentSkills {
 	public float allDamageModifier( boolean ranged ){
 		float m = 1f;
 		for (Skill s : allSkills) m *= ranged ? s.rangedDamageModifier() : s.damageModifier();
+		m *= xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( ranged );
 		return m;
 	}
 
 	public int allIncomingDamage( int dmg, Object source ){
+		dmg = xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( dmg, source );
 		//damage over time always lands; only a death-saving skill may answer the tick that would kill
 		boolean tick = Skill.isTickDamage(source);
 		Hero hero = Dungeon.hero;
@@ -619,6 +621,7 @@ public class CurrentSkills {
 			DamageLedger.push( enemy, Step.ATTACKER, DamageLedger.AUTO, s );
 			damage = DamageLedger.pop( s.onHitProc(enemy, damage, ranged) );
 		}
+		damage = xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( enemy, damage, ranged );
 		return damage;
 	}
 
@@ -639,6 +642,7 @@ public class CurrentSkills {
 	public float allToHitModifier(){
 		float m = 1f;
 		for (Skill s : allSkills) m *= s.toHitModifier();
+		m *= xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.accuracyMod();
 		return m;
 	}
 
@@ -684,6 +688,7 @@ public class CurrentSkills {
 	public int allWeaponLevelBonus(){
 		int b = 0;
 		for (Skill s : allSkills) b += s.weaponLevelBonus();
+		b += xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.levelBonus();
 		return b;
 	}
 
@@ -807,6 +812,7 @@ public class CurrentSkills {
 		killDispatch++;
 		try {
 			for (Skill s : allSkills) if (s.level > 0) s.onKill( mob, ranged );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( mob, ranged );
 		} finally {
 			killDispatch--;
 		}

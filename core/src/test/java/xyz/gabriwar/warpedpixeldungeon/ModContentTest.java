@@ -2416,6 +2416,154 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theGunslingerTalentsAndCrownWork() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> keepTalents = h.talents;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		int keepBullet = Dungeon.bullet, keepHP = h.HP, keepHT = h.HT;
+		try {
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass g = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			h.heroClass = g;
+			//the class talents, tier by tier
+			java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> t = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( g, t );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.AMMO_BELT, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEADY_HANDS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.POWDER_HORN, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEEL_NERVES }) assertTrue( x + " tier 1", t.get( 0 ).containsKey( x ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.COOL_BARREL, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.RELOAD_ON_THE_RUN, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HAIR_TRIGGER, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.POCKET_ROUNDS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMITHS_EYE }) assertTrue( x + " tier 2", t.get( 1 ).containsKey( x ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.CALLED_SHOTS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.OVERCHARGE_ROUNDS }) assertTrue( x + " tier 3", t.get( 2 ).containsKey( x ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DEAD_TO_RIGHTS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LEGEND_OF_THE_WEST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LAST_BULLET }) {
+				boolean found = false;
+				for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> m : t) if (m.containsKey( x )) found = true;
+				assertTrue( x + " at level 40 or 60", found );
+			}
+			//its own, not the Duelist's
+			assertFalse( t.get( 0 ).containsKey( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STRENGTHENING_MEAL ) );
+			//the subclass talents
+			java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> so = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initSubclassTalents( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW, so );
+			java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> sd = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initSubclassTalents( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.DEMOLITIONIST, sd );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.TRIGGER_HAPPY, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.BOUNTY_HUNTER, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DESPERADO }) { boolean f = false; for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> m : so) if (m.containsKey( x )) f = true; assertTrue( x + " outlaw", f ); }
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.BIGGER_BANG, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SPENT_CASINGS }) { boolean f = false; for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> m : sd) if (m.containsKey( x )) f = true; assertTrue( x + " demolitionist", f ); }
+
+			//every new talent has a title and a +1 description
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[] mine = { xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.AMMO_BELT, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEADY_HANDS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.POWDER_HORN, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEEL_NERVES, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.COOL_BARREL, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.RELOAD_ON_THE_RUN, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HAIR_TRIGGER, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.POCKET_ROUNDS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMITHS_EYE,
+					xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.CALLED_SHOTS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.OVERCHARGE_ROUNDS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DEAD_TO_RIGHTS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LEGEND_OF_THE_WEST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LAST_BULLET, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.TRIGGER_HAPPY, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.BOUNTY_HUNTER, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DESPERADO,
+					xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.BIGGER_BANG, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SPENT_CASINGS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LONG_BURST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.PIERCING_FIRE, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.FOCUSED_VOLLEY, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.THICK_SMOKE, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DECOY_SWARM, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GHOST_STEP, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEADY_STREAM, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HOT_BARRELS, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.COVERING_FIRE };
+			assertEquals( 30, mine.length );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent x : mine) {
+				assertFalse( x + " title", x.title().contains( "!!!" ) );
+				assertTrue( x + " description: " + x.desc(), x.desc().contains( "_+1:_" ) );
+			}
+
+			//the crown abilities
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.ArmorAbility[] abs = g.armorAbilities();
+			assertEquals( 3, abs.length );
+			assertEquals( "barrage", abs[0].name() );
+			assertEquals( "smoke and mirrors", abs[1].name() );
+			assertEquals( "hail of lead", abs[2].name() );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.ArmorAbility a : abs) {
+				assertEquals( 4, a.talents().length );
+				assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HEROIC_ENERGY, a.talents()[3] );
+				assertFalse( a.desc().contains( "!!!" ) );
+				assertFalse( a.shortDesc().contains( "!!!" ) );
+			}
+
+			//the numbers, with a firearm in hand and the points spent
+			h.talents = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( h );
+			for (int i = 0; i < 6; i++) while (h.talents.size() <= i) h.talents.add( new java.util.LinkedHashMap<>() );
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			h.belongings.weapon = r;
+			r.quickReload();
+			h.HT = 100; h.HP = 100;
+			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LEGEND_OF_THE_WEST, 3 );
+			assertEquals( "legend: +30%", 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			assertEquals( "and only for ranged", 1f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( false ), 0.001f );
+			h.talents.get( 1 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.COOL_BARREL, 2 );
+			assertEquals( "cool barrel on a full magazine", 1.3f * 1.16f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.talents.get( 2 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.OVERCHARGE_ROUNDS, 3 );
+			while (r.round() > 1) r.useRound();
+			assertEquals( "overcharge on the last round, no cool barrel on a nearly empty one", 1.3f * 1.45f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.HP = 40;
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DESPERADO, 3 );
+			assertEquals( "desperado below half health", 1.3f * 1.45f * 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.HP = 100;
+
+			h.talents.get( 2 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.CALLED_SHOTS, 3 );
+			assertEquals( 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.accuracyMod(), 0.001f );
+			h.talents.get( 1 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HAIR_TRIGGER, 2 );
+			assertEquals( 1f / 1.2f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.shotSpeed(), 0.001f );
+			h.talents.get( 0 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.POWDER_HORN, 2 );
+			assertEquals( 5, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.refund( 10 ) );
+			h.talents.get( 1 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMITHS_EYE, 2 );
+			assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.levelBonus() );
+			h.talents.get( 0 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.AMMO_BELT, 2 );
+			Dungeon.bullet = 0;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onFood( h );
+			assertEquals( "ammo belt", 7, Dungeon.bullet );
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.TRIGGER_HAPPY, 3 );
+			int spared = 0;
+			for (int i = 0; i < 3000; i++) if (xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.sparesRound()) spared++;
+			assertEquals( "trigger happy: 15%", 0.15, spared / 3000.0, 0.04 );
+
+			//a kill opens the window for quicker reloads, and a reload for the gunsmoke
+			h.talents.get( 1 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.RELOAD_ON_THE_RUN, 2 );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
+			assertEquals( "reload on the run", 0.5f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.reloadFactor(), 0.001f );
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE, 3 );
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST, 3 );
+			assertEquals( "the vest", 85, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( 100, null ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onReloaded();
+			assertEquals( "gunsmoke and the vest", 51, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( 100, null ) );
+
+			//what a shot does to an enemy that has not noticed you, and to a nearly dead one
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			h.talents.get( 0 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STEADY_HANDS, 2 );
+			assertEquals( "steady hands: +50%", 150, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( rat, 100, true ) );
+			assertEquals( "not for a melee blow", 100, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( rat, 100, false ) );
+			h.talents.get( 4 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DEAD_TO_RIGHTS, 3 );
+			rat.HP = rat.HT / 4;
+			assertEquals( "dead to rights: +60%", 240, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( rat, 100, true ) );
+
+			//Last Bullet: once a floor
+			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.LAST_BULLET, 3 );
+			h.talents.get( 5 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.GUNSMOKE ); h.talents.get( 5 ).remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.SHRAPNEL_VEST );
+			r.useRound();
+			int before = r.round();
+			h.HP = 100;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( 80, null );
+			assertEquals( "a full magazine", r.maxRound(), r.round() );
+			r.useRound();
+			h.HP = 30;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.incoming( 5, null );
+			assertTrue( "only once a floor", r.round() < r.maxRound() );
+
+			//no firearm, no talent
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			assertEquals( 1f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.accuracyMod(), 0.001f );
+			assertEquals( 0, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.levelBonus() );
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( rat, 100, true ) );
+
+			//the hail of lead remembers itself across a save
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead.Hail hail = new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead.Hail();
+			hail.set( 8, 1.3f, 2 );
+			com.watabou.utils.Bundle bd = new com.watabou.utils.Bundle();
+			hail.storeInBundle( bd );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead.Hail back = new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead.Hail();
+			back.restoreFromBundle( bd );
+			assertEquals( 8, back.turnsLeft() );
+		} finally {
+			h.heroClass = keepClass;
+			h.talents = keepTalents;
+			h.belongings.weapon = keepWeapon;
+			Dungeon.bullet = keepBullet; h.HP = keepHP; h.HT = keepHT;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

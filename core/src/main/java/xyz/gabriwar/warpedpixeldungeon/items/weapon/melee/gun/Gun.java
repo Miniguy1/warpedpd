@@ -335,8 +335,11 @@ public class Gun extends MeleeWeapon {
 				manualReload();
 			}
 		} else {
-			Dungeon.bullet -= bulletUse();
-			quickReload();
+			int used = bulletUse();
+      Dungeon.bullet -= used;
+      quickReload();
+      Dungeon.bullet += xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.refund( used );   //Powder Horn
+      xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onReloaded();
 		}
 
 		hero.busy();
@@ -737,7 +740,7 @@ public class Gun extends MeleeWeapon {
 		@Override
 		public float delayFactor(Char user) {
 			float speed = Gun.this.delayFactor(user) * shootingSpeed;
-      speed *= xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.shotDelay;   //a snapped shot
+      speed *= xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.shotDelay * xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.shotSpeed();   //a snapped shot, Hair Trigger
 			return speed;
 		}
 
@@ -840,7 +843,7 @@ public class Gun extends MeleeWeapon {
 
 		public void onShoot() {
 			//an AMMO line's spared round
-			if (!Quality.rollSpareAmmo(Gun.this, curUser)) round --;
+			if (!Quality.rollSpareAmmo(Gun.this, curUser) && !xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.sparesRound()) round --;   //Trigger Happy
 
 			aggro();
 

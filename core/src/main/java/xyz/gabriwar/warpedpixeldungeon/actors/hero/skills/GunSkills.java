@@ -76,7 +76,7 @@ public final class GunSkills {
 		int q = lvl( QuickHands.class );
 		float f = q > 0 ? 1f - (0.05f + 0.15f * q) : 1f;
 		if (lvl( LongBarrel.class ) > 0) f *= 1.2f;
-		return f;
+		return f * xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.reloadFactor();
 	}
 
 	public static boolean hipFire(){
