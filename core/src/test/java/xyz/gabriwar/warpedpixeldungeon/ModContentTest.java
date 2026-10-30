@@ -2321,6 +2321,101 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theGunslingerSkillTreeWorks() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		int keepBullet = Dungeon.bullet;
+		try {
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			h.heroSkills = sk;
+			//the shape of the tree
+			assertEquals( 4, sk.passiveASkills.size() );
+			assertEquals( 6, sk.passiveBSkills.size() );
+			assertEquals( 5, sk.activeSkills.size() );
+			assertEquals( 5, sk.fourthSkills.size() );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.passiveBSkills) if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DoubleBarrel) assertTrue( s.exclusiveWith instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.LongBarrel );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.fourthSkills) if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BulletTime) assertTrue( s.exclusiveWith instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.LastRound );
+			assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.subclassSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW ).size() );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.subclassSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW ).get( 0 ) instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DoubleTap );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.subclassSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.DEMOLITIONIST ).get( 2 ) instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Shrapnel );
+			//every skill has a name and a description of its own
+			java.util.List<xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill> all = new java.util.ArrayList<>();
+			all.addAll( sk.passiveASkills ); all.addAll( sk.passiveBSkills ); all.addAll( sk.activeSkills ); all.addAll( sk.fourthSkills );
+			all.addAll( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.subclassSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW ) );
+			all.addAll( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.subclassSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.DEMOLITIONIST ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : all) {
+				String info = xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( s, "desc" );
+				assertFalse( s.getClass().getSimpleName() + " has no text", info.contains( "!!!" ) );
+				assertTrue( s.getClass().getSimpleName() + " needs +1 +2 +3 lines", info.contains( "_+1:_" ) && info.contains( "_+3:_" ) );
+			}
+
+			//the gun hooks
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			h.belongings.weapon = r;
+			assertEquals( 6, r.maxRound() );
+			assertEquals( 2f, r.reloadTime( h ), 0.001f );
+			sk.passiveASkills.get( 2 ).level = 3;   //Deep Pockets
+			assertEquals( "deep pockets: +3 rounds", 9, r.maxRound() );
+			sk.passiveASkills.get( 1 ).level = 3;   //Quick Hands
+			assertEquals( "quick hands: half the reload", 1f, r.reloadTime( h ), 0.001f );
+			sk.passiveBSkills.get( 5 ).level = 1;   //Long Barrel
+			assertEquals( "a long barrel reloads 20% slower", 1.2f, r.reloadTime( h ), 0.001f );
+			sk.passiveBSkills.get( 5 ).level = 0;
+
+			//Dead Calm: only the first shot after a full reload
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill calm = sk.passiveASkills.get( 3 );
+			calm.level = 3;
+			r.manualReload( 9, true );
+			assertTrue( r.round() >= r.maxRound() );
+			assertEquals( 1.9f, calm.rangedDamageModifier(), 0.001f );
+			assertTrue( calm.sureHit( null ) );
+			r.useRound();
+			assertEquals( 1f, calm.rangedDamageModifier(), 0.001f );
+			assertFalse( calm.sureHit( null ) );
+
+			//Last Round: only when one round is left
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill last = sk.fourthSkills.get( 4 );
+			last.level = 3;
+			assertEquals( 1f, last.rangedDamageModifier(), 0.001f );
+			while (r.round() > 1) r.useRound();
+			assertEquals( 5f, last.rangedDamageModifier(), 0.001f );
+			assertTrue( last.sureHit( null ) );
+
+			//Double Barrel: 4th, 3rd, 2nd shot
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill dbl = sk.passiveBSkills.get( 4 );
+			dbl.level = 3;
+			int twice = 0;
+			for (int i = 0; i < 100; i++) if (dbl.doubleShot()) twice++;
+			assertEquals( 50, twice );
+
+			//Scavenger: kills leave bullets, but only with a firearm in hand
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill scav = sk.passiveBSkills.get( 2 );
+			scav.level = 3;
+			Dungeon.bullet = 0;
+			for (int i = 0; i < 300; i++) scav.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
+			assertTrue( "bullets from kills: " + Dungeon.bullet, Dungeon.bullet > 150 );
+			int got = Dungeon.bullet;
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			for (int i = 0; i < 300; i++) scav.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
+			assertEquals( "no firearm, no bullets", got, Dungeon.bullet );
+
+			//the shot hooks leave other weapons alone
+			calm.level = 3; last.level = 3;
+			assertEquals( 1f, calm.rangedDamageModifier(), 0.001f );
+			assertEquals( 1f, last.rangedDamageModifier(), 0.001f );
+			assertEquals( 1f, sk.passiveASkills.get( 0 ).toHitModifier(), 0.001f );
+		} finally {
+			h.heroClass = keepClass;
+			h.heroSkills = keepSkills;
+			h.belongings.weapon = keepWeapon;
+			Dungeon.bullet = keepBullet;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

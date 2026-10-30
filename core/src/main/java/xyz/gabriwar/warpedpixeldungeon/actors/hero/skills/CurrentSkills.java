@@ -222,7 +222,7 @@ public class CurrentSkills {
 				break;
 			}
 
-			case DUELIST: case GUNSLINGER: {
+			case DUELIST: {
 				Skill finesse = new FinesseGrip(), brutal = new BrutalGrip();
 				Skill pirouette = new Pirouette(), bind = new BladeBind();
 				branchPA = new DuelistPassiveA();
@@ -235,6 +235,22 @@ public class CurrentSkills {
 				setBranch(fourthSkills, new Sidestep(), new Fleche(), new CounterTime(), pirouette, bind);
 				linkExclusive(finesse, brutal);
 				linkExclusive(pirouette, bind);
+				break;
+			}
+
+			case GUNSLINGER: {
+				Skill doubleBarrel = new DoubleBarrel(), longBarrel = new LongBarrel();
+				Skill bulletTime = new BulletTime(), lastRound = new LastRound();
+				branchPA = new GunslingerPassiveA();
+				setBranch(passiveASkills, new SteadyAim(), new QuickHands(), new DeepPockets(), new DeadCalm());
+				branchPB = new GunslingerPassiveB();
+				setBranch(passiveBSkills, new HipFire(), new RollWithIt(), new Scavenger(), new PistolWhip(), doubleBarrel, longBarrel);
+				branchA = new GunslingerActive();
+				setBranch(activeSkills, new SnapShot(), new Ricochet(), new SuppressFire(), new CalledShot(), new Flashbang());
+				branchD = new GunslingerFourth();
+				setBranch(fourthSkills, new FanTheHammer(), new DeadEye(), new QuickDraw(), bulletTime, lastRound);
+				linkExclusive(doubleBarrel, longBarrel);
+				linkExclusive(bulletTime, lastRound);
 				break;
 			}
 
@@ -364,11 +380,17 @@ public class CurrentSkills {
 			case WARDEN:
 				Collections.addAll(skills, new Thorns(), new Symbiosis(), new WildCall());
 				break;
-			case CHAMPION: case OUTLAW:
+			case CHAMPION:
 				Collections.addAll(skills, new Banner(), new SecondWind(), new Challenge());
 				break;
-			case MONK: case DEMOLITIONIST:
+			case MONK:
 				Collections.addAll(skills, new PressurePoint(), new InnerPeace(), new DragonKick());
+				break;
+			case OUTLAW:
+				Collections.addAll(skills, new DoubleTap(), new LuckyStreak(), new DeadMansHand());
+				break;
+			case DEMOLITIONIST:
+				Collections.addAll(skills, new BlastRounds(), new ClusterShot(), new Shrapnel());
 				break;
 			case PRIEST:
 				Collections.addAll(skills, new Litany(), new MassHeal(), new Purify());

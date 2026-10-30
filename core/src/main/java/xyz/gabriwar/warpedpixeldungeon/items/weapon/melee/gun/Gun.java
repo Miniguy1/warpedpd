@@ -391,6 +391,7 @@ public class Gun extends MeleeWeapon {
 		int amount = max_round;
 
 		amount = this.magazineMod.magazineFactor(amount);
+    amount += xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.magazineBonus();   //Deep Pockets
 
 		return amount;
 	}
@@ -409,6 +410,7 @@ public class Gun extends MeleeWeapon {
 		amount = this.magazineMod.reloadTimeFactor(amount);
 
 		amount = Math.max(0, amount);
+    amount *= xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.reloadFactor();   //Quick Hands and a Long Barrel
 		return amount;
 	}
 
@@ -735,6 +737,7 @@ public class Gun extends MeleeWeapon {
 		@Override
 		public float delayFactor(Char user) {
 			float speed = Gun.this.delayFactor(user) * shootingSpeed;
+      speed *= xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.shotDelay;   //a snapped shot
 			return speed;
 		}
 
@@ -758,7 +761,7 @@ public class Gun extends MeleeWeapon {
 
 		@Override
 		protected float adjacentAccFactor(Char owner, Char target) {
-			return adjacentShootingAccuracy;
+			return xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.hipFire() ? adjacentShootingAccuracy * 1.25f : adjacentShootingAccuracy;   //Hip Fire
 		}
 
 		@Override
