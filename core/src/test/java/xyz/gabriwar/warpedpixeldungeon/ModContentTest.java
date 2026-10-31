@@ -2334,7 +2334,8 @@ public class ModContentTest {
 			//the shape of the tree
 			assertEquals( 4, sk.passiveASkills.size() );
 			assertEquals( 6, sk.passiveBSkills.size() );
-			assertEquals( 5, sk.activeSkills.size() );
+			assertEquals( 6, sk.activeSkills.size() );
+			assertTrue( "Bullseye is the first of Trick Shots", sk.activeSkills.get( 0 ) instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Bullseye );
 			assertEquals( 5, sk.fourthSkills.size() );
 			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.passiveBSkills) if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DoubleBarrel) assertTrue( s.exclusiveWith instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.LongBarrel );
 			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.fourthSkills) if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BulletTime) assertTrue( s.exclusiveWith instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.LastRound );
@@ -2885,6 +2886,57 @@ public class ModContentTest {
 			assertEquals( "a sword asks the same of everyone", new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Longsword().STRReq( 0 ), swordNow );
 		} finally {
 			h.heroClass = keep;
+		}
+	}
+
+	@Test
+	public void bullseyeNeverMissesFromTheFirstPoint() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		try {
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			h.heroSkills = sk;
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Bullseye b = (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Bullseye) sk.activeSkills.get( 0 );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			//not called yet: nothing
+			b.level = 1;
+			assertFalse( b.sureHit( rat ) );
+			assertEquals( 1f, b.rangedDamageModifier(), 0.001f );
+			//called at the very first point: it cannot miss, and it hits 25% harder
+			b.arm();
+			assertTrue( "a guaranteed hit at level 1", b.sureHit( rat ) );
+			assertEquals( 1.25f, b.rangedDamageModifier(), 0.001f );
+			assertFalse( "armor only at level 3", b.ignoresArmor( rat ) );
+			//it is one shot: the hit uses it up
+			assertEquals( 100, b.onHitProc( rat, 100, true ) );
+			assertFalse( b.sureHit( rat ) );
+			assertEquals( 1f, b.rangedDamageModifier(), 0.001f );
+			//the higher levels
+			b.level = 2; b.arm();
+			assertEquals( 1.5f, b.rangedDamageModifier(), 0.001f );
+			assertFalse( b.ignoresArmor( rat ) );
+			b.level = 3; b.arm();
+			assertEquals( 1.75f, b.rangedDamageModifier(), 0.001f );
+			assertTrue( b.ignoresArmor( rat ) );
+			//a melee blow does not use it up
+			b.onHitProc( rat, 100, false );
+			assertTrue( b.sureHit( rat ) );
+			b.onHeroAttackMiss( rat, true );
+			assertFalse( "and it is gone if the shot is somehow lost", b.sureHit( rat ) );
+			//with no point in it, it does nothing at all
+			b.level = 0; b.arm();
+			assertFalse( b.sureHit( rat ) );
+			//its cost: 5 mana at level 1
+			b.level = 1;
+			assertEquals( 5, b.getManaCost() );
+		} finally {
+			h.heroClass = keepClass;
+			h.heroSkills = keepSkills;
+			h.belongings.weapon = keepWeapon;
 		}
 	}
 

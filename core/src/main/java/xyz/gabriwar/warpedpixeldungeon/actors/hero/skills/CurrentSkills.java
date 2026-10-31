@@ -246,7 +246,7 @@ public class CurrentSkills {
 				branchPB = new GunslingerPassiveB();
 				setBranch(passiveBSkills, new HipFire(), new RollWithIt(), new Scavenger(), new PistolWhip(), doubleBarrel, longBarrel);
 				branchA = new GunslingerActive();
-				setBranch(activeSkills, new SnapShot(), new Ricochet(), new SuppressFire(), new CalledShot(), new Flashbang());
+				setBranch(activeSkills, new Bullseye(), new SnapShot(), new Ricochet(), new SuppressFire(), new CalledShot(), new Flashbang());
 				branchD = new GunslingerFourth();
 				setBranch(fourthSkills, new FanTheHammer(), new DeadEye(), new QuickDraw(), bulletTime, lastRound);
 				linkExclusive(doubleBarrel, longBarrel);
