@@ -84,7 +84,7 @@ public class RubblePile extends NPC {
 	}
 
 	/** the rubble is gone: a stash on its cell, and the rats that nested behind it */
-	public void clear() {
+	public void uncover() {
 		Level level = Dungeon.level;
 		int cell = pos;
 		leave();
@@ -104,7 +104,7 @@ public class RubblePile extends NPC {
 		boolean done = dig();
 		((Hero) c).spend( 1f );
 		((Hero) c).busy();
-		if (done) clear();
+		if (done) uncover();
 		else GLog.i( Messages.get( this, "digging", dug, TURNS ) );
 		return true;
 	}

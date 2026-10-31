@@ -3199,7 +3199,7 @@ public class ModContentTest {
 			int rats0 = 0;
 			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat) rats0++;
 			int cell = pile.pos;
-			pile.clear();
+			pile.uncover();
 			xyz.gabriwar.warpedpixeldungeon.items.Heap stash = level.heaps.get( cell );
 			assertNotNull( "a stash where the rubble was", stash );
 			boolean gold = false, bandage = false;
