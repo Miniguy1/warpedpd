@@ -88,4 +88,11 @@ public class AmuletOfRenewal extends Item {
 			return true;
 		}
 	}
+
+	/** a set piece is worth gold like any other gear (it never was, so no shop would take it): 30 at tier 6, up to 60 at tier 9 */
+	@Override
+	public int value() {
+		int t = xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( this );
+		return t > 0 ? 20 + 10 * (Math.max( 5, t ) - 5) : 0;
+	}
 }
