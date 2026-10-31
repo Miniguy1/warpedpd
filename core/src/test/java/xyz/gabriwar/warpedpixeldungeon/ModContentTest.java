@@ -3161,7 +3161,7 @@ public class ModContentTest {
 			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp) campOnLevel = (xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp) m;
 			assertNotNull( "the camp is on the level", campOnLevel );
 			boolean supplies = false;
-			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll && hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST) supplies = true;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll && hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST) supplies = true;
 			assertTrue( "a supply chest with a bandage roll", supplies );
 			//the fire heals once, fully, and ends the bleeding
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp camp = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp();
@@ -3203,7 +3203,7 @@ public class ModContentTest {
 			xyz.gabriwar.warpedpixeldungeon.items.Heap stash = level.heaps.get( cell );
 			assertNotNull( "a stash where the rubble was", stash );
 			boolean gold = false, bandage = false;
-			for (Item it : stash.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandage = true; }
+			for (Item it : stash.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandage = true; }
 			assertTrue( gold && bandage );
 			int rats1 = 0;
 			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat) rats1++;
@@ -3217,7 +3217,7 @@ public class ModContentTest {
 			assertNotNull( chest );
 			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST, chest.type );
 			boolean stone = false, flares = false;
-			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SmokeFlare && it.quantity() == 2) flares = true; }
+			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() == 2) flares = true; }
 			assertTrue( "a whetstone and two smoke flares in the chest", stone && flares );
 			int before = level.mobs.size();
 			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
@@ -3243,7 +3243,7 @@ public class ModContentTest {
 			assertFalse( "paid once", pr.receive( h ) );
 			java.util.ArrayList<Item> pay = pr.payout();
 			boolean weapon = false; int bandages = 0;
-			for (Item it : pay) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.Weapon && it.isIdentified()) weapon = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandages += it.quantity(); }
+			for (Item it : pay) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.Weapon && it.isIdentified()) weapon = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandages += it.quantity(); }
 			assertTrue( "an identified weapon", weapon );
 			assertEquals( "and two bandage rolls", 2, bandages );
 			com.watabou.utils.Bundle pb = new com.watabou.utils.Bundle();
@@ -3264,7 +3264,7 @@ public class ModContentTest {
 			assertTrue( "enemies stand over him: " + hostile, hostile >= 1 );
 			assertFalse( adv.rewarded() );
 			boolean flare2 = false, bandage1 = false; int finds = 0;
-			for (Item it : adv.payout()) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SmokeFlare && it.quantity() == 2) flare2 = true; else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandage1 = true; else finds++; }
+			for (Item it : adv.payout()) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() == 2) flare2 = true; else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandage1 = true; else finds++; }
 			assertTrue( "two smoke flares and a bandage", flare2 && bandage1 );
 			assertEquals( "and two random finds", 2, finds );
 
