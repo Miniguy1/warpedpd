@@ -1,0 +1,102 @@
+> Task :core:compileTestJava FAILED
+-----
+24-
+25-> Task :core:compileTestJava
+26:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3707: error: allSkills has private access in CurrentSkills
+27-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) {
+28-					                                                                    ^
+29:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3715: error: allSkills has private access in CurrentSkills
+30-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
+31-					                                                                    ^
+32:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3723: error: allSkills has private access in CurrentSkills
+33-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) was.add( s );
+34-					                                                                    ^
+35:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3724: error: allSkills has private access in CurrentSkills
+36-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : back.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) now.add( s );
+37-					                                                                      ^
+38:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3759: error: allSkills has private access in CurrentSkills
+39-			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 3;
+40-			                                                                    ^
+41-Note: Some input files use or override a deprecated API.
+42-Note: Recompile with -Xlint:deprecation for details.
+43-Note: Some input files use unchecked or unsafe operations.
+44-Note: Recompile with -Xlint:unchecked for details.
+45-5 errors
+46-
+--
+52-FAILURE: Build failed with an exception.
+53-
+54:* What went wrong:
+55-Execution failed for task ':core:compileTestJava'.
+56-> Compilation failed; see the compiler output below.
+57-  Note: Recompile with -Xlint:deprecation for details.
+58:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3707: error: allSkills has private access in CurrentSkills
+59-  					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) {
+60-  					                                                                    ^
+61:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3715: error: allSkills has private access in CurrentSkills
+62-  					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
+63-  					                                                                    ^
+64:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3723: error: allSkills has private access in CurrentSkills
+65-  					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) was.add( s );
+66-  					                                                                    ^
+67:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3724: error: allSkills has private access in CurrentSkills
+68-  					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : back.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) now.add( s );
+69-  					                                                                      ^
+70:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3759: error: allSkills has private access in CurrentSkills
+71-  			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 3;
+72-  			                                                                    ^
+73-  Note: Recompile with -Xlint:unchecked for details.
+74-  Note: Some input files use or override a deprecated API.
+75-  Note: Some input files use unchecked or unsafe operations.
+76-  5 errors
+77-
+78-* Try:
+--
+148-Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
+149-Note: Recompile with -Xlint:deprecation for details.
+150:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3707: error: allSkills has private access in CurrentSkills
+151-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) {
+152-					                                                                    ^
+153:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:3715: error: allSkills has private access in CurrentSkills
+154-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
+155-					                                                                    ^
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 61 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 41s
+6 actionable tasks: 6 executed
