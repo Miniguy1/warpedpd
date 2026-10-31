@@ -396,7 +396,9 @@ public class MagesStaff extends MeleeWeapon {
 
 	@Override
 	public int value() {
-		return 0;
+		//the Mage's own staff is never sold, but the new staffs are gear like any other: 35 at tier 5, up to 95 at tier 9
+		int t = xyz.gabriwar.warpedpixeldungeon.items.GearSets.gearTier( this );
+		return t >= 5 ? 35 + 15 * (t - 5) : 0;
 	}
 	
 	@Override

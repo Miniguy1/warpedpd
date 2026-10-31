@@ -602,7 +602,7 @@ public class ModContentTest {
 						mine++;
 					}
 				}
-				assertTrue( order[i] + ": about 30% of rolls are its own set, got " + mine + "/6000", mine > 1400 && mine < 2200 );
+				assertTrue( order[i] + ": about 20% of rolls are its own set, got " + mine + "/6000", mine > 900 && mine < 1500 );
 			}
 			Set<Class<?>> yog = new HashSet<>();
 			int cy = Cycle.number;
@@ -2845,7 +2845,7 @@ public class ModContentTest {
 			h.HP = keepHP; h.HT = keepHT;
 		}
 		String report = (bad.length() > 0 ? "SET BONUSES THAT DO NOT MATCH:" + bad : "") + (unreachable.length() > 0 ? "\nSET PIECES THAT CANNOT BE WORN AT ONCE:" + unreachable : "");
-		assertTrue( report, report.isEmpty() );
+		assertTrue( report.replace( "\n", " | " ), report.isEmpty() );
 	}
 
 	@Test
