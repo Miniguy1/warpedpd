@@ -89,6 +89,13 @@ public final class GunSkills {
 		return Random.NormalIntRange( g.bulletMin(), Math.max( g.bulletMin(), g.bulletMax() ) );
 	}
 
+	/** the Gunslinger knows firearms: they ask for 2 less Strength than they ask of anyone else (a new hero has 10, and the
+	 *  revolver, a tier 2 gun, asks 12) */
+	public static int strengthDiscount(){
+		Hero h = Dungeon.hero;
+		return h != null && h.heroClass == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ? 2 : 0;
+	}
+
 	/** a firearm in hand with a round in it, else a word to the player and null */
 	public static Gun needLoaded(){
 		Gun g = gun();

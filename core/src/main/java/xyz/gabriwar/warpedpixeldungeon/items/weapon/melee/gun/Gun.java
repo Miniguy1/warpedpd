@@ -444,6 +444,7 @@ public class Gun extends MeleeWeapon {
 			req -= 2;
 		}
 		req -= xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.strReqBonus( this );
+		req -= xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.strengthDiscount();   //the Gunslinger knows firearms
 		return req;
 	}
 

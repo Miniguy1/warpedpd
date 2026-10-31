@@ -45,6 +45,6 @@ public class GunslingersPeacemaker extends Gun {
 	//a set piece asks for the Strength of its tier
 	@Override
 	public int STRReq( int lvl ) {
-		return GearSets.strengthFor( this, lvl );
+		return Math.max( 8, GearSets.strengthFor( this, lvl ) - xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.strengthDiscount() );
 	}
 }

@@ -2862,6 +2862,31 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void aGunslingerCanHoldTheirFirstGunWithoutPenalty() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keep = h.heroClass;
+		try {
+			//anyone else: a tier 2 gun asks 12
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			assertEquals( 12, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().STRReq( 0 ) );
+			assertEquals( 10, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Derringer().STRReq( 0 ) );
+			int peace = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker().STRReq( 0 );
+			//the Gunslinger: two less, so the gun it starts with asks exactly what a new hero has
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			assertEquals( "the starting revolver", 10, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().STRReq( 0 ) );
+			assertEquals( 8, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Derringer().STRReq( 0 ) );
+			assertEquals( 12, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine().STRReq( 0 ) );
+			assertEquals( 14, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.HuntingRifle().STRReq( 0 ) );
+			assertEquals( "the set gun", peace - 2, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker().STRReq( 0 ) );
+			assertTrue( "a new hero (10 Strength) can hold the starting gun", new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().STRReq( 0 ) <= 10 );
+			//it only applies to firearms
+			assertEquals( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Longsword().STRReq( 0 ), 14 );
+		} finally {
+			h.heroClass = keep;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;
