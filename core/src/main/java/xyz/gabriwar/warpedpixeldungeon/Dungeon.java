@@ -1236,7 +1236,7 @@ public class Dungeon {
 	public static boolean beltNeeded() {
 		//1 bullet belt each floor set, the bulk ammo source for guns and bows
 		//a Gunslinger lives on ammunition: two belts in each set of floors
-		int perSet = hero != null && hero.heroClass == HeroClass.GUNSLINGER ? 2 : 1;
+		int perSet = hero != null && hero.heroClass == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ? 2 : 1;
 		int beltLeftThisSet = perSet - (LimitedDrops.BULLET_BELT.count - perSet * (depth / 5));
 		if (beltLeftThisSet <= 0) return false;
 
