@@ -612,7 +612,7 @@ public class Hero extends Char {
 		heroSkills.restoreSkillsFromBundle(bundle);
 		//a Gunslinger saved before its skills had tags of their own lost the levels of twelve of them (they shared one save
 		//slot) while the points stayed spent: the points left are worked out again from the hero's level
-		if (heroClass == HeroClass.GUNSLINGER && !bundle.contains( "skill_tags_v2" ) && heroSkills.foreignSkills.isEmpty()){
+		if (heroClass == HeroClass.GUNSLINGER && !bundle.contains( "skill_tags_v2" ) && !heroSkills.holdsForeignSkills()){
 			heroSkills.availableSkill = heroSkills.pointsLeft( lvl );
 		}
 		if (MT == 0) MT = 5;

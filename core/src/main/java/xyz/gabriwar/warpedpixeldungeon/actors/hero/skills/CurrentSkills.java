@@ -1010,6 +1010,11 @@ public class CurrentSkills {
 		return b.get(b.size()-1).upgradeCost();
 	}
 
+	/** does the hero hold skills of another calling? (their points are lent, and counted elsewhere) */
+	public boolean holdsForeignSkills(){
+		return !foreignSkills.isEmpty();
+	}
+
 	/** the points a hero of this level has left: everything the level has earned (the starting points, three for each level after the first), less what the skills' levels cost */
 	public int pointsLeft( int heroLevel ){
 		int spent = 0;
