@@ -297,6 +297,7 @@ public class Dungeon {
 		Legacy.store( bundle );
 		BountyBoard.store( bundle );
 		Pacts.store( bundle );
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.store( bundle );
 	}
 
 	public static void restoreAscentState( Bundle bundle ){
@@ -306,6 +307,7 @@ public class Dungeon {
 		Legacy.restore( bundle );
 		BountyBoard.restore( bundle );
 		Pacts.restore( bundle );
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.restore( bundle );
 		if (bundle.contains( ASCENT_REBUILDS )){
 			int[] ra = bundle.getIntArray( ASCENT_REBUILDS );
 			for (int i = 0; i + 1 < ra.length; i += 2) ascentRebuilds.put( ra[i], ra[i + 1] );
@@ -478,6 +480,7 @@ public class Dungeon {
 		Legacy.reset();
 		BountyBoard.reset();
 		Pacts.reset();
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.reset();
 
 		gold = 0;
 		bullet = 0;
@@ -836,6 +839,8 @@ public class Dungeon {
 			}
 			//every block of five floors holds an event, on the way down as well as the climb
 			if (branch == 0) xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.roll( level );
+			//and the early floors have events and visitors of their own, in every run
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.roll( level );
 			//the bosses of a later cycle are mutated
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.assign( level );
 			//the pact of crowded floors, and then the elites
@@ -1132,6 +1137,7 @@ public class Dungeon {
 		//a climb floor's event, the first time the hero is on it
 		xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
 		Pacts.onArrive( level );
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.announce( level );
 		//first steps somewhere new write its pages into the Descent Guide
 		xyz.gabriwar.warpedpixeldungeon.journal.GuideGraph.onArrive( depth, branch );
 

@@ -3112,6 +3112,193 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theEarlyFloorEventsAndVisitorsWork() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepHP = h.HP, keepHT = h.HT, keepMP = h.MP, keepMT = h.MT, keepPos = h.pos;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		boolean pm = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet, am = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet;
+		try {
+			//which floors: 2 to 4 and 6 to 9, in the dungeon proper only
+			for (int d = 1; d <= 11; d++) assertEquals( "floor " + d, d == 2 || d == 3 || d == 4 || (d >= 6 && d <= 9), xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.eligible( 0, d ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.eligible( 1, 3 ) );
+			//each block holds exactly one forced floor, whatever the seed
+			int[] a = new int[3], b = new int[4];
+			for (long seed = 1; seed <= 300; seed++) {
+				int fa = 0, fb = 0, at = -1, bt = -1;
+				for (int d = 1; d <= 11; d++) if (xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.forced( seed, d )) { if (d <= 5) { fa++; at = d; } else { fb++; bt = d; } }
+				assertEquals( 1, fa ); assertEquals( 1, fb );
+				a[at - 2]++; b[bt - 6]++;
+			}
+			for (int n : a) assertTrue( "early block choices " + java.util.Arrays.toString( a ), n > 50 );
+			for (int n : b) assertTrue( "later block choices " + java.util.Arrays.toString( b ), n > 35 );
+
+			//a real level at the forced floor of each block holds an event
+			Cycle.number = 0; Dungeon.branch = 0;
+			for (int block = 0; block < 2; block++) {
+				int forcedFloor = -1;
+				for (int d = block == 0 ? 2 : 6; d <= (block == 0 ? 4 : 9); d++) if (xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.forced( Dungeon.seed, d )) forcedFloor = d;
+				assertTrue( forcedFloor > 0 );
+				Dungeon.generatedLevels.clear();
+				Dungeon.depth = forcedFloor;
+				Level built = Dungeon.newLevel();
+				assertTrue( "floor " + forcedFloor + " holds an event", built.earlyEvent != xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.NONE );
+			}
+
+			//the three events, on a level of their own
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet = true; xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet = true;   //no visitors while the events are built
+			Dungeon.generatedLevels.clear();
+			Dungeon.depth = 3;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+
+			//the camp: a fire to rest at and a chest of supplies beside it
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CAMP );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CAMP, level.earlyEvent );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp campOnLevel = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp) campOnLevel = (xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp) m;
+			assertNotNull( "the camp is on the level", campOnLevel );
+			boolean supplies = false;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll && hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST) supplies = true;
+			assertTrue( "a supply chest with a bandage roll", supplies );
+			//the fire heals once, fully, and ends the bleeding
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp camp = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp();
+			h.HT = 100; h.HP = 5; h.MT = 30; h.MP = 0;
+			assertFalse( camp.used() );
+			assertTrue( camp.rest( h ) );
+			assertEquals( 100, h.HP ); assertEquals( 30, h.MP );
+			h.HP = 5;
+			assertFalse( "never a second time", camp.rest( h ) );
+			assertEquals( 5, h.HP );
+			//the clock only runs once you have rested, and the patrol comes twenty turns later
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp fresh = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp();
+			for (int i = 0; i < 40; i++) fresh.step();
+			assertFalse( "no patrol if nobody rested", fresh.patrolSent() );
+			for (int i = 0; i < xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp.PATROL_AFTER - 1; i++) camp.step();
+			assertFalse( camp.patrolSent() );
+			camp.step();
+			assertTrue( "the patrol arrives", camp.patrolSent() );
+			//and it is all saved
+			com.watabou.utils.Bundle cb = new com.watabou.utils.Bundle();
+			camp.storeInBundle( cb );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp back = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp();
+			back.restoreFromBundle( cb );
+			assertTrue( back.used() ); assertTrue( back.patrolSent() );
+
+			//the cave-in: rubble that does not cut the floor in two, five turns of digging, then a stash and rats
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CAVE_IN );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile pile = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile) pile = (xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile) m;
+			assertNotNull( "the rubble is on the level", pile );
+			assertFalse( "it must not block the way between the stairs", xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.blocksPath( level, pile.pos ) );
+			for (int i = 0; i < xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile.TURNS - 1; i++) assertFalse( pile.dig() );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile.TURNS - 1, pile.dug() );
+			assertTrue( "the last stone", pile.dig() );
+			int rats0 = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat) rats0++;
+			int cell = pile.pos;
+			pile.clear();
+			xyz.gabriwar.warpedpixeldungeon.items.Heap stash = level.heaps.get( cell );
+			assertNotNull( "a stash where the rubble was", stash );
+			boolean gold = false, bandage = false;
+			for (Item it : stash.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandage = true; }
+			assertTrue( gold && bandage );
+			int rats1 = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat) rats1++;
+			assertTrue( "rats behind the rubble: " + rats0 + " -> " + rats1, rats1 >= rats0 + 2 );
+
+			//the rat parade: a chest in the open, and when it is opened, rats from the walls
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.PARADE );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.PARADE, level.earlyEvent );
+			assertTrue( level.paradeChest >= 0 );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap chest = level.heaps.get( level.paradeChest );
+			assertNotNull( chest );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST, chest.type );
+			boolean stone = false, flares = false;
+			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SmokeFlare && it.quantity() == 2) flares = true; }
+			assertTrue( "a whetstone and two smoke flares in the chest", stone && flares );
+			int before = level.mobs.size();
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.onParade( h );
+			assertEquals( "the chest is spent", -1, level.paradeChest );
+			assertTrue( "the rats come: " + before + " -> " + level.mobs.size(), level.mobs.size() >= before + 4 );
+
+			//the Old Prospector: a pickaxe to find, a weapon and bandages to pay
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet = false;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector spawned = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.spawnProspector( level );
+			assertNotNull( spawned );
+			assertTrue( "once a run", xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet );
+			boolean pickaxe = false;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe) pickaxe = true;
+			assertTrue( "his pickaxe lies somewhere on the floor", pickaxe );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pr = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
+			assertFalse( "no pickaxe, no reward", pr.receive( h ) );
+			assertFalse( pr.done() );
+			new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe().collect( h.belongings.backpack );
+			assertTrue( pr.receive( h ) );
+			assertTrue( pr.done() );
+			assertNull( "he takes it back", h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			assertFalse( "paid once", pr.receive( h ) );
+			java.util.ArrayList<Item> pay = pr.payout();
+			boolean weapon = false; int bandages = 0;
+			for (Item it : pay) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.Weapon && it.isIdentified()) weapon = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandages += it.quantity(); }
+			assertTrue( "an identified weapon", weapon );
+			assertEquals( "and two bandage rolls", 2, bandages );
+			com.watabou.utils.Bundle pb = new com.watabou.utils.Bundle();
+			pr.storeInBundle( pb );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pback = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
+			pback.restoreFromBundle( pb );
+			assertTrue( "his thanks are remembered", pback.done() );
+
+			//the Stranded Adventurer: cornered, with enemies at his side
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet = false;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer adv = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.spawnAdventurer( level );
+			assertNotNull( adv );
+			assertTrue( "once a run", xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet );
+			int hostile = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) {
+				if (m != adv && m.alignment == xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ENEMY && Dungeon.level.distance( m.pos, adv.pos ) <= 1) hostile++;
+			}
+			assertTrue( "enemies stand over him: " + hostile, hostile >= 1 );
+			assertFalse( adv.rewarded() );
+			boolean flare2 = false, bandage1 = false; int finds = 0;
+			for (Item it : adv.payout()) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.SmokeFlare && it.quantity() == 2) flare2 = true; else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.BandageRoll) bandage1 = true; else finds++; }
+			assertTrue( "two smoke flares and a bandage", flare2 && bandage1 );
+			assertEquals( "and two random finds", 2, finds );
+
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.HP = keepHP; h.HT = keepHT; h.MP = keepMP; h.MT = keepMT; h.pos = keepPos;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet = pm; xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet = am;
+		}
+	}
+
+	@Test
+	public void theEarlyFloorVisitorsHaveTheirWords() {
+		java.util.ArrayList<xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob> all = new java.util.ArrayList<>();
+		all.add( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp() ); all.add( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile() );
+		all.add( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector() ); all.add( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer() );
+		for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : all) {
+			String who = m.getClass().getSimpleName();
+			assertFalse( who + " name", m.name().contains( "!!!" ) );
+			assertFalse( who + " description", m.description().contains( "!!!" ) );
+			assertTrue( who + " is a character you can walk up to", m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.NPC );
+			int hp = m.HP;
+			m.damage( 500, null );
+			assertEquals( who + " cannot be hurt", hp, m.HP );
+			assertTrue( who + " stays through a level reset", m.reset() );
+		}
+		assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe().name().contains( "!!!" ) );
+		assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe().desc().contains( "!!!" ) );
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

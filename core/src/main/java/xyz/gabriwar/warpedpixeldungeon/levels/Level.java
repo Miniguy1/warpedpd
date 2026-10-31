@@ -255,6 +255,9 @@ public abstract class Level implements Bundlable {
 	private static final String CLIMB_EVENT = "climbEvent";
 	private static final String CLIMB_ANNOUNCED = "climbEventAnnounced";
 	private static final String CURSED_CHEST = "cursedChest";
+	private static final String EARLY_EVENT = "earlyEvent";
+	private static final String EARLY_ANNOUNCED = "earlyAnnounced";
+	private static final String PARADE_CHEST = "paradeChest";
 	private static final String CLEARED     = "cleared";
 	private static final String SEALEDLEVEL = "sealedlevel";
 	private static final String HEAPS		= "heaps";
@@ -505,6 +508,9 @@ public abstract class Level implements Bundlable {
 		climbEvent = bundle.getInt( CLIMB_EVENT );
 		climbEventAnnounced = bundle.getBoolean( CLIMB_ANNOUNCED );
 		cursedChest = bundle.contains( CURSED_CHEST ) ? bundle.getInt( CURSED_CHEST ) : -1;
+		earlyEvent = bundle.getInt( EARLY_EVENT );
+		earlyAnnounced = bundle.getBoolean( EARLY_ANNOUNCED );
+		paradeChest = bundle.contains( PARADE_CHEST ) ? bundle.getInt( PARADE_CHEST ) : -1;
 		cleared     = bundle.getBoolean( CLEARED );
 		sealedlevel = bundle.getBoolean( SEALEDLEVEL );
 
@@ -656,6 +662,9 @@ public abstract class Level implements Bundlable {
 		bundle.put( CLIMB_EVENT, climbEvent );
 		bundle.put( CLIMB_ANNOUNCED, climbEventAnnounced );
 		bundle.put( CURSED_CHEST, cursedChest );
+		bundle.put( EARLY_EVENT, earlyEvent );
+		bundle.put( EARLY_ANNOUNCED, earlyAnnounced );
+		bundle.put( PARADE_CHEST, paradeChest );
 		bundle.put( CLEARED, cleared );
 		bundle.put( SEALEDLEVEL, sealedlevel );
 		bundle.put( HEAPS, heaps.valueList() );
@@ -1136,6 +1145,10 @@ public abstract class Level implements Bundlable {
 	public boolean climbEventAnnounced = false;
 	/** the cell of a cursed chest (ClimbEvents.CURSED_CHEST), -1 for none */
 	public int cursedChest = -1;
+	/** an early-floor event (levels/EarlyEvents): which one, whether the hero has been told, and the rat parade's chest */
+	public int earlyEvent = 0;
+	public boolean earlyAnnounced = false;
+	public int paradeChest = -1;
 
 	public int randomRespawnCell( Char ch ) {
 		int cell;

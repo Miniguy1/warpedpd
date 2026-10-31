@@ -961,6 +961,7 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.items.rings.AscendedDuelistsSignet.class,
         xyz.gabriwar.warpedpixeldungeon.items.AscendedDuelistsGlove.class,
         xyz.gabriwar.warpedpixeldungeon.items.AscendedDuelistsMedal.class,
+        xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class,
         xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll.class,
         xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.class,
         xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare.class,

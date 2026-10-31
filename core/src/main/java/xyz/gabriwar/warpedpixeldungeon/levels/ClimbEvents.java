@@ -165,6 +165,7 @@ public final class ClimbEvents {
 	/** the cursed chest is opened: the floor wakes and comes for the hero */
 	public static void onChestOpened( xyz.gabriwar.warpedpixeldungeon.items.Heap heap, xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero ){
 		Level lv = Dungeon.level;
+		if (lv != null && heap != null && lv.paradeChest == heap.pos){ EarlyEvents.onParade( hero ); return; }
 		if (lv == null || heap == null || lv.cursedChest != heap.pos) return;
 		lv.cursedChest = -1;
 		GLog.n( "The chest was cursed! The floor wakes around you." );
