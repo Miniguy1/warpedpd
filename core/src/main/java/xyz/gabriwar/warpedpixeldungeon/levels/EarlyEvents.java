@@ -186,6 +186,21 @@ public final class EarlyEvents {
 		return npc;
 	}
 
+	/** An NPC's own code failed: say what and where in the game log (instead of closing the game), so the cause can be read off it. Returns the line. */
+	public static String report( Mob who, Throwable t ) {
+		StackTraceElement[] st = t.getStackTrace();
+		StringBuilder at = new StringBuilder();
+		for (int i = 0; i < Math.min( 3, st.length ); i++) {
+			if (i > 0) at.append( " < " );
+			at.append( st[i].getClassName().replaceAll( ".*\\.", "" ) ).append( '.' ).append( st[i].getMethodName() ).append( ':' ).append( st[i].getLineNumber() );
+		}
+		String text = (who == null ? "NPC" : who.getClass().getSimpleName()) + " trouble: " + t.getClass().getSimpleName()
+				+ (t.getMessage() == null ? "" : " (" + t.getMessage() + ")") + " at " + at;
+		try { xyz.gabriwar.warpedpixeldungeon.utils.GLog.n( text ); } catch (Throwable ignored) {}
+		try { com.watabou.noosa.Game.reportException( t ); } catch (Throwable ignored) {}
+		return text;
+	}
+
 	/** a reward is handed over at the hero's feet (and beside them when there are several), never as a string of pickups that each spend the hero's turn */
 	public static void give( Hero hero, java.util.List<xyz.gabriwar.warpedpixeldungeon.items.Item> items ) {
 		Level level = Dungeon.level;

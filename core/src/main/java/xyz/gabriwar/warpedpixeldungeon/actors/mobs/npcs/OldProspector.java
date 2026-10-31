@@ -64,7 +64,13 @@ public class OldProspector extends NPC {
 	}
 
 	protected void say( String text ) {
-		if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+		//the words are always in the log, whatever the window does
+    xyz.gabriwar.warpedpixeldungeon.utils.GLog.i( text );
+    try {
+      if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+    }
 	}
 
 	protected void leave() {
@@ -123,6 +129,16 @@ public class OldProspector extends NPC {
 
   @Override
   protected boolean act() {
+    try {
+      return actBody();
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      spend( TICK );
+      return true;
+    }
+  }
+
+  private boolean actBody() {
     if (isAlive() && tryAutoTurnIn( Dungeon.hero )) {
       spend( TICK );
       return true;
@@ -132,6 +148,15 @@ public class OldProspector extends NPC {
 
   @Override
   public boolean interact( Char c ) {
+    try {
+      return interactBody( c );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      return true;
+    }
+  }
+
+  private boolean interactBody( Char c ) {
     if (c != Dungeon.hero) return true;
     Hero hero = (Hero) c;
     if (done) {

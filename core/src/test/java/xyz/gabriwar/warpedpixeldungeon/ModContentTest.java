@@ -3765,6 +3765,22 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void anNpcFailureBecomesALogLineNotACrash() {
+		String line = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer(), new IllegalStateException( "boom" ) );
+		assertTrue( line, line.contains( "StrandedAdventurer trouble" ) );
+		assertTrue( line, line.contains( "IllegalStateException" ) );
+		assertTrue( line, line.contains( "boom" ) );
+		assertTrue( "it says where", line.contains( " at " ) && line.contains( "anNpcFailureBecomesALogLineNotACrash" ) );
+		String none = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( null, new RuntimeException() );
+		assertTrue( none, none.startsWith( "NPC trouble" ) );
+		//the four are all still ordinary interactive NPCs, and an interaction with nobody does nothing
+		Hero h = Dungeon.hero;
+		for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob[]{ new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector(), new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer(), new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.AbandonedCamp(), new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile() }) {
+			assertTrue( m.getClass().getSimpleName(), m.interact( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() ) );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

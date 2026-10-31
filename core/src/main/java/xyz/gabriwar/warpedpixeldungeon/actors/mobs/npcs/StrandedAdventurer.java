@@ -63,7 +63,13 @@ public class StrandedAdventurer extends NPC {
 	}
 
 	protected void say( String text ) {
-		if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+		//the words are always in the log, whatever the window does
+    xyz.gabriwar.warpedpixeldungeon.utils.GLog.i( text );
+    try {
+      if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+    }
 	}
 
 	protected void leave() {
@@ -85,11 +91,22 @@ public class StrandedAdventurer extends NPC {
 		return false;
 	}
 
+  /** a random find; if one cannot be made, gold stands in for it */
+  private Item safeFind() {
+    try {
+      Item it = Generator.random();
+      if (it != null) return it;
+    } catch (RuntimeException e) {
+      //fall through to the gold
+    }
+    return new xyz.gabriwar.warpedpixeldungeon.items.Gold( 30 + 10 * Math.max( 1, Dungeon.depth ) );
+  }
+
 	/** the reward: two random finds, two smoke flares and a bandage */
 	public ArrayList<Item> payout() {
 		ArrayList<Item> out = new ArrayList<>();
-		out.add( Generator.random() );
-		out.add( Generator.random() );
+		out.add( safeFind() );
+		out.add( safeFind() );
 		out.add( new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare().quantity( 2 ) );
 		out.add( new BandageRoll() );
 		return out;
@@ -107,6 +124,16 @@ public class StrandedAdventurer extends NPC {
 
   @Override
   protected boolean act() {
+    try {
+      return actBody();
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      spend( TICK );
+      return true;
+    }
+  }
+
+  private boolean actBody() {
     Hero h = Dungeon.hero;
     if (isAlive() && !rewarded && h != null && h.isAlive() && Dungeon.level != null
         && Dungeon.level.distance( pos, h.pos ) <= 2 && thank( h )) {
@@ -118,6 +145,15 @@ public class StrandedAdventurer extends NPC {
 
   @Override
   public boolean interact( Char c ) {
+    try {
+      return interactBody( c );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      return true;
+    }
+  }
+
+  private boolean interactBody( Char c ) {
     if (c != Dungeon.hero) return true;
     Hero hero = (Hero) c;
     if (rewarded) return true;

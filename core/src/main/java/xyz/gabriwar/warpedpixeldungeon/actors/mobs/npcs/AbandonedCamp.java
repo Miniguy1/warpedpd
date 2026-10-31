@@ -68,7 +68,13 @@ public class AbandonedCamp extends NPC {
 	}
 
 	protected void say( String text ) {
-		if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+		//the words are always in the log, whatever the window does
+    xyz.gabriwar.warpedpixeldungeon.utils.GLog.i( text );
+    try {
+      if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+    }
 	}
 
 	protected void leave() {
@@ -104,14 +110,33 @@ public class AbandonedCamp extends NPC {
 	}
 
 	@Override
-	protected boolean act() {
+  protected boolean act() {
+    try {
+      return actBody();
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      spend( TICK );
+      return true;
+    }
+  }
+
+  private boolean actBody() {
 		step();
 		spend( TICK );
 		return true;
 	}
 
 	@Override
-	public boolean interact( Char c ) {
+  public boolean interact( Char c ) {
+    try {
+      return interactBody( c );
+    } catch (Throwable t) {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
+      return true;
+    }
+  }
+
+  private boolean interactBody( Char c ) {
 		if (c != Dungeon.hero) return true;
 		if (rest( (Hero) c )) {
 			((Hero) c).spend( 10f );
