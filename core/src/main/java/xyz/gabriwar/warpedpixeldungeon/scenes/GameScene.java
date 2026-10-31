@@ -2904,7 +2904,7 @@ public class GameScene extends PixelScene {
 	
 	public static boolean cancelCellSelector() {
 		if (cellSelector.listener != null && cellSelector.listener != defaultCellListener) {
-			cellSelector.resetKeyHold();
+			if (cellSelector != null) cellSelector.resetKeyHold();
 			cellSelector.cancel();
 			return true;
 		} else {
@@ -2968,7 +2968,7 @@ public class GameScene extends PixelScene {
 	}
 
 	public static boolean cancel() {
-		cellSelector.resetKeyHold();
+		if (cellSelector != null) cellSelector.resetKeyHold();
 		if (Dungeon.hero != null && (Dungeon.hero.curAction != null || Dungeon.hero.resting)) {
 			
 			Dungeon.hero.curAction = null;
@@ -2998,7 +2998,7 @@ public class GameScene extends PixelScene {
 	}
 	
 	public static void resetKeyHold(){
-		cellSelector.resetKeyHold();
+		if (cellSelector != null) cellSelector.resetKeyHold();
 	}
 
 	public static void examineCell( Integer cell ) {
