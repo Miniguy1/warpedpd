@@ -48,6 +48,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -3637,7 +3638,13 @@ public class ModContentTest {
 
 			//or give it from the pack
 			xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe second = new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe();
-			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE, second.defaultAction );
+			try {
+				java.lang.reflect.Field da = xyz.gabriwar.warpedpixeldungeon.items.Item.class.getDeclaredField( "defaultAction" );
+				da.setAccessible( true );
+				assertEquals( "tapping the pickaxe gives it", xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE, da.get( second ) );
+			} catch (ReflectiveOperationException e) {
+				fail( "defaultAction not readable: " + e );
+			}
 			assertTrue( second.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE ) );
 			second.collect( h.belongings.backpack );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pr2 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
