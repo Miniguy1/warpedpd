@@ -3686,6 +3686,85 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void everySkillTreeKeepsItsLevelsThroughASave() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass keepSub = h.subClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		StringBuilder bad = new StringBuilder();
+		try {
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass cls : xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values()) {
+				for (xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass sub : cls.subClasses()) {
+					h.heroClass = cls;
+					h.subClass = sub;
+					xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+					sk.init( h );
+					sk.initSubclassBranch( h );
+					h.heroSkills = sk;
+					String who = cls + "/" + sub;
+					java.util.Set<String> tags = new java.util.HashSet<>();
+					int n = 0;
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) {
+						if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill) continue;
+						n++;
+						if (s.tag.isEmpty()) bad.append( "\n  " ).append( who ).append( ": " ).append( s.getClass().getSimpleName() ).append( " has no tag" );
+						else if (!tags.add( s.tag )) bad.append( "\n  " ).append( who ).append( ": " ).append( s.getClass().getSimpleName() ).append( " shares the tag " ).append( s.tag );
+					}
+					//give every skill a level of its own, save, and load into a fresh tree
+					int k = 0;
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
+					com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+					sk.storeInBundle( b );
+					xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills back = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+					back.init( h );
+					back.initSubclassBranch( h );
+					back.restoreSkillsFromBundle( b );
+					java.util.ArrayList<xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill> was = new java.util.ArrayList<>(), now = new java.util.ArrayList<>();
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) was.add( s );
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : back.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) now.add( s );
+					if (was.size() != now.size()) { bad.append( "\n  " ).append( who ).append( ": " ).append( was.size() ).append( " skills became " ).append( now.size() ); continue; }
+					for (int i = 0; i < was.size(); i++) {
+						if (was.get( i ).level != now.get( i ).level) bad.append( "\n  " ).append( who ).append( ": " ).append( was.get( i ).getClass().getSimpleName() ).append( " went from " ).append( was.get( i ).level ).append( " to " ).append( now.get( i ).level );
+					}
+				}
+			}
+		} finally {
+			h.heroClass = keepClass;
+			h.subClass = keepSub;
+			h.heroSkills = keepSkills;
+		}
+		assertTrue( ( "SKILLS THAT DO NOT SURVIVE A SAVE:" + bad ).replace( "\n", " | " ), bad.length() == 0 );
+	}
+
+	@Test
+	public void theGunslingersSkillPointsAreWorkedOutFromItsLevel() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		try {
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			h.heroSkills = sk;
+			int start = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill.STARTING_SKILL;
+			assertEquals( "nothing spent at level 1", start, sk.pointsLeft( 1 ) );
+			assertEquals( "three more for each level", start + 12, sk.pointsLeft( 5 ) );
+			//Bullseye (tier 1) at level 2 costs 2, Dead Eye (tier 2) at level 1 costs 2
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill bull = sk.activeSkills.get( 0 );
+			assertTrue( bull instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Bullseye );
+			bull.level = 2;
+			assertEquals( start + 12 - 2, sk.pointsLeft( 5 ) );
+			assertEquals( 0, new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ).pointsLeft( 1 ) - new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ).pointsLeft( 1 ) );
+			//never negative
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 3;
+			assertEquals( 0, sk.pointsLeft( 1 ) );
+		} finally {
+			h.heroClass = keepClass;
+			h.heroSkills = keepSkills;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

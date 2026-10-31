@@ -50,6 +50,7 @@ public class Flashbang extends Skill {
 		image = 102;
 		mana = 5;
 		tier = 3;
+		tag = "A5";
 	}
 
 	@Override public boolean toggleable(){ return false; }

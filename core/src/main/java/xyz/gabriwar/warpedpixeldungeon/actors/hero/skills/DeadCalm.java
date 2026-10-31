@@ -48,6 +48,7 @@ public class DeadCalm extends Skill {
 		name = "Dead Calm";
 		image = 87;
 		tier = 3;
+		tag = "PA4";
 	}
 
 	@Override

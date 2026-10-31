@@ -48,6 +48,7 @@ public class QuickDraw extends Skill {
 		name = "Quick Draw";
 		image = 107;
 		tier = 3;
+		tag = "D3";
 	}
 
 	@Override

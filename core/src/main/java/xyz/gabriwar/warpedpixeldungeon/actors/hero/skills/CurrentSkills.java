@@ -1010,6 +1010,13 @@ public class CurrentSkills {
 		return b.get(b.size()-1).upgradeCost();
 	}
 
+	/** the points a hero of this level has left: everything the level has earned (the starting points, three for each level after the first), less what the skills' levels cost */
+	public int pointsLeft( int heroLevel ){
+		int spent = 0;
+		for (Skill s : allSkills) if (!(s instanceof BranchSkill)) spent += s.level * s.upgradeCost();
+		return Math.max( 0, Skill.STARTING_SKILL + (heroLevel - 1) * 3 - spent );
+	}
+
 	public void storeInBundle( Bundle bundle ){
 		bundle.put( TYPE, heroClass.name() );
 		for (int i = 0; i < quickslots.length; i++) bundle.put("skill_quickslot_" + i, quickslots[i] == null ? "" : quickslots[i]);

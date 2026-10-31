@@ -48,6 +48,7 @@ public class DoubleBarrel extends Skill {
 		name = "Double Barrel";
 		image = 95;
 		tier = 3;
+		tag = "CA";
 	}
 
 	@Override

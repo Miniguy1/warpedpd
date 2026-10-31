@@ -50,6 +50,7 @@ public class DeadEye extends Skill {
 		image = 105;
 		mana = 5;
 		tier = 2;
+		tag = "D2";
 	}
 
 	@Override public boolean toggleable(){ return false; }

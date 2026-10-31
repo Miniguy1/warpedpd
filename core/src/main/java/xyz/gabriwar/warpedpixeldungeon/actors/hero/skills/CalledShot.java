@@ -50,6 +50,7 @@ public class CalledShot extends Skill {
 		image = 101;
 		mana = 5;
 		tier = 3;
+		tag = "A4";
 	}
 
 	@Override public boolean toggleable(){ return false; }

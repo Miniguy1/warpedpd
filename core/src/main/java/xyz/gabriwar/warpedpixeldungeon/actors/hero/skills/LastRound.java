@@ -48,6 +48,7 @@ public class LastRound extends Skill {
 		name = "Last Round";
 		image = 109;
 		tier = 4;
+		tag = "CD";
 	}
 
 	@Override

@@ -50,6 +50,7 @@ public class BulletTime extends Skill {
 		image = 108;
 		mana = 8;
 		tier = 4;
+		tag = "CC";
 	}
 
 	@Override public boolean toggleable(){ return false; }

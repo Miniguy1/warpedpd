@@ -48,6 +48,7 @@ public class LongBarrel extends Skill {
 		name = "Long Barrel";
 		image = 97;
 		tier = 3;
+		tag = "CB";
 	}
 
 	@Override

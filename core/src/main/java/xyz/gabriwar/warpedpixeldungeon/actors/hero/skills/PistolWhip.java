@@ -48,6 +48,7 @@ public class PistolWhip extends Skill {
 		name = "Pistol Whip";
 		image = 93;
 		tier = 2;
+		tag = "PB4";
 	}
 
 	@Override

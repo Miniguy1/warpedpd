@@ -534,6 +534,7 @@ public class Hero extends Char {
 		bundle.put(MANATOTAL, MT);
 
 		bundle.put(SKILLS_AVAILABLE, heroSkills.availableSkill);
+		bundle.put( "skill_tags_v2", true );
 		bundle.put("debug_all_skill_paths", debugAllSkillPaths);
 		bundle.put("debug_infinite_health", debugInfiniteHealth);
 		heroSkills.storeInBundle(bundle);
@@ -609,6 +610,11 @@ public class Hero extends Char {
 			heroSkills.initSubclassBranch(this);
 		}
 		heroSkills.restoreSkillsFromBundle(bundle);
+		//a Gunslinger saved before its skills had tags of their own lost the levels of twelve of them (they shared one save
+		//slot) while the points stayed spent: the points left are worked out again from the hero's level
+		if (heroClass == HeroClass.GUNSLINGER && !bundle.contains( "skill_tags_v2" ) && heroSkills.foreignSkills.isEmpty()){
+			heroSkills.availableSkill = heroSkills.pointsLeft( lvl );
+		}
 		if (MT == 0) MT = 5;
 		if (MP > MT) MP = MT;
 

@@ -50,6 +50,7 @@ public class Bullseye extends Skill {
 		image = 96;
 		mana = 3;
 		tier = 1;
+		tag = "A6";
 	}
 
 	/** the level the shot was called at; 0 when no shot is called */

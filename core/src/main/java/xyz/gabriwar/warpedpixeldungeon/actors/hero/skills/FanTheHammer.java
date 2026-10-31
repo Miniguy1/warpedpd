@@ -50,6 +50,7 @@ public class FanTheHammer extends Skill {
 		image = 103;
 		mana = 5;
 		tier = 2;
+		tag = "D1";
 	}
 
 	@Override public boolean toggleable(){ return false; }
