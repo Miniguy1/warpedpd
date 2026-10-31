@@ -3299,6 +3299,103 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void aGunslingerHasTheAmmoAndThePowerForTheEarlyFloors() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		int keepBullet = Dungeon.bullet, keepDepth = Dungeon.depth, keepBelts = Dungeon.LimitedDrops.BULLET_BELT.count;
+		try {
+			//power: a fifth harder than a sword, and each upgrade adds more
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			assertEquals( "revolver max", 18, r.bulletMax() );
+			assertEquals( 2, r.bulletMin() );
+			int avg0 = r.bulletMin() + r.bulletMax();
+			r.upgrade( 3 );
+			assertEquals( 3, r.level() );
+			assertEquals( "+3 revolver max", 30, r.bulletMax() );
+			assertEquals( 5, r.bulletMin() );
+			assertTrue( "each upgrade is worth about 3 average damage", r.bulletMin() + r.bulletMax() - avg0 >= 2 * 3 * 3 / 2 * 2 - 6 );
+			//upgrades add rounds: one every second level
+			assertEquals( 6, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().maxRound() );
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r1 = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver(); r1.upgrade( 1 );
+			assertEquals( 6, r1.maxRound() );
+			assertEquals( "+3 loads one more round", 7, r.maxRound() );
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r4 = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver(); r4.upgrade( 4 );
+			assertEquals( 8, r4.maxRound() );
+			//the other ladder guns too, and the older guns are left alone
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.HuntingRifle rifle = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.HuntingRifle(); rifle.upgrade( 2 );
+			assertEquals( 6, rifle.maxRound() );
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker pm = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker(); pm.upgrade( 2 );
+			assertEquals( 9, pm.maxRound() );
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.LG.LG laser = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.LG.LG(); laser.upgrade( 4 );
+			assertEquals( "an older gun gains no rounds from upgrades", new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.LG.LG().maxRound(), laser.maxRound() );
+
+			//a sidearm: carried, it can be shot and reloaded by a Gunslinger, and only by one
+			r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			h.belongings.backpack.items.add( r );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			assertFalse( r.usable( h ) );
+			assertFalse( r.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Gun.AC_SHOOT ) );
+			assertNull( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.gun() );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			assertTrue( "a Gunslinger can use a carried gun", r.usable( h ) );
+			assertTrue( r.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Gun.AC_SHOOT ) );
+			assertTrue( r.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Gun.AC_RELOAD ) );
+			assertSame( "and its skills count", r, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.gun() );
+			//the best carried gun is the sidearm
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine carbine = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine();
+			h.belongings.backpack.items.add( carbine );
+			assertSame( carbine, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.gun() );
+			//a wielded gun comes first
+			h.belongings.weapon = r;
+			h.belongings.backpack.items.remove( r );
+			assertSame( r, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.gun() );
+			assertTrue( r.usable( h ) );
+			//with nothing to shoot, nothing counts
+			h.belongings.backpack.items.remove( carbine );
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			assertNull( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.gun() );
+
+			//ammunition: a Gunslinger is given two belts in each set of five floors, anyone else one
+			double gun = 0, other = 0; int most = 0, mostOther = 0;
+			for (int trial = 0; trial < 600; trial++) {
+				for (int pass = 0; pass < 2; pass++) {
+					h.heroClass = pass == 0 ? xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER : xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+					Dungeon.LimitedDrops.BULLET_BELT.count = 0;
+					int belts = 0;
+					for (int d = 1; d <= 4; d++) { Dungeon.depth = d; if (Dungeon.beltNeeded()) { Dungeon.LimitedDrops.BULLET_BELT.count++; belts++; } }
+					if (pass == 0) { gun += belts; most = Math.max( most, belts ); } else { other += belts; mostOther = Math.max( mostOther, belts ); }
+				}
+			}
+			assertEquals( "never more than two for a Gunslinger", 2, most );
+			assertEquals( "and never more than one for anyone else", 1, mostOther );
+			assertTrue( "belts in floors 1 to 4: gunslinger " + gun / 600 + ", others " + other / 600, gun / 600 > other / 600 + 0.35 );
+			//the later sets follow the same rule: a Gunslinger who has had four belts by floor 10 is owed none more in that set
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			Dungeon.LimitedDrops.BULLET_BELT.count = 4; Dungeon.depth = 10;
+			assertFalse( Dungeon.beltNeeded() );
+
+			//and kills turn up bullets, about one in eight
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			Dungeon.bullet = 0;
+			for (int i = 0; i < 1000; i++) xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
+			assertTrue( "bullets from 1000 kills: " + Dungeon.bullet, Dungeon.bullet > 130 && Dungeon.bullet < 340 );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			Dungeon.bullet = 0;
+			for (int i = 0; i < 300; i++) xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), true );
+			assertEquals( "nobody else", 0, Dungeon.bullet );
+		} finally {
+			h.heroClass = keepClass;
+			h.belongings.weapon = keepWeapon;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			Dungeon.bullet = keepBullet; Dungeon.depth = keepDepth; Dungeon.LimitedDrops.BULLET_BELT.count = keepBelts;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

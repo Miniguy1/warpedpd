@@ -107,6 +107,8 @@ public final class GunTalents {
 		Hero h = Dungeon.hero;
 		if (h == null || GunSkills.gun() == null) return;
 		lastKill = Actor.now();
+		//a Gunslinger turns up a few bullets now and then, talents or no
+		if (h.heroClass == HeroClass.GUNSLINGER && Random.Float() < 0.12f) Dungeon.bullet += Random.IntRange( 1, 3 );
 		int nerves = pts( Talent.STEEL_NERVES );
 		if (nerves > 0) Buff.affect( h, Barrier.class ).incShield( 3 * nerves );
 		int casings = pts( Talent.SPENT_CASINGS );

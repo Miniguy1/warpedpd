@@ -54,7 +54,20 @@ public final class GunSkills {
 		Hero h = Dungeon.hero;
 		if (h == null || h.belongings == null) return null;
 		Object w = h.belongings.weapon();
-		return w instanceof Gun ? (Gun) w : null;
+		if (w instanceof Gun) return (Gun) w;
+		return sidearm( h );
+	}
+
+	/** a Gunslinger's sidearm: with something else in hand, the best gun carried in the pack still fires, and the skills still count */
+	public static Gun sidearm( Hero h ){
+		if (h == null || h.belongings == null || h.heroClass != xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER) return null;
+		Gun best = null;
+		for (xyz.gabriwar.warpedpixeldungeon.items.Item it : h.belongings.backpack.items){
+			if (!(it instanceof Gun)) continue;
+			Gun g = (Gun) it;
+			if (best == null || g.tier() > best.tier() || (g.tier() == best.tier() && g.level() > best.level())) best = g;
+		}
+		return best;
 	}
 
 	public static int lvl( Class<? extends Skill> cls ){

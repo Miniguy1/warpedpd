@@ -39,12 +39,18 @@ public class GunslingersPeacemaker extends Gun {
 
 	@Override
 	protected int baseBulletMax( int lvl ) {
-		return 5 * (tier() + 1) + lvl * (tier() + 1);
+		return 6 * (tier() + 1) + lvl * (tier() + 2);
 	}
 
 	//a set piece asks for the Strength of its tier
 	@Override
 	public int STRReq( int lvl ) {
 		return Math.max( 8, GearSets.strengthFor( this, lvl ) - xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.strengthDiscount() );
+	}
+
+	//every second upgrade loads another round
+	@Override
+	protected int upgradeRounds() {
+		return Math.max( 0, level() ) / 2;
 	}
 }

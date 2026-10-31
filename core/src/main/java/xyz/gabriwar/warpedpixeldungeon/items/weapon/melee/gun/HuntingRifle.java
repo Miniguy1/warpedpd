@@ -36,9 +36,15 @@ public class HuntingRifle extends Gun {
 		shootingSpeed = 1.25f;
 	}
 
-	//the same damage as a melee weapon of its tier, spent a round at a time
+	//a fifth harder than a melee weapon of its tier (it runs out of bullets), and it grows faster with each upgrade
 	@Override
 	protected int baseBulletMax( int lvl ) {
-		return 5 * (tier() + 1) + lvl * (tier() + 1);
+		return 6 * (tier() + 1) + lvl * (tier() + 2);
+	}
+
+	//every second upgrade loads another round
+	@Override
+	protected int upgradeRounds() {
+		return Math.max( 0, level() ) / 2;
 	}
 }

@@ -247,7 +247,7 @@ public class Gun extends MeleeWeapon {
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
-		if (isEquipped( hero )) {
+		if (usable( hero )) {
 			actions.add(AC_SHOOT);
 			actions.add(AC_RELOAD);
 		}
@@ -259,7 +259,7 @@ public class Gun extends MeleeWeapon {
 		super.execute(hero, action);
 
 		if (action.equals(AC_SHOOT)) {
-			if (!isEquipped( hero )) {
+			if (!usable( hero )) {
 				usesTargeting = false;
 				GLog.w(Messages.get(this, "not_equipped"));
 			} else {
@@ -395,8 +395,19 @@ public class Gun extends MeleeWeapon {
 
 		amount = this.magazineMod.magazineFactor(amount);
     amount += xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.magazineBonus();   //Deep Pockets
+		amount += upgradeRounds();
 
 		return amount;
+	}
+
+	/** rounds a gun gains from being upgraded (none for the older guns; the Gunslinger's ladder gains one every second upgrade) */
+	protected int upgradeRounds() {
+		return 0;
+	}
+
+	/** can this gun be shot and reloaded now? Wielded, or, for a Gunslinger, carried in the pack as a sidearm. */
+	public boolean usable( Hero hero ) {
+		return isEquipped( hero ) || (hero.heroClass == HeroClass.GUNSLINGER && hero.belongings.backpack.contains( this ));
 	}
 
 	public int round() {

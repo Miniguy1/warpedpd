@@ -288,7 +288,10 @@ public enum HeroClass {
 		(hero.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver()).identify();
 		hero.belongings.weapon.activate(hero);
 		//the bullet pool the firearms reload from
-		Dungeon.bullet = 30;
+		Dungeon.bullet = 60;
+		//the early floors are rough: two bandages and a smoke flare to start with
+		new xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll().quantity( 2 ).identify().collect();
+		new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare().identify().collect();
 
 		Dungeon.quickslot.setSlot(0, hero.belongings.weapon);
 
