@@ -2748,7 +2748,7 @@ public class ModContentTest {
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon && h.belongings.weapon == null) { h.belongings.weapon = (xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon) it; placed++; }
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.ring == null) { h.belongings.ring = (xyz.gabriwar.warpedpixeldungeon.items.rings.Ring) it; placed++; }
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.misc == null) { h.belongings.misc = (xyz.gabriwar.warpedpixeldungeon.items.KindofMisc) it; placed++; }
-					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
 					else unreachable.append( "\n  " ).append( xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[s] ).append( ": " ).append( c.getSimpleName() ).append( " cannot be worn or carried with the rest" );
 				}
 				int[] n = xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h );
