@@ -53,7 +53,7 @@ public class SmokeFlare extends FieldItem {
 				Buff.prolong( m, Blindness.class, 6f );
 			}
 		}
-		if (GameScene.scene != null) CellEmitter.center( cell ).burst( Speck.factory( Speck.DUST ), 16 );
+		if (com.watabou.noosa.Game.scene() instanceof GameScene) CellEmitter.center( cell ).burst( Speck.factory( Speck.DUST ), 16 );
 	}
 
 	@Override
