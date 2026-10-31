@@ -95,21 +95,40 @@ public class StrandedAdventurer extends NPC {
 		return out;
 	}
 
-	@Override
-	public boolean interact( Char c ) {
-		if (c != Dungeon.hero) return true;
-		Hero hero = (Hero) c;
-		if (rewarded) return true;
-		if (threatened( hero )) {
-			say( Messages.get( this, "danger" ) );
-			return true;
-		}
-		rewarded = true;
-		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
-		say( Messages.get( this, "thanks" ) );
-		leave();
-		return true;
-	}
+  /** thank him once the floor is clear: the reward at the hero's feet, a line in the log, and he is on his way */
+  public boolean thank( Hero hero ) {
+    if (rewarded || hero == null || threatened( hero )) return false;
+    rewarded = true;
+    xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
+    xyz.gabriwar.warpedpixeldungeon.utils.GLog.p( Messages.get( this, "thanks" ) );
+    leave();
+    return true;
+  }
+
+  @Override
+  protected boolean act() {
+    Hero h = Dungeon.hero;
+    if (isAlive() && !rewarded && h != null && h.isAlive() && Dungeon.level != null
+        && Dungeon.level.distance( pos, h.pos ) <= 2 && thank( h )) {
+      spend( TICK );
+      return true;
+    }
+    return super.act();
+  }
+
+  @Override
+  public boolean interact( Char c ) {
+    if (c != Dungeon.hero) return true;
+    Hero hero = (Hero) c;
+    if (rewarded) return true;
+    if (threatened( hero )) {
+      say( Messages.get( this, "danger" ) );
+      return true;
+    }
+    thank( hero );
+    return true;
+  }
+
 
 	private static final String REWARDED = "rewarded";
 

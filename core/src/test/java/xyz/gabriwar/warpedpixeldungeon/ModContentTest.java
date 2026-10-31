@@ -3593,6 +3593,92 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theProspectorTakesThePickaxeWithoutAnyClicking() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			java.util.HashSet<Integer> none = new java.util.HashSet<>();
+			//with no pickaxe there is nothing to hand over
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pr = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
+			pr.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			assertFalse( pr.turnIn( h ) );
+			assertFalse( pr.tryAutoTurnIn( h ) );
+			//with it, but far away: he does not take it
+			xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe pick = new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe();
+			pick.collect( h.belongings.backpack );
+			int far = pr.pos;
+			for (int tries = 0; tries < 200 && level.distance( far, h.pos ) <= 2; tries++) far = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			assertTrue( "a cell more than two steps away", level.distance( far, h.pos ) > 2 );
+			pr.pos = far;
+			assertFalse( pr.tryAutoTurnIn( h ) );
+			assertNotNull( "the pickaxe is still in the pack", h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			//walk up to him: that is all it takes
+			pr.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			int pack = h.belongings.backpack.items.size();
+			assertTrue( "he takes it when you are beside him", pr.tryAutoTurnIn( h ) );
+			assertTrue( pr.done() );
+			assertNull( h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			assertEquals( "the pickaxe left the pack and nothing was added to it", pack - 1, h.belongings.backpack.items.size() );
+			boolean bandages = false, weapon = false;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) {
+				if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll && level.distance( hp.pos, h.pos ) <= 1) bandages = true;
+				if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.Weapon && level.distance( hp.pos, h.pos ) <= 1 && it.isIdentified()) weapon = true;
+			}
+			assertTrue( "the bandages and the weapon lie beside you", bandages && weapon );
+			assertFalse( "once only", pr.tryAutoTurnIn( h ) );
+
+			//or give it from the pack
+			xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe second = new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe();
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE, second.defaultAction );
+			assertTrue( second.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE ) );
+			second.collect( h.belongings.backpack );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pr2 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
+			pr2.pos = far;
+			level.mobs.add( pr2 );
+			level.heroFOV[far] = false;
+			second.execute( h, xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE );
+			assertFalse( "he is out of sight: nothing happens", pr2.done() );
+			assertNotNull( h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			pr2.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			level.heroFOV[pr2.pos] = true;
+			second.execute( h, xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.AC_GIVE );
+			assertTrue( "given from the pack", pr2.done() );
+			assertNull( h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe().desc().contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( second, "nobody" ).contains( "!!!" ) );
+
+			//the stranded adventurer is thanked by walking up to him once the floor is clear
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer adv = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer();
+			adv.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			rat.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, new java.util.HashSet<>( java.util.Arrays.asList( adv.pos ) ) );
+			level.mobs.add( rat );
+			level.heroFOV[rat.pos] = true;
+			assertFalse( "not while an enemy is in view", adv.thank( h ) );
+			assertFalse( adv.rewarded() );
+			level.mobs.remove( rat );
+			assertTrue( "once it is clear", adv.thank( h ) );
+			assertTrue( adv.rewarded() );
+			assertFalse( adv.thank( h ) );
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

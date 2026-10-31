@@ -105,22 +105,44 @@ public class OldProspector extends NPC {
 		return out;
 	}
 
-	@Override
-	public boolean interact( Char c ) {
-		if (c != Dungeon.hero) return true;
-		Hero hero = (Hero) c;
-		if (done) {
-			say( Messages.get( this, "after" ) );
-		} else if (receive( hero )) {
-			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
-			say( Messages.get( this, "thanks" ) );
-			leave();
-		} else {
-			told = true;
-			say( Messages.get( this, "asks" ) );
-		}
-		return true;
-	}
+  /** the whole exchange: the pickaxe taken, the reward at the hero's feet, a line in the log and he is on his way (false when the hero has no pickaxe for him) */
+  public boolean turnIn( Hero hero ) {
+    if (!receive( hero )) return false;
+    xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
+    xyz.gabriwar.warpedpixeldungeon.utils.GLog.p( Messages.get( this, "thanks" ) );
+    leave();
+    return true;
+  }
+
+  /** with the pickaxe in the pack, walking up to him is enough: there is nothing to tap */
+  public boolean tryAutoTurnIn( Hero hero ) {
+    if (done || hero == null || !hero.isAlive() || Dungeon.level == null) return false;
+    if (Dungeon.level.distance( pos, hero.pos ) > 2) return false;
+    return turnIn( hero );
+  }
+
+  @Override
+  protected boolean act() {
+    if (isAlive() && tryAutoTurnIn( Dungeon.hero )) {
+      spend( TICK );
+      return true;
+    }
+    return super.act();
+  }
+
+  @Override
+  public boolean interact( Char c ) {
+    if (c != Dungeon.hero) return true;
+    Hero hero = (Hero) c;
+    if (done) {
+      say( Messages.get( this, "after" ) );
+    } else if (!turnIn( hero )) {
+      told = true;
+      say( Messages.get( this, "asks" ) );
+    }
+    return true;
+  }
+
 
 	private static final String TOLD = "told", DONE = "done";
 
