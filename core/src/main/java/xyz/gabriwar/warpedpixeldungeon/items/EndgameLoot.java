@@ -62,7 +62,7 @@ public class EndgameLoot {
 	private static final int KINDS = 35;
 
 	/** the share of rolls that are a piece of the hero's own class set */
-	public static final float CLASS_SHARE = 0.30f;
+	public static final float CLASS_SHARE = 0.20f;
 
 	/** a random new item: a piece of the hero's own class set about three times in ten, otherwise
 	 *  anything from the general pool */
@@ -88,7 +88,7 @@ public class EndgameLoot {
 
 	/** the share of the dungeon's item drops that are pieces of the hero's own class set, which grows with the cycle as the general pool (tier 5) falls behind */
 	public static float classShare() {
-		return Cycle.number <= 1 ? CLASS_SHARE : Cycle.number == 2 ? 0.60f : Cycle.number == 3 ? 0.85f : 1f;
+		return Cycle.number <= 1 ? CLASS_SHARE : Cycle.number == 2 ? 0.28f : Cycle.number == 3 ? 0.35f : 0.40f;
 	}
 
 	/** the tier a rating drops on this roll: its whole part, or the next one up with the fraction's
@@ -126,7 +126,21 @@ public class EndgameLoot {
 		if (h != null && h.heroClass != null && Random.Float() < classShare()) {
 			return rollClassSet( h.heroClass, tierOfRating( rating ), excessLevels( rating ) );
 		}
-		return rollGeneral();
+		//a set piece you already own is no use to you: another roll, and failing that, something else instead
+		Item it = rollGeneral();
+		for (int tries = 0; tries < 8 && alreadyOwned( it ); tries++) it = rollGeneral();
+		return alreadyOwned( it ) ? duplicateReward() : it;
+	}
+
+	/** is this a piece of a set that the hero already has, worn or carried? */
+	static boolean alreadyOwned( Item it ) {
+		return it != null && GearSets.setOf( it.getClass() ) >= 0 && GearSets.owned( Dungeon.hero, it.getClass() );
+	}
+
+	/** what a roll pays when every piece it could have been is already owned: shards in a new cycle, gold before */
+	static Item duplicateReward() {
+		if (Cycle.number >= 1) return new CycleShard().quantity( 1 + Cycle.number / 2 );
+		return new Gold( 30 + 8 * Math.max( 1, Dungeon.depth ) );
 	}
 
 	/** one piece of a class's own set, of tier 6, 7, 8 or 9 */
@@ -175,7 +189,11 @@ public class EndgameLoot {
 
 	private static Item fromSet( int set, int extra ) {
 		Class<?>[] pieces = GearSets.piecesOf( set );
-		Item item = (Item)Reflection.newInstance( pieces[Random.Int( pieces.length )] );
+		//only the pieces the hero does not have yet; a full set already owned pays shards (or gold) instead
+		java.util.ArrayList<Class<?>> fresh = new java.util.ArrayList<>();
+		for (Class<?> c : pieces) if (!GearSets.owned( Dungeon.hero, c )) fresh.add( c );
+		if (fresh.isEmpty()) return duplicateReward();
+		Item item = (Item)Reflection.newInstance( fresh.get( Random.Int( fresh.size() ) ) );
 		return item == null ? rollGeneral() : prepare( item, extra );
 	}
 

@@ -1902,11 +1902,11 @@ public class ModContentTest {
 			Cycle.number = 3; assertEquals( 9, EndgameLoot.maxTier() );
 			Cycle.number = 8; assertEquals( 9, EndgameLoot.maxTier() );
 			//the share of drops that are class pieces (the rest are the plain tier 5 pool) grows with the cycle
-			Cycle.number = 0; assertEquals( 0.30f, EndgameLoot.classShare(), 0.001f );
-			Cycle.number = 1; assertEquals( 0.30f, EndgameLoot.classShare(), 0.001f );
-			Cycle.number = 2; assertEquals( 0.60f, EndgameLoot.classShare(), 0.001f );
-			Cycle.number = 3; assertEquals( 0.85f, EndgameLoot.classShare(), 0.001f );
-			Cycle.number = 4; assertEquals( 1.00f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 0; assertEquals( 0.20f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 1; assertEquals( 0.20f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 2; assertEquals( 0.28f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 3; assertEquals( 0.35f, EndgameLoot.classShare(), 0.001f );
+			Cycle.number = 4; assertEquals( 0.40f, EndgameLoot.classShare(), 0.001f );
 
 			//cycle 1 (and the first run): floors pay tier 6 and never 7; a boss has a low chance of 7
 			for (int c = 0; c <= 1; c++) {
@@ -2670,6 +2670,182 @@ public class ModContentTest {
 			if (c == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER) continue;
 			for (int i = 0; i < 100; i++) assertTrue( c + " is not dropped the Gunslinger's set", xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( c, 6 ).getClass() ) < 31 );
 		}
+	}
+
+	@Test
+	public void setPiecesAreNeverDuplicatedAndRelicsCanBeSold() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		int keepCycle = Cycle.number;
+		try {
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MAGE;
+			h.belongings.backpack.items.clear();
+			Cycle.number = 1;
+			Class<?>[] six = xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( 7 );   //the Archmage's set
+			//every piece is rolled until it is owned; a piece owned is never rolled again
+			java.util.Set<Class<?>> got = new java.util.HashSet<>();
+			for (int i = 0; i < 400; i++) {
+				Item it = xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( h.heroClass, 6 );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( it.getClass() ) < 0) continue;
+				assertFalse( "a duplicate " + it.getClass().getSimpleName(), xyz.gabriwar.warpedpixeldungeon.items.GearSets.owned( h, it.getClass() ) );
+				got.add( it.getClass() );
+				h.belongings.backpack.items.add( it );
+			}
+			assertEquals( "all five pieces come, once each", 5, got.size() );
+			for (Class<?> c : six) assertTrue( c.getSimpleName(), got.contains( c ) );
+			//with the whole set owned, the same roll pays shards in a new cycle, and gold before
+			for (int i = 0; i < 60; i++) assertTrue( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( h.heroClass, 6 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard );
+			Cycle.number = 0;
+			for (int i = 0; i < 60; i++) assertTrue( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( h.heroClass, 6 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold );
+			//but the next tier's pieces are still new
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollClassSet( h.heroClass, 7 ).getClass() ) >= 0 );
+			//the general pool too
+			for (int i = 0; i < 400; i++) {
+				Item it = xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.rollRated( 6f );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( it.getClass() ) >= 0) assertFalse( "a duplicate " + it.getClass().getSimpleName(), xyz.gabriwar.warpedpixeldungeon.items.GearSets.owned( h, it.getClass() ) );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( it.getClass() ) >= 0) h.belongings.backpack.items.add( it );
+			}
+
+			//a carried relic is worth something, more with its tier
+			assertEquals( 30, new xyz.gabriwar.warpedpixeldungeon.items.GunslingersBelt().value() );
+			assertEquals( 40, new xyz.gabriwar.warpedpixeldungeon.items.AscendedGunslingersBelt().value() );
+			assertEquals( 60, new xyz.gabriwar.warpedpixeldungeon.items.GodforgedGunslingersLuckyCoin().value() );
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( 7 )) {
+				Item it = (Item) com.watabou.utils.Reflection.newInstance( c );
+				assertTrue( c.getSimpleName() + " sells for something", it.value() > 0 );
+			}
+		} finally {
+			h.heroClass = keepClass;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			Cycle.number = keepCycle;
+		}
+	}
+
+	@Test
+	public void everySetBonusReallyActivatesOnAWornHero() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepW = h.belongings.weapon;
+		xyz.gabriwar.warpedpixeldungeon.items.armor.Armor keepA = h.belongings.armor;
+		xyz.gabriwar.warpedpixeldungeon.items.artifacts.Artifact keepArt = h.belongings.artifact;
+		xyz.gabriwar.warpedpixeldungeon.items.KindofMisc keepMisc = h.belongings.misc;
+		xyz.gabriwar.warpedpixeldungeon.items.rings.Ring keepRing = h.belongings.ring;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		int keepHP = h.HP, keepHT = h.HT;
+		StringBuilder bad = new StringBuilder();
+		StringBuilder unreachable = new StringBuilder();
+		try {
+			for (int s = 0; s < xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES.length; s++) {
+				h.belongings.weapon = null; h.belongings.armor = null; h.belongings.artifact = null; h.belongings.misc = null; h.belongings.ring = null;
+				h.belongings.backpack.items.clear();
+				h.HT = 5000; h.HP = 5000;
+				Class<?>[] pieces = xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( s );
+				int placed = 0;
+				for (Class<?> c : pieces) {
+					Item it = (Item) com.watabou.utils.Reflection.newInstance( c );
+					if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor && h.belongings.armor == null) { h.belongings.armor = (xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) it; placed++; }
+					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon && h.belongings.weapon == null) { h.belongings.weapon = (xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon) it; placed++; }
+					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.ring == null) { h.belongings.ring = (xyz.gabriwar.warpedpixeldungeon.items.rings.Ring) it; placed++; }
+					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.misc == null) { h.belongings.misc = (xyz.gabriwar.warpedpixeldungeon.items.KindofMisc) it; placed++; }
+					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+					else unreachable.append( "\n  " ).append( xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[s] ).append( ": " ).append( c.getSimpleName() ).append( " cannot be worn or carried with the rest" );
+				}
+				int[] n = xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h );
+				if (n[s] != placed) bad.append( "\n  " ).append( xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[s] ).append( ": placed " ).append( placed ).append( " but " ).append( n[s] ).append( " counted" );
+				xyz.gabriwar.warpedpixeldungeon.items.GearSets.Effects e = xyz.gabriwar.warpedpixeldungeon.items.GearSets.effects( n );
+				String nm = xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[s];
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.accuracyMultiplier( h ) != e.accuracy) bad.append( "\n  " ).append( nm ).append( ": accuracy" );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.evasionMultiplier( h ) != e.evasion) bad.append( "\n  " ).append( nm ).append( ": evasion" );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier( h ) != e.speed) bad.append( "\n  " ).append( nm ).append( ": speed" );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.expMultiplier( h ) != e.exp) bad.append( "\n  " ).append( nm ).append( ": experience" );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.wandDamageMultiplier() != e.wandDamage) bad.append( "\n  " ).append( nm ).append( ": wand damage" );
+				if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.wandRechargeMultiplier( h ) != e.wandRecharge) bad.append( "\n  " ).append( nm ).append( ": wand recharge" );
+				int outBase = e.damage == 1f ? 1000 : Math.max( 1, Math.round( 1000 * e.damage ) );
+				h.HP = 5000;
+				int out = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, null, 1000 );
+				if (out != outBase) bad.append( "\n  " ).append( nm ).append( ": damage " ).append( out ).append( " not " ).append( outBase );
+				int inBase = e.taken == 1f ? 1000 : Math.max( 1, Math.round( 1000 * Math.max( 0.4f, e.taken ) ) );
+				int in = xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, null );
+				if (in != inBase) bad.append( "\n  " ).append( nm ).append( ": damage taken " ).append( in ).append( " not " ).append( inBase );
+				if (Math.abs( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.reloadFactor() - Math.max( 0.35f, e.reload ) ) > 0.001f) bad.append( "\n  " ).append( nm ).append( ": reload" );
+				//lifesteal
+				if (e.lifesteal > 0f) {
+					h.HP = 4000;
+					int o = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, null, 1000 );
+					int want = 4000 + Math.max( 1, Math.round( o * e.lifesteal ) );
+					if (h.HP != want) bad.append( "\n  " ).append( nm ).append( ": lifesteal " ).append( h.HP ).append( " not " ).append( want );
+					h.HP = 5000;
+				}
+				//the situational damage
+				if (e.lowHp > 0f) {
+					h.HP = 1000;
+					int o = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, null, 1000 );
+					int want = Math.max( 1, Math.round( 1000 * e.damage * (1f + e.lowHp) ) );
+					if (o != want && Math.abs( o - want ) > 1 + (e.lifesteal > 0f ? 0 : 0)) bad.append( "\n  " ).append( nm ).append( ": low health damage " ).append( o ).append( " not " ).append( want );
+					h.HP = 5000;
+				}
+				if (e.vsFull > 0f || e.vsWeak > 0f) {
+					xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat r = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+					r.HT = r.HP = 1000;
+					r.state = r.HUNTING;
+					double sneak = e.sneak > 0f && r.surprisedBy( h, true ) ? 1 + e.sneak : 1;
+					if (e.vsFull > 0f) {
+						int o = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 1000 );
+						int want = (int) Math.max( 1, Math.round( 1000 * e.damage * (1f + e.vsFull) * sneak ) );
+						if (Math.abs( o - want ) > 1) bad.append( "\n  " ).append( nm ).append( ": damage to a full-health enemy " ).append( o ).append( " not " ).append( want );
+					}
+					if (e.vsWeak > 0f) {
+						r.HP = 200;
+						int o = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 1000 );
+						int want = (int) Math.max( 1, Math.round( 1000 * e.damage * (1f + e.vsWeak) * sneak ) );
+						if (Math.abs( o - want ) > 1) bad.append( "\n  " ).append( nm ).append( ": damage to a weak enemy " ).append( o ).append( " not " ).append( want );
+					}
+				}
+				//thorns
+				if (e.thorns > 0f) {
+					xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat r = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+					r.HT = r.HP = 100000;
+					int taken = xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, r );
+					int want = 100000 - Math.max( 1, Math.round( taken * e.thorns ) );
+					if (r.HP != want) bad.append( "\n  " ).append( nm ).append( ": thorns " ).append( r.HP ).append( " not " ).append( want );
+				}
+				//regeneration, and none where there should be none
+				h.HP = 4000;
+				if (e.regenEvery > 0) {
+					for (int i = 0; i < e.regenEvery; i++) xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick( h );
+					if (h.HP != 4001) bad.append( "\n  " ).append( nm ).append( ": regeneration gave " ).append( h.HP - 4000 );
+				} else {
+					for (int i = 0; i < 60; i++) xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick( h );
+					if (h.HP != 4000) bad.append( "\n  " ).append( nm ).append( ": regenerates though it should not" );
+				}
+				h.HP = 5000;
+				//barriers
+				xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+				if (e.barrierEvery > 0) {
+					for (int i = 0; i < e.barrierEvery; i++) xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick( h );
+					if (h.shielding() <= 0) bad.append( "\n  " ).append( nm ).append( ": no periodic barrier" );
+					xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+				}
+				if (e.zapBarrier > 0f) {
+					xyz.gabriwar.warpedpixeldungeon.items.GearSets.afterZap();
+					if (h.shielding() <= 0) bad.append( "\n  " ).append( nm ).append( ": no barrier after a zap" );
+					xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+				}
+				if (e.freeZap > 0f) {
+					int free = 0;
+					for (int i = 0; i < 6000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.GearSets.freeZap()) free++;
+					if (Math.abs( free / 6000.0 - e.freeZap ) > 0.03) bad.append( "\n  " ).append( nm ).append( ": free zaps " ).append( free / 6000.0 ).append( " not " ).append( e.freeZap );
+				}
+			}
+		} finally {
+			h.belongings.weapon = keepW; h.belongings.armor = keepA; h.belongings.artifact = keepArt; h.belongings.misc = keepMisc; h.belongings.ring = keepRing;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			h.HP = keepHP; h.HT = keepHT;
+		}
+		String report = (bad.length() > 0 ? "SET BONUSES THAT DO NOT MATCH:" + bad : "") + (unreachable.length() > 0 ? "\nSET PIECES THAT CANNOT BE WORN AT ONCE:" + unreachable : "");
+		assertTrue( report, report.isEmpty() );
 	}
 
 	@Test

@@ -366,6 +366,15 @@ public class GearSets {
 		return n;
 	}
 
+	/** does the hero have this piece, worn or carried (a class armor made from it counts)? */
+	public static boolean owned( Hero h, Class<?> c ) {
+		if (h == null || h.belongings == null) return false;
+		for (Item it : h.belongings) {
+			if (it != null && pieceClass( it ) == c) return true;
+		}
+		return false;
+	}
+
 	public static Effects of( Hero h ) {
 		return effects( pieceCounts( h ) );
 	}

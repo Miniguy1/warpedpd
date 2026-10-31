@@ -41,6 +41,12 @@ public abstract class SetRelic extends Item {
 		return new ItemSprite.Glowing( glow );
 	}
 
+	/** a carried relic is worth gold like any other gear (it was worth nothing, so no shop would take it): 30 at tier 6, up to 60 at tier 9 */
+	@Override
+	public int value() {
+		return 20 + 10 * (Math.max( 5, GearSets.gearTier( this ) ) - 5);
+	}
+
 	@Override
 	public boolean isUpgradable() {
 		return false;
