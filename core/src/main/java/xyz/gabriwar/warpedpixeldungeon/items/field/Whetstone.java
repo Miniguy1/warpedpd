@@ -57,18 +57,21 @@ public class Whetstone extends FieldItem {
 	@Override
 	public void execute( Hero hero, String action ) {
 		super.execute( hero, action );
-		if (AC_APPLY.equals( action )) {
-			if (hero.belongings.weapon() == null) {
-				GLog.w( Messages.get( this, "no_weapon" ) );
-				return;
-			}
-			detach( hero.belongings.backpack );
-			Buff.affect( hero, Sharpened.class ).set( 10 );
-			hero.spend( 1f );
-			hero.busy();
-			if (hero.sprite != null) hero.sprite.operate( hero.pos );
-			GLog.p( Messages.get( this, "applied" ) );
+		if (AC_APPLY.equals( action )) apply( hero );
+	}
+
+	/** use one on the weapon in hand */
+	public void apply( Hero hero ) {
+		if (hero.belongings.weapon() == null) {
+			GLog.w( Messages.get( this, "no_weapon" ) );
+			return;
 		}
+		detach( hero.belongings.backpack );
+		Buff.affect( hero, Sharpened.class ).set( 10 );
+		hero.spend( 1f );
+		hero.busy();
+		if (hero.sprite != null) hero.sprite.operate( hero.pos );
+		GLog.p( Messages.get( this, "applied" ) );
 	}
 
 	@Override

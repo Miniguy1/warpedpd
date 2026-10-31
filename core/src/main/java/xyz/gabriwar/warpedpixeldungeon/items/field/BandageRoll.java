@@ -57,15 +57,18 @@ public class BandageRoll extends FieldItem {
 	@Override
 	public void execute( Hero hero, String action ) {
 		super.execute( hero, action );
-		if (AC_APPLY.equals( action )) {
-			detach( hero.belongings.backpack );
-			Buff.detach( hero, Bleeding.class );
-			Buff.affect( hero, Healing.class ).setHeal( Math.max( 8, Math.round( hero.HT * 0.30f ) ), 0.25f, 1 );
-			hero.spend( 1f );
-			hero.busy();
-			if (hero.sprite != null) hero.sprite.operate( hero.pos );
-			GLog.p( Messages.get( this, "applied" ) );
-		}
+		if (AC_APPLY.equals( action )) apply( hero );
+	}
+
+	/** use one: the bleeding stops and the healing begins */
+	public void apply( Hero hero ) {
+		detach( hero.belongings.backpack );
+		Buff.detach( hero, Bleeding.class );
+		Buff.affect( hero, Healing.class ).setHeal( Math.max( 8, Math.round( hero.HT * 0.30f ) ), 0.25f, 1 );
+		hero.spend( 1f );
+		hero.busy();
+		if (hero.sprite != null) hero.sprite.operate( hero.pos );
+		GLog.p( Messages.get( this, "applied" ) );
 	}
 
 	@Override

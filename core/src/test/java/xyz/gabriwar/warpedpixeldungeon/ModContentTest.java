@@ -3041,7 +3041,7 @@ public class ModContentTest {
 			h.belongings.backpack.items.add( bandage );
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ).set( 3 );
 			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
-			bandage.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll.AC_APPLY );
+			bandage.apply( h );
 			assertNull( "the bleeding stops", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
 			assertNotNull( "and the healing starts", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Healing.class ) );
 			assertEquals( 2, bandage.quantity() );
@@ -3051,11 +3051,11 @@ public class ModContentTest {
 			xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone stone = (xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) new xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone().quantity( 2 );
 			h.belongings.backpack.items.add( stone );
 			h.belongings.weapon = null;
-			stone.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.AC_APPLY );
+			stone.apply( h );
 			assertNull( "no weapon, no edge", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ) );
 			assertEquals( 2, stone.quantity() );
 			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
-			stone.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.AC_APPLY );
+			stone.apply( h );
 			assertEquals( 10, h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ).left() );
 			assertEquals( 1, stone.quantity() );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
