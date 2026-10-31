@@ -211,14 +211,25 @@ public final class EarlyEvents {
 		return -1;
 	}
 
-	/** would a pile of rubble on this cell cut the stairs off from each other? */
+	/** are the stairs joined by walking, with this map of what can be walked on? (a stair cell itself may not be walkable, so a way to its side counts) */
+	private static boolean joined( Level level, boolean[] pass, int from, int to ) {
+		PathFinder.buildDistanceMap( from, pass );
+		if (PathFinder.distance[to] != Integer.MAX_VALUE) return true;
+		for (int d : PathFinder.NEIGHBOURS8) {
+			int n = to + d;
+			if (n >= 0 && n < level.length() && pass[n] && PathFinder.distance[n] != Integer.MAX_VALUE) return true;
+		}
+		return false;
+	}
+
+	/** would a pile of rubble on this cell cut the stairs off from each other? Only if they were joined before it. */
 	public static boolean blocksPath( Level level, int cell ) {
 		int from = level.entrance(), to = level.exit();
 		if (from < 0 || to < 0) return false;
+		if (!joined( level, level.passable, from, to )) return false;   //nothing to cut
 		boolean[] pass = level.passable.clone();
 		pass[cell] = false;
-		PathFinder.buildDistanceMap( from, pass );
-		return PathFinder.distance[to] == Integer.MAX_VALUE;
+		return !joined( level, pass, from, to );
 	}
 
 	/** n enemies of a kind next to a cell (in the running game they come at the hero) */
