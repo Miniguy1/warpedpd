@@ -2749,6 +2749,7 @@ public class ModContentTest {
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.ring == null) { h.belongings.ring = (xyz.gabriwar.warpedpixeldungeon.items.rings.Ring) it; placed++; }
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.rings.Ring && h.belongings.misc == null) { h.belongings.misc = (xyz.gabriwar.warpedpixeldungeon.items.KindofMisc) it; placed++; }
 					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+					else if (s < xyz.gabriwar.warpedpixeldungeon.items.GearSets.GENERIC_SETS) { h.belongings.backpack.items.add( it ); placed++; }   //a general set's spare piece is carried
 					else unreachable.append( "\n  " ).append( xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES[s] ).append( ": " ).append( c.getSimpleName() ).append( " cannot be worn or carried with the rest" );
 				}
 				int[] n = xyz.gabriwar.warpedpixeldungeon.items.GearSets.pieceCounts( h );
@@ -2846,6 +2847,18 @@ public class ModContentTest {
 		}
 		String report = (bad.length() > 0 ? "SET BONUSES THAT DO NOT MATCH:" + bad : "") + (unreachable.length() > 0 ? "\nSET PIECES THAT CANNOT BE WORN AT ONCE:" + unreachable : "");
 		assertTrue( report.replace( "\n", " | " ), report.isEmpty() );
+	}
+
+	@Test
+	public void everySetPieceCanBeSold() {
+		StringBuilder bad = new StringBuilder();
+		for (int s = 0; s < xyz.gabriwar.warpedpixeldungeon.items.GearSets.NAMES.length; s++) {
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.GearSets.piecesOf( s )) {
+				Item it = (Item) com.watabou.utils.Reflection.newInstance( c );
+				if (it.value() <= 0) bad.append( " " ).append( c.getSimpleName() );
+			}
+		}
+		assertTrue( "pieces no shop would buy:" + bad, bad.length() == 0 );
 	}
 
 	@Test

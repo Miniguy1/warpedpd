@@ -354,7 +354,10 @@ public class GearSets {
 		}
 		if (h.belongings.backpack != null) {
 			for (Item it : h.belongings.backpack.items) {
-				if (it instanceof Trinket || it instanceof AmuletOfRenewal || it instanceof AmuletOfAegis || it instanceof SetRelic) {
+				//a general set has two weapons, two armors or a wand among its five, which no hero can wield at once: its spare pieces count carried
+				int carriedSet = setOf( it.getClass() );
+				if (it instanceof Trinket || it instanceof AmuletOfRenewal || it instanceof AmuletOfAegis || it instanceof SetRelic
+						|| (carriedSet >= 0 && carriedSet < GENERIC_SETS)) {
 					seen.add( it.getClass() );
 				}
 			}
