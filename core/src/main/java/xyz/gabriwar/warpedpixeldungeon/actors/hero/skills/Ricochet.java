@@ -71,12 +71,17 @@ public class Ricochet extends ActiveSkill2 {
 	private int armed = 0;
 	private float armedAt = -100f;
 
+	//a second press of the skill fires at the target it has marked
+	@Override
+	public boolean confirmTarget( Hero hero ){ return GunSkills.confirmPending( hero, this ); }
+
 	@Override
 	public void execute( final Hero hero, String action ){
 		if (!AC_CAST.equals( action ) || level <= 0 || hero.MP < getManaCost()) return;
+		if (confirmTarget( hero )) return;
 		final Gun gun = GunSkills.needLoaded();
 		if (gun == null) return;
-		GunSkills.pickEnemy( Messages.get( this, "prompt" ), e -> {
+		GunSkills.pickEnemy( this, Messages.get( this, "prompt" ), e -> {
 			hero.MP -= getManaCost();
 			castTextYell();
 			hero.heroSkills.lastUsed = Ricochet.this;

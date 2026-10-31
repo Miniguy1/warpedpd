@@ -105,9 +105,7 @@ public class StrandedAdventurer extends NPC {
 			return true;
 		}
 		rewarded = true;
-		for (Item it : payout()) {
-			if (!it.doPickUp( hero )) Dungeon.level.drop( it, hero.pos ).sprite.drop();
-		}
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
 		say( Messages.get( this, "thanks" ) );
 		leave();
 		return true;

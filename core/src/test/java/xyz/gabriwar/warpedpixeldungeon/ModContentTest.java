@@ -3436,6 +3436,163 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void earlyRewardsAreHandedOverAtTheHeroesFeet() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			int pack = h.belongings.backpack.items.size();
+			java.util.ArrayList<Item> items = new java.util.ArrayList<>();
+			items.add( new xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll().quantity( 2 ) );
+			items.add( new xyz.gabriwar.warpedpixeldungeon.items.Gold( 50 ) );
+			items.add( new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare() );
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( h, items );
+			assertEquals( "handed over by dropping, not by pickups that spend turns", pack, h.belongings.backpack.items.size() );
+			for (Item it : items) {
+				boolean found = false;
+				for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) if (hp.items.contains( it ) && level.distance( hp.pos, h.pos ) <= 1) found = true;
+				assertTrue( it.getClass().getSimpleName() + " lies at the hero's feet or beside them", found );
+			}
+			//the payouts never fail, on any floor, and keep their content
+			for (int d : new int[]{ 3, 7 }) {
+				Dungeon.depth = d;
+				for (int i = 0; i < 40; i++) {
+					java.util.ArrayList<Item> pay = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector().payout();
+					assertEquals( 2, pay.size() );
+					assertNotNull( pay.get( 0 ) );
+					assertTrue( pay.get( 1 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll );
+					assertEquals( 2, pay.get( 1 ).quantity() );
+					assertEquals( 4, new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer().payout().size() );
+				}
+			}
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+		}
+	}
+
+	@Test
+	public void theGunsSkillsLockOntoTheTargetThatCanBeShot() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat a = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+		xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat b = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			java.util.HashSet<Integer> taken = new java.util.HashSet<>();
+			a.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken ); taken.add( a.pos );
+			b.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken );
+			assertTrue( a.pos > 0 && b.pos > 0 );
+			xyz.gabriwar.warpedpixeldungeon.actors.Actor.add( a );
+			xyz.gabriwar.warpedpixeldungeon.actors.Actor.add( b );
+			level.heroFOV[a.pos] = true; level.heroFOV[b.pos] = true;
+			//nothing aimed at yet: one of the two enemies in view is marked
+			xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.lastTarget = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.Char t = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h );
+			assertTrue( "an enemy in view is suggested", t == a || t == b );
+			//the one you last aimed at comes first
+			xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.lastTarget = b;
+			assertSame( b, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h ) );
+			xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.lastTarget = a;
+			assertSame( a, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h ) );
+			//a dead one is skipped, then the other
+			a.HP = 0;
+			assertSame( b, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h ) );
+			//an enemy you cannot see is no target
+			level.heroFOV[b.pos] = false;
+			assertNull( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h ) );
+			//an ally is never a target
+			a.HP = a.HT; level.heroFOV[b.pos] = true; level.heroFOV[a.pos] = true;
+			a.alignment = xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ALLY;
+			b.HP = 0;
+			assertNull( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.autoTarget( h ) );
+			//with no selection open there is nothing for a second press to confirm
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill bull = new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Bullseye();
+			assertFalse( bull.confirmTarget( h ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.confirmPending( h, bull ) );
+		} finally {
+			xyz.gabriwar.warpedpixeldungeon.actors.Actor.remove( a );
+			xyz.gabriwar.warpedpixeldungeon.actors.Actor.remove( b );
+			xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.lastTarget = null;
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+		}
+	}
+
+	@Test
+	public void theStartingRevolverRollsItsQualityLikeAnyWeapon() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 1;
+			Dungeon.generatedLevels.clear();
+			Dungeon.level = Dungeon.newLevel();
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			java.util.Set<Object> rarities = new java.util.HashSet<>();
+			int plusOne = 0, trials = 600;
+			for (int i = 0; i < trials; i++) {
+				xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+				assertNull( "a fresh revolver has no quality yet", xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( r ) );
+				h.belongings.weapon = r;
+				xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( h );
+				xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality q = xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( r );
+				assertNotNull( "it has a quality now", q );
+				assertNotNull( q.type );
+				rarities.add( q.rarity );
+				if (r.level() == 1) {
+					plusOne++;
+					assertNotNull( "a +1 start comes with an enchantment", r.enchantment );
+				} else {
+					assertEquals( 0, r.level() );
+				}
+				//the roll happens once
+				int lvl = r.level();
+				xyz.gabriwar.warpedpixeldungeon.items.rarity.Rarity was = q.rarity;
+				xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( h );
+				assertEquals( lvl, r.level() );
+				assertSame( was, xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( r ).rarity );
+			}
+			assertTrue( "different rarities turn up: " + rarities, rarities.size() >= 2 );
+			assertEquals( "about a third start at +1: " + plusOne + "/" + trials, 0.30, plusOne / (double) trials, 0.07 );
+			//nobody else's weapon, and no other weapon of the Gunslinger's, is touched
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger dagger = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			h.belongings.weapon = dagger;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( h );
+			assertNull( xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( dagger ) );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver other = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			h.belongings.weapon = other;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( h );
+			assertNull( "only a Gunslinger's starter", xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( other ) );
+		} finally {
+			h.heroClass = keepClass;
+			h.belongings.weapon = keepWeapon;
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

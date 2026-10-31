@@ -109,6 +109,24 @@ public final class GunSkills {
 		return h != null && h.heroClass == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ? 2 : 0;
 	}
 
+	/**
+	 * The Gunslinger's starting revolver rolls its rarity, type (gamma, beta or alpha) and bonus lines the way any fresh
+	 * weapon does. The starting kit is packed before a level exists, so it waits for the first one; the roll happens
+	 * once, since an item that has a quality is left alone. A third of the time it also starts at +1 with an enchantment.
+	 */
+	public static void rollStarter( Hero h ){
+		if (h == null || h.heroClass != xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER || h.belongings == null) return;
+		Object w = h.belongings.weapon;
+		if (!(w instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver)) return;
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = (xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver) w;
+		if (xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.of( r ) != null) return;
+		xyz.gabriwar.warpedpixeldungeon.items.rarity.Quality.roll( r );
+		if (Random.Float() < 0.30f){
+			r.upgrade();
+			if (r.enchantment == null) r.enchant();
+		}
+	}
+
 	/** a firearm in hand with a round in it, else a word to the player and null */
 	public static Gun needLoaded(){
 		Gun g = gun();
@@ -121,22 +139,92 @@ public final class GunSkills {
 
 	public interface Spot { void on( int cell ); }
 
-	/** asks for a visible enemy */
-	public static void pickEnemy( final String prompt, final Target then ){
-		GameScene.selectCell( new CellSelector.Listener(){
-			@Override
-			public void onSelect( Integer cell ){
-				if (cell == null) return;
-				Char e = Actor.findChar( cell );
-				if (e == null || e.alignment != Char.Alignment.ENEMY || !Dungeon.level.heroFOV[cell]){
-					GLog.w( "Pick an enemy you can see." );
-					return;
+	/** the skill whose selection is open (so a second press of that skill can confirm its suggested target) */
+	private static Pending pending;
+
+	private static boolean validEnemy( Hero hero, Char e ){
+		return hero != null && e != null && e.isAlive() && e.alignment == Char.Alignment.ENEMY && Actor.chars().contains( e )
+				&& Dungeon.level != null && Dungeon.level.heroFOV[e.pos] && SkillInteractions.valid( e.pos ) && SkillInteractions.clear( hero.pos, e.pos );
+	}
+
+	/** the enemy a skill suggests: the one you last aimed at, else the nearest one you can see */
+	public static Char autoTarget( Hero hero ){
+		Char best = xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.lastTarget;
+		if (validEnemy( hero, best )) return best;
+		best = null;
+		for (Char e : Actor.chars()){
+			if (validEnemy( hero, e ) && (best == null || Dungeon.level.distance( hero.pos, e.pos ) < Dungeon.level.distance( hero.pos, best.pos ))) best = e;
+		}
+		return best;
+	}
+
+	/** a second press of the skill: fire at the suggested target (false when there is none to confirm) */
+	public static boolean confirmPending( Hero hero, Skill owner ){
+		Pending p = pending;
+		if (p == null || owner == null || p.owner != owner || !validEnemy( hero, p.suggested )) return false;
+		GameScene.handleCell( p.suggested.pos );
+		return true;
+	}
+
+	private static class Pending extends CellSelector.Listener {
+		final Skill owner;
+		final String prompt;
+		final Target then;
+		Char suggested;
+		boolean finished;
+		com.watabou.noosa.Image marker;
+
+		Pending( Skill owner, String prompt, Target then ){
+			this.owner = owner; this.prompt = prompt; this.then = then;
+		}
+
+		void showMarker(){
+			if (suggested == null || suggested.sprite == null || suggested.sprite.parent == null) return;
+			marker = new com.watabou.noosa.Image( xyz.gabriwar.warpedpixeldungeon.ui.Icons.get( xyz.gabriwar.warpedpixeldungeon.ui.Icons.TARGET ) ){
+				@Override
+				public void update(){
+					super.update();
+					visible = validEnemy( Dungeon.hero, suggested ) && suggested.sprite.visible;
+					point( suggested.sprite.center( this ) );
 				}
-				then.on( e );
+			};
+			marker.point( suggested.sprite.center( marker ) );
+			suggested.sprite.parent.addToFront( marker );
+		}
+
+		void finish(){
+			finished = true;
+			if (pending == this) pending = null;
+			if (marker != null){ marker.killAndErase(); marker.destroy(); marker = null; }
+		}
+
+		@Override
+		public void onSelect( Integer cell ){
+			finish();
+			if (cell == null) return;
+			Char e = Actor.findChar( cell );
+			if (!validEnemy( Dungeon.hero, e )){
+				GLog.w( "Pick an enemy you can see." );
+				return;
 			}
-			@Override
-			public String prompt(){ return prompt; }
-		} );
+			xyz.gabriwar.warpedpixeldungeon.ui.QuickSlotButton.target( e );
+			then.on( e );
+		}
+
+		@Override
+		public String prompt(){ return prompt; }
+	}
+
+	/** asks for a visible enemy, with the nearest (or last aimed at) one already marked: press the skill again, or tap it */
+	public static void pickEnemy( Skill owner, final String prompt, final Target then ){
+		Pending p = new Pending( owner, prompt, then );
+		p.suggested = autoTarget( Dungeon.hero );
+		GameScene.selectCell( p );
+		if (!p.finished){ pending = p; p.showMarker(); }
+	}
+
+	public static void pickEnemy( final String prompt, final Target then ){
+		pickEnemy( null, prompt, then );
 	}
 
 	/** asks for any visible tile */

@@ -90,11 +90,17 @@ public class OldProspector extends NPC {
 	/** a weapon of the floor's tier, identified and a level better, and two bandage rolls */
 	public ArrayList<Item> payout() {
 		ArrayList<Item> out = new ArrayList<>();
-		Item w = Generator.random( Dungeon.depth <= 5 ? Generator.Category.WEP_T3 : Generator.Category.WEP_T4 );
-		w.cursed = false;
-		w.identify();
-		w.upgrade();
-		out.add( w );
+		Item w = null;
+    //a reward must never be what brings the game down: if the weapon cannot be made, gold stands in for it
+    try {
+      w = Generator.random( Dungeon.depth <= 5 ? Generator.Category.WEP_T3 : Generator.Category.WEP_T4 );
+      w.cursed = false;
+      w.identify();
+      w.upgrade();
+    } catch (RuntimeException e) {
+      w = null;
+    }
+    out.add( w != null ? w : new xyz.gabriwar.warpedpixeldungeon.items.Gold( 40 + 12 * Math.max( 1, Dungeon.depth ) ) );
 		out.add( new BandageRoll().quantity( 2 ) );
 		return out;
 	}
@@ -106,9 +112,7 @@ public class OldProspector extends NPC {
 		if (done) {
 			say( Messages.get( this, "after" ) );
 		} else if (receive( hero )) {
-			for (Item it : payout()) {
-				if (!it.doPickUp( hero )) Dungeon.level.drop( it, hero.pos ).sprite.drop();
-			}
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
 			say( Messages.get( this, "thanks" ) );
 			leave();
 		} else {

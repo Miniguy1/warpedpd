@@ -186,6 +186,26 @@ public final class EarlyEvents {
 		return npc;
 	}
 
+	/** a reward is handed over at the hero's feet (and beside them when there are several), never as a string of pickups that each spend the hero's turn */
+	public static void give( Hero hero, java.util.List<Item> items ) {
+		Level level = Dungeon.level;
+		if (level == null || hero == null) return;
+		HashSet<Integer> taken = new HashSet<>();
+		taken.add( hero.pos );
+		boolean first = true;
+		for (Item it : items) {
+			int at = hero.pos;
+			if (!first) {
+				int n = neighbour( level, hero.pos, taken );
+				if (n != -1) at = n;
+			}
+			taken.add( at );
+			first = false;
+			Heap heap = level.drop( it, at );
+			if (heap != null && heap.sprite != null) heap.sprite.drop();
+		}
+	}
+
 	/** a free, reachable cell: nothing lies on it or stands on it, and it is not a staircase */
 	public static int freeCell( Level level ) {
 		for (int tries = 0; tries < 60; tries++) {

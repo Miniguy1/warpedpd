@@ -1137,6 +1137,7 @@ public class Dungeon {
 		//a climb floor's event, the first time the hero is on it
 		xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
 		Pacts.onArrive( level );
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( hero );
 		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.announce( level );
 		//first steps somewhere new write its pages into the Descent Guide
 		xyz.gabriwar.warpedpixeldungeon.journal.GuideGraph.onArrive( depth, branch );

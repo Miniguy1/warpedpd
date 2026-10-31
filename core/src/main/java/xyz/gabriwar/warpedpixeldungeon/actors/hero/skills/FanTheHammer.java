@@ -68,12 +68,17 @@ public class FanTheHammer extends Skill {
 
 	@Override protected boolean upgrade(){ return true; }
 
+	//a second press of the skill fires at the target it has marked
+	@Override
+	public boolean confirmTarget( Hero hero ){ return GunSkills.confirmPending( hero, this ); }
+
 	@Override
 	public void execute( final Hero hero, String action ){
 		if (!AC_CAST.equals( action ) || level <= 0 || hero.MP < getManaCost()) return;
+		if (confirmTarget( hero )) return;
 		final Gun gun = GunSkills.needLoaded();
 		if (gun == null) return;
-		GunSkills.pickEnemy( Messages.get( this, "prompt" ), e -> {
+		GunSkills.pickEnemy( this, Messages.get( this, "prompt" ), e -> {
 			int fired = 0;
 			float factor = 0.45f + 0.15f * level;
 			//the whole magazine, one round after another, until the target drops
