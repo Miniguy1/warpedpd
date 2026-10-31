@@ -3782,6 +3782,62 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void aThanksAnOldCrashLeftUnfinishedIsFinishedNow() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			java.util.HashSet<Integer> none = new java.util.HashSet<>();
+			//the old man: the pickaxe was taken (and the game went down) before the thanks
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector p = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
+			p.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			new xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe().collect( h.belongings.backpack );
+			assertTrue( p.receive( h ) );
+			assertTrue( p.done() );
+			assertNull( h.belongings.getItem( xyz.gabriwar.warpedpixeldungeon.items.quest.LostPickaxe.class ) );
+			//an old save: he is still here, done. Walking up to him finishes it.
+			assertTrue( "the unfinished thanks is finished", p.tryAutoTurnIn( h ) );
+			boolean bandages = false;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) for (Item it : hp.items) if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll && level.distance( hp.pos, h.pos ) <= 1) bandages = true;
+			assertTrue( "the reward is paid", bandages );
+			assertFalse( "and he is gone: never twice", p.tryAutoTurnIn( h ) );
+			assertTrue( "tapping him afterwards does nothing and does not fail", p.interact( h ) );
+
+			//the adventurer: flagged as thanked, still here
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer a = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer();
+			a.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+			com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
+			a.storeInBundle( b );
+			b.put( "rewarded", true );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer stuck = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.StrandedAdventurer();
+			stuck.restoreFromBundle( b );
+			stuck.pos = a.pos;
+			assertTrue( stuck.rewarded() );
+			int before = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) before += hp.items.size();
+			assertTrue( "tapping him finishes the thanks instead of doing nothing", stuck.interact( h ) );
+			int after = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) after += hp.items.size();
+			assertTrue( "the reward was dropped: " + before + " -> " + after, after >= before + 3 );
+			assertFalse( "and he is gone", stuck.thank( h ) );
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

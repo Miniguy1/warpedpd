@@ -21,75 +21,76 @@
 
 package xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs;
 
-import java.util.ArrayList;
-
 import com.watabou.utils.Bundle;
-import com.watabou.utils.PathFinder;
-import com.watabou.utils.Random;
+
+import java.util.ArrayList;
 
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.Char;
-import xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero;
 import xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob;
 import xyz.gabriwar.warpedpixeldungeon.items.Generator;
-import xyz.gabriwar.warpedpixeldungeon.items.Heap;
 import xyz.gabriwar.warpedpixeldungeon.items.Item;
 import xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll;
-import xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents;
 import xyz.gabriwar.warpedpixeldungeon.levels.Level;
 import xyz.gabriwar.warpedpixeldungeon.messages.Messages;
 import xyz.gabriwar.warpedpixeldungeon.scenes.GameScene;
 import xyz.gabriwar.warpedpixeldungeon.utils.GLog;
 import xyz.gabriwar.warpedpixeldungeon.windows.WndQuest;
 
-/** A Stranded Adventurer, cornered by enemies: clear them and he thanks you with a reward. */
+/**
+ * The Stranded Adventurer: hurt, with two enemies standing over him. Clear them and walk up to him (or tap him):
+ * he thanks you with two finds, two smoke flares and a bandage roll.
+ */
 public class StrandedAdventurer extends NPC {
 
-	{
-		spriteClass = xyz.gabriwar.warpedpixeldungeon.sprites.StrandedAdventurerSprite.class;
-		properties.add( Property.IMMOVABLE );
-	}
+  {
+    spriteClass = xyz.gabriwar.warpedpixeldungeon.sprites.StrandedAdventurerSprite.class;
+    properties.add( Property.IMMOVABLE );
+  }
 
-	private boolean rewarded = false;
+  private boolean rewarded = false;
+  //he has gone (not saved)
+  private boolean left = false;
 
-	@Override
-	public void damage( int dmg, Object src ) {
-	}
+  @Override
+  public void damage( int dmg, Object src ) {
+  }
 
-	@Override
-	public boolean reset() {
-		return true;
-	}
+  @Override
+  public boolean reset() {
+    return true;
+  }
 
-	protected void say( String text ) {
-		//the words are always in the log, whatever the window does
-    xyz.gabriwar.warpedpixeldungeon.utils.GLog.i( text );
+  protected void say( String text ) {
+    //the words are always in the log, whatever the window does
+    GLog.i( text );
     try {
       if (com.watabou.noosa.Game.scene() instanceof GameScene) GameScene.show( new WndQuest( this, text ) );
     } catch (Throwable t) {
       xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.report( this, t );
     }
-	}
+  }
 
-	protected void leave() {
-		destroy();
-		if (sprite != null) sprite.killAndErase();
-		if (Dungeon.level != null) Dungeon.level.mobs.remove( this );
-	}
+  protected void leave() {
+    left = true;
+    destroy();
+    if (sprite != null) sprite.killAndErase();
+    if (Dungeon.level != null) Dungeon.level.mobs.remove( this );
+  }
 
-	public boolean rewarded() { return rewarded; }
+  public boolean rewarded() { return rewarded; }
 
-	/** are there enemies in view and near? Then he will not be thanked yet */
-	public boolean threatened( Hero hero ) {
-		Level level = Dungeon.level;
-		if (level == null) return false;
-		for (Mob m : level.mobs.toArray( new Mob[0] )) {
-			if (m != this && m.alignment == Char.Alignment.ENEMY && m.isAlive() && level.heroFOV[m.pos]
-					&& level.distance( hero.pos, m.pos ) <= 8) return true;
-		}
-		return false;
-	}
+  /** are there enemies in view and near? Then he will not be thanked yet */
+  public boolean threatened( Hero hero ) {
+    Level level = Dungeon.level;
+    if (level == null) return false;
+    for (Mob m : level.mobs.toArray( new Mob[0] )) {
+      if (m != this && m.alignment == Char.Alignment.ENEMY && m.isAlive() && level.heroFOV[m.pos]
+          && level.distance( hero.pos, m.pos ) <= 8) return true;
+    }
+    return false;
+  }
 
   /** a random find; if one cannot be made, gold stands in for it */
   private Item safeFind() {
@@ -102,23 +103,30 @@ public class StrandedAdventurer extends NPC {
     return new xyz.gabriwar.warpedpixeldungeon.items.Gold( 30 + 10 * Math.max( 1, Dungeon.depth ) );
   }
 
-	/** the reward: two random finds, two smoke flares and a bandage */
-	public ArrayList<Item> payout() {
-		ArrayList<Item> out = new ArrayList<>();
-		out.add( safeFind() );
-		out.add( safeFind() );
-		out.add( new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare().quantity( 2 ) );
-		out.add( new BandageRoll() );
-		return out;
-	}
+  /** the reward: two random finds, two smoke flares and a bandage */
+  public ArrayList<Item> payout() {
+    ArrayList<Item> out = new ArrayList<>();
+    out.add( safeFind() );
+    out.add( safeFind() );
+    out.add( new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare().quantity( 2 ) );
+    out.add( new BandageRoll() );
+    return out;
+  }
 
-  /** thank him once the floor is clear: the reward at the hero's feet, a line in the log, and he is on his way */
+  /**
+   * Thank him once the floor is clear: the reward at the hero's feet and a line in the log. He is on his way afterwards
+   * even if the reward fails, and one an old crash left thanked but still here is simply finished.
+   */
   public boolean thank( Hero hero ) {
-    if (rewarded || hero == null || threatened( hero )) return false;
+    if (left || hero == null) return false;
+    if (!rewarded && threatened( hero )) return false;
     rewarded = true;
-    xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
-    xyz.gabriwar.warpedpixeldungeon.utils.GLog.p( Messages.get( this, "thanks" ) );
-    leave();
+    try {
+      xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.give( hero, payout() );
+      GLog.p( Messages.get( this, "thanks" ) );
+    } finally {
+      leave();
+    }
     return true;
   }
 
@@ -135,7 +143,7 @@ public class StrandedAdventurer extends NPC {
 
   private boolean actBody() {
     Hero h = Dungeon.hero;
-    if (isAlive() && !rewarded && h != null && h.isAlive() && Dungeon.level != null
+    if (isAlive() && !left && h != null && h.isAlive() && Dungeon.level != null
         && Dungeon.level.distance( pos, h.pos ) <= 2 && thank( h )) {
       spend( TICK );
       return true;
@@ -154,10 +162,9 @@ public class StrandedAdventurer extends NPC {
   }
 
   private boolean interactBody( Char c ) {
-    if (c != Dungeon.hero) return true;
+    if (c != Dungeon.hero || left) return true;
     Hero hero = (Hero) c;
-    if (rewarded) return true;
-    if (threatened( hero )) {
+    if (!rewarded && threatened( hero )) {
       say( Messages.get( this, "danger" ) );
       return true;
     }
@@ -165,18 +172,17 @@ public class StrandedAdventurer extends NPC {
     return true;
   }
 
+  private static final String REWARDED = "rewarded";
 
-	private static final String REWARDED = "rewarded";
+  @Override
+  public void storeInBundle( Bundle bundle ) {
+    super.storeInBundle( bundle );
+    bundle.put( REWARDED, rewarded );
+  }
 
-	@Override
-	public void storeInBundle( Bundle bundle ) {
-		super.storeInBundle( bundle );
-		bundle.put( REWARDED, rewarded );
-	}
-
-	@Override
-	public void restoreFromBundle( Bundle bundle ) {
-		super.restoreFromBundle( bundle );
-		rewarded = bundle.getBoolean( REWARDED );
-	}
+  @Override
+  public void restoreFromBundle( Bundle bundle ) {
+    super.restoreFromBundle( bundle );
+    rewarded = bundle.getBoolean( REWARDED );
+  }
 }
