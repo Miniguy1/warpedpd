@@ -39,8 +39,11 @@ public class LostPickaxe extends Item {
 	/** hand it to the Old Prospector if he is near and in view */
 	@Override
 	public void execute( xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero hero, String action ) {
-		super.execute( hero, action );
-		if (!AC_GIVE.equals( action )) return;
+		//giving it is ours alone; every other action (drop, throw) is the item's own
+		if (!AC_GIVE.equals( action )) {
+			super.execute( hero, action );
+			return;
+		}
 		xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector near = null;
 		xyz.gabriwar.warpedpixeldungeon.levels.Level level = xyz.gabriwar.warpedpixeldungeon.Dungeon.level;
 		if (level != null) {
