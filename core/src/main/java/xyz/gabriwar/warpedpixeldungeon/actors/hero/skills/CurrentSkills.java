@@ -1010,6 +1010,11 @@ public class CurrentSkills {
 		return b.get(b.size()-1).upgradeCost();
 	}
 
+	/** a copy of every skill the hero has in the tree (the branch roots too) */
+	public java.util.List<Skill> skillsOfTree(){
+		return new java.util.ArrayList<>( allSkills );
+	}
+
 	/** does the hero hold skills of another calling? (their points are lent, and counted elsewhere) */
 	public boolean holdsForeignSkills(){
 		return !foreignSkills.isEmpty();

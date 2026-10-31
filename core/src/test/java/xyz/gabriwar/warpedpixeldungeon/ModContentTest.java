@@ -3704,7 +3704,7 @@ public class ModContentTest {
 					String who = cls + "/" + sub;
 					java.util.Set<String> tags = new java.util.HashSet<>();
 					int n = 0;
-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) {
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) {
 						if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill) continue;
 						n++;
 						if (s.tag.isEmpty()) bad.append( "\n  " ).append( who ).append( ": " ).append( s.getClass().getSimpleName() ).append( " has no tag" );
@@ -3712,7 +3712,7 @@ public class ModContentTest {
 					}
 					//give every skill a level of its own, save, and load into a fresh tree
 					int k = 0;
-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 1 + (k++ % 3);
 					com.watabou.utils.Bundle b = new com.watabou.utils.Bundle();
 					sk.storeInBundle( b );
 					xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills back = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
@@ -3720,8 +3720,8 @@ public class ModContentTest {
 					back.initSubclassBranch( h );
 					back.restoreSkillsFromBundle( b );
 					java.util.ArrayList<xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill> was = new java.util.ArrayList<>(), now = new java.util.ArrayList<>();
-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) was.add( s );
-					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : back.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) now.add( s );
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) was.add( s );
+					for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : back.skillsOfTree()) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) now.add( s );
 					if (was.size() != now.size()) { bad.append( "\n  " ).append( who ).append( ": " ).append( was.size() ).append( " skills became " ).append( now.size() ); continue; }
 					for (int i = 0; i < was.size(); i++) {
 						if (was.get( i ).level != now.get( i ).level) bad.append( "\n  " ).append( who ).append( ": " ).append( was.get( i ).getClass().getSimpleName() ).append( " went from " ).append( was.get( i ).level ).append( " to " ).append( now.get( i ).level );
@@ -3756,7 +3756,7 @@ public class ModContentTest {
 			assertEquals( start + 12 - 2, sk.pointsLeft( 5 ) );
 			assertEquals( 0, new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ).pointsLeft( 1 ) - new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER ).pointsLeft( 1 ) );
 			//never negative
-			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.allSkills) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 3;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) if (!(s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.BranchSkill)) s.level = 3;
 			assertEquals( 0, sk.pointsLeft( 1 ) );
 		} finally {
 			h.heroClass = keepClass;
