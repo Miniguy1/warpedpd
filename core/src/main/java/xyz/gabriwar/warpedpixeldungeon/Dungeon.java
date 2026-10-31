@@ -839,14 +839,14 @@ public class Dungeon {
 			}
 			//every block of five floors holds an event, on the way down as well as the climb
 			if (branch == 0) xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.roll( level );
-			//and the early floors have events and visitors of their own, in every run
-			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.roll( level );
 			//the bosses of a later cycle are mutated
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.BossMutation.assign( level );
 			//the pact of crowded floors, and then the elites
 			Pacts.crowd( level );
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.assign( level );
 		}
+		//the early floors have events and visitors of their own, in every run (the first included), and in every cycle
+		if (branch == 0) xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.roll( level );
 		//a barrow's deepest floor: its way down sealed, its guardian set
 		if (xyz.gabriwar.warpedpixeldungeon.levels.Delves.isDelve( branch )){
 			xyz.gabriwar.warpedpixeldungeon.levels.Delves.afterCreate( level );

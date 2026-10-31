@@ -201,6 +201,8 @@ public final class Cycle {
 		boolean[] kept = new boolean[ONCE_ONLY.length];
 		for (int i = 0; i < ONCE_ONLY.length; i++) kept[i] = ONCE_ONLY[i].dropped();
 		Dungeon.LimitedDrops.reset();
+		//the old prospector and the stranded adventurer are on the early floors again
+		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.reset();
 		for (int i = 0; i < ONCE_ONLY.length; i++) if (kept[i]) ONCE_ONLY[i].drop();
 
 		Ghost.Quest.reset();
