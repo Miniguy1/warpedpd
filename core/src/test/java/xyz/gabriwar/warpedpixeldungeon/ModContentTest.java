@@ -3374,8 +3374,14 @@ public class ModContentTest {
 			assertTrue( "belts in floors 1 to 4: gunslinger " + gun / 600 + ", others " + other / 600, gun / 600 > other / 600 + 0.35 );
 			//the later sets follow the same rule: a Gunslinger who has had four belts by floor 10 is owed none more in that set
 			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
-			Dungeon.LimitedDrops.BULLET_BELT.count = 4; Dungeon.depth = 10;
-			assertFalse( Dungeon.beltNeeded() );
+			//floor 10 starts the third set of five: with only four belts so far two are still owed, with six none are
+			Dungeon.depth = 10;
+			Dungeon.LimitedDrops.BULLET_BELT.count = 6;
+			for (int i = 0; i < 200; i++) assertFalse( "nothing owed once the set is paid", Dungeon.beltNeeded() );
+			Dungeon.LimitedDrops.BULLET_BELT.count = 4;
+			boolean owed = false;
+			for (int i = 0; i < 200; i++) if (Dungeon.beltNeeded()) owed = true;
+			assertTrue( "two still owed in the third set", owed );
 
 			//and kills turn up bullets, about one in eight
 			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
