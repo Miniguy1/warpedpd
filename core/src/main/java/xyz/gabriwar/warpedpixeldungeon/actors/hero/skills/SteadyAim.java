@@ -53,20 +53,9 @@ public class SteadyAim extends PassiveSkillA1 {
 	@Override
 	protected boolean upgrade(){ return true; }
 
-
-	private float lastMove = -10f;
-
-	@Override
-	public void onCharMoved( Char ch, int from, boolean travelling ){
-		if (ch == Dungeon.hero) lastMove = Actor.now();
-	}
-
-	//+8/16/24% accuracy with a firearm, doubled when you have stood still
+	//+6/12/18% accuracy with a firearm, all the time (it used to need you to stand still)
 	@Override
 	public float toHitModifier(){
-		if (level <= 0 || GunSkills.gun() == null) return 1f;
-		float b = 0.08f * level;
-		if (Actor.now() - lastMove >= 1f) b *= 2f;
-		return 1f + b;
+		return level > 0 && GunSkills.gun() != null ? 1f + 0.06f * level : 1f;
 	}
 }

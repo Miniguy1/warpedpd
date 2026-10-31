@@ -3396,6 +3396,40 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void steadyAimIsRawAccuracy() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		try {
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			h.heroSkills = sk;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill aim = sk.passiveASkills.get( 0 );
+			assertTrue( aim instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.SteadyAim );
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+			aim.level = 0;
+			assertEquals( 1f, aim.toHitModifier(), 0.0001f );
+			//the same bonus whether you have just moved or not
+			for (int pass = 0; pass < 2; pass++) {
+				if (pass == 1) aim.onCharMoved( h, 1, false );
+				aim.level = 1; assertEquals( 1.06f, aim.toHitModifier(), 0.0001f );
+				aim.level = 2; assertEquals( 1.12f, aim.toHitModifier(), 0.0001f );
+				aim.level = 3; assertEquals( 1.18f, aim.toHitModifier(), 0.0001f );
+			}
+			//and it is a firearm's bonus: nothing with no gun at hand
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			assertEquals( 1f, aim.toHitModifier(), 0.0001f );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( aim, "desc" ).contains( "standing still" ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( aim, "desc" ).contains( "_+6%_" ) );
+		} finally {
+			h.heroClass = keepClass;
+			h.heroSkills = keepSkills;
+			h.belongings.weapon = keepWeapon;
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;
