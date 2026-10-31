@@ -2880,7 +2880,9 @@ public class ModContentTest {
 			assertEquals( "the set gun", peace - 2, new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.GunslingersPeacemaker().STRReq( 0 ) );
 			assertTrue( "a new hero (10 Strength) can hold the starting gun", new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().STRReq( 0 ) <= 10 );
 			//it only applies to firearms
-			assertEquals( new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Longsword().STRReq( 0 ), 14 );
+			int swordNow = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Longsword().STRReq( 0 );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			assertEquals( "a sword asks the same of everyone", new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Longsword().STRReq( 0 ), swordNow );
 		} finally {
 			h.heroClass = keep;
 		}
