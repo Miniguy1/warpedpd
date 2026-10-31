@@ -1,0 +1,96 @@
+> Task :core:compileTestJava FAILED
+-----
+24-
+25-> Task :core:compileTestJava
+26:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+27-					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+28-					                                                                                                                                                                                                              ^
+29-  symbol:   class AmuletOfRenewal
+30-  location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+31:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+32-					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+33-					                                                                                                                                                                                                                                                                                               ^
+34-  symbol:   class AmuletOfAegis
+35-  location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+36-Note: Some input files use or override a deprecated API.
+37-Note: Recompile with -Xlint:deprecation for details.
+38-Note: Some input files use unchecked or unsafe operations.
+39-Note: Recompile with -Xlint:unchecked for details.
+--
+47-FAILURE: Build failed with an exception.
+48-
+49:* What went wrong:
+50-Execution failed for task ':core:compileTestJava'.
+51-> Compilation failed; see the compiler output below.
+52-  Note: Recompile with -Xlint:deprecation for details.
+53:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+54-  					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+55-  					                                                                                                                                                                                                              ^
+56-    symbol:   class AmuletOfRenewal
+57-    location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+58:  /home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+59-  					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+60-  					                                                                                                                                                                                                                                                                                               ^
+61-    symbol:   class AmuletOfAegis
+62-    location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+63-  Note: Recompile with -Xlint:unchecked for details.
+64-  Note: Some input files use or override a deprecated API.
+65-  Note: Some input files use unchecked or unsafe operations.
+66-  2 errors
+--
+107-Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
+108-Note: Recompile with -Xlint:deprecation for details.
+109:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+110-					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+111-					                                                                                                                                                                                                              ^
+112-  symbol:   class AmuletOfRenewal
+113-  location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+114:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:2751: error: cannot find symbol
+115-					else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.trinkets.Trinket || it instanceof xyz.gabriwar.warpedpixeldungeon.items.SetRelic || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfRenewal || it instanceof xyz.gabriwar.warpedpixeldungeon.items.artifacts.AmuletOfAegis) { h.belongings.backpack.items.add( it ); placed++; }
+116-					                                                                                                                                                                                                                                                                                               ^
+117-  symbol:   class AmuletOfAegis
+118-  location: package xyz.gabriwar.warpedpixeldungeon.items.artifacts
+119-Note: Recompile with -Xlint:unchecked for details.
+120-Note: Some input files use or override a deprecated API.
+121-Note: Some input files use unchecked or unsafe operations.
+122-2 errors
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 51s
+6 actionable tasks: 6 executed
