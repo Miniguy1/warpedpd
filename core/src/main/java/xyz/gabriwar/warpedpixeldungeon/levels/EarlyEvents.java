@@ -187,13 +187,13 @@ public final class EarlyEvents {
 	}
 
 	/** a reward is handed over at the hero's feet (and beside them when there are several), never as a string of pickups that each spend the hero's turn */
-	public static void give( Hero hero, java.util.List<Item> items ) {
+	public static void give( Hero hero, java.util.List<xyz.gabriwar.warpedpixeldungeon.items.Item> items ) {
 		Level level = Dungeon.level;
 		if (level == null || hero == null) return;
 		HashSet<Integer> taken = new HashSet<>();
 		taken.add( hero.pos );
 		boolean first = true;
-		for (Item it : items) {
+		for (xyz.gabriwar.warpedpixeldungeon.items.Item it : items) {
 			int at = hero.pos;
 			if (!first) {
 				int n = neighbour( level, hero.pos, taken );
