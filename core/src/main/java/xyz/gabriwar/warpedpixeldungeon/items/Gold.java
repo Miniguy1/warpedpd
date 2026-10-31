@@ -63,6 +63,8 @@ public class Gold extends Item {
 		Catalog.setSeen(getClass());
 		Statistics.itemTypesDiscovered.add(getClass());
 
+		quantity = xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.goldBonus( hero, quantity );   //a lucky rat tooth
+
 		//skill tree: Bandit sniffs out extra coin
 		int skillBonus = hero.heroSkills.allLootBonus( quantity );
 		if (skillBonus > 0) quantity += skillBonus;

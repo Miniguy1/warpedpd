@@ -121,7 +121,8 @@ public class MobSpawner extends Actor {
 				return new ArrayList<>(Arrays.asList(Rat.class, Rat.class,
 						Snake.class, Snake.class,
 						Gnoll.class, Gnoll.class,
-						BrownBat.class));
+						BrownBat.class,
+			PowderRat.class, PickpocketRat.class));
 			case 3:
 				//1x rat, 2x snake, 3x gnoll, 1x swarm, 1x crab, 1x brown bat, 1x grey rat
 				return new ArrayList<>(Arrays.asList(Rat.class,
@@ -131,7 +132,8 @@ public class MobSpawner extends Actor {
 						Crab.class,
 						BrownBat.class,
 						GreyRat.class,
-						Velocirooster.class));
+						Velocirooster.class,
+			PowderRat.class, PickpocketRat.class, BogNewt.class));
 			case 4: case 5:
 				//1x gnoll, 1x swarm, 2x crab, 2x slime
 				return new ArrayList<>(Arrays.asList(Gnoll.class,
@@ -140,7 +142,8 @@ public class MobSpawner extends Actor {
 						Slime.class, Slime.class,
 						SlimeBrown.class,
 						Velocirooster.class,
-						SlimeRed.class));
+						SlimeRed.class,
+			PowderRat.class, BogNewt.class));
 
 			// Prison
 			case 6:
@@ -148,7 +151,8 @@ public class MobSpawner extends Actor {
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
 						Swarm.class,
-						GreyRat.class));
+						GreyRat.class,
+			BogNewt.class));
 			case 7:
 				//3x skeleton, 1x thief, 1x DM-100, 1x guard, 1x fossil skeleton
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
@@ -156,7 +160,8 @@ public class MobSpawner extends Actor {
 						DM100.class,
 						Guard.class,
 						FossilSkeleton.class,
-						Zombie.class));
+						Zombie.class,
+			BogNewt.class));
 			case 8:
 				//2x skeleton, 1x thief, 2x DM-100, 2x guard, 1x necromancer, 1x fossil skeleton
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class,

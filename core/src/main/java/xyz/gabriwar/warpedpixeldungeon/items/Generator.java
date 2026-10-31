@@ -469,7 +469,9 @@ public class Generator {
 		SPELLS  ( 0, 0, Spell.class ),
 		STONE   ( 1, 1, Runestone.class),
 
-		GOLD	( 10, 10,   Gold.class );
+		FIELD ( 4, 4, xyz.gabriwar.warpedpixeldungeon.items.field.FieldItem.class ),
+
+    GOLD	( 10, 10,   Gold.class );
 		
 		public Class<?>[] classes;
 
@@ -542,6 +544,8 @@ public class Generator {
 		}
 
 		static {
+			FIELD.classes = new Class<?>[]{ xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll.class, xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.class, xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare.class, xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.class };
+			FIELD.probs = new float[]{ 4, 3, 3, 1 };
 			GOLD.classes = new Class<?>[]{
 					Gold.class };
 			GOLD.probs = new float[]{ 1 };

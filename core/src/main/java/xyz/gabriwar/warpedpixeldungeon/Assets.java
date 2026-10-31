@@ -578,6 +578,9 @@ public class Assets {
 		public static final String GUARDIAN = "sprites/guardian.png";
 		public static final String SLIME    = "sprites/slime.png";
 		public static final String SNAKE    = "sprites/snake.png";
+		public static final String POWDER_RAT     = "sprites/powder_rat.png";
+		public static final String PICKPOCKET_RAT = "sprites/pickpocket_rat.png";
+		public static final String BOG_NEWT       = "sprites/bog_newt.png";
 		public static final String NECRO    = "sprites/necromancer.png";
 		public static final String GHOUL    = "sprites/ghoul.png";
 		public static final String RIPPER   = "sprites/ripper.png";

@@ -2237,4 +2237,16 @@ public class ItemSpriteSheet {
     assignItemRect(GUN_BELT, 16, 15);
     assignItemRect(LUCKY_COIN, 12, 12);
   }
+
+  private static final int OW_FIELD     =                            xy(1, 74);   //the early-floor field items (drawn by script)
+  public static final int BANDAGE_ROLL        = OW_FIELD+0;
+  public static final int WHETSTONE           = OW_FIELD+1;
+  public static final int SMOKE_FLARE         = OW_FIELD+2;
+  public static final int RAT_TOOTH           = OW_FIELD+3;
+  static {
+    assignItemRect(BANDAGE_ROLL, 12, 12);
+    assignItemRect(WHETSTONE, 15, 14);
+    assignItemRect(SMOKE_FLARE, 14, 15);
+    assignItemRect(RAT_TOOTH, 10, 16);
+  }
 }

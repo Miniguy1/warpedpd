@@ -2941,6 +2941,177 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theEarlyFloorEnemiesWork() {
+		int keepBranch = Dungeon.branch, keepDepth = Dungeon.depth, keepGold = Dungeon.gold;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos, keepHP = h.HP, keepHT = h.HT;
+		Dungeon.generatedLevels.clear();
+		try {
+			//where they live
+			Dungeon.branch = 0;
+			java.util.function.IntFunction<java.util.Set<Class<?>>> seen = d -> {
+				java.util.Set<Class<?>> got = new java.util.HashSet<>();
+				for (int i = 0; i < 400; i++) got.addAll( xyz.gabriwar.warpedpixeldungeon.actors.mobs.MobSpawner.getMobRotation( d ) );
+				return got;
+			};
+			java.util.Set<Class<?>> d1 = seen.apply( 1 ), d2 = seen.apply( 2 ), d3 = seen.apply( 3 ), d5 = seen.apply( 5 ), d7 = seen.apply( 7 ), d9 = seen.apply( 9 );
+			assertFalse( d1.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) || d1.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat.class ) || d1.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) );
+			assertTrue( d2.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) && d2.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat.class ) && !d2.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) );
+			assertTrue( d3.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) && d3.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat.class ) && d3.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) );
+			assertTrue( d5.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) && d5.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) && !d5.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat.class ) );
+			assertTrue( d7.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) && !d7.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) );
+			assertFalse( d9.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt.class ) || d9.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class ) || d9.contains( xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat.class ) );
+
+			Dungeon.depth = 3;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.HT = 300; h.HP = 300;
+			//the powder rat: a blast that reaches the neighbours and nobody else
+			int a = -1, b = -1;
+			for (int c = 40; c < level.length() - 40 && a < 0; c++) {
+				if (!level.passable[c]) continue;
+				for (int n : com.watabou.utils.PathFinder.NEIGHBOURS8) if (level.passable[c + n] && b < 0) { a = c; b = c + n; }
+			}
+			assertTrue( a >= 0 );
+			h.pos = a;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat();
+			rat.pos = b;
+			level.mobs.add( rat );
+			//a bystander next to the rat (not the hero's cell), and one far away
+			int c2 = -1;
+			for (int n : com.watabou.utils.PathFinder.NEIGHBOURS8) { int c = b + n; if (c != a && level.passable[c] && level.adjacent( b, c )) { c2 = c; break; } }
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat near = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); near.HT = near.HP = 900; near.pos = c2 >= 0 ? c2 : a;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat far = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); far.HT = far.HP = 900; far.pos = -1;
+			for (int c = level.length() - 1; c > 0; c--) if (level.passable[c] && level.distance( c, b ) > 6) { far.pos = c; break; }
+			level.mobs.add( near ); level.mobs.add( far );
+			assertTrue( far.pos >= 0 );
+			rat.explode();
+			assertTrue( "the hero beside it was hurt: " + h.HP, h.HP < 300 );
+			assertTrue( "so was the enemy beside it: " + near.HP, near.HP < 900 );
+			assertEquals( "nobody far away", 900, far.HP );
+			int after = h.HP, nearAfter = near.HP;
+			rat.explode();
+			assertEquals( "it bursts only once", after, h.HP );
+			assertEquals( nearAfter, near.HP );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat().description().contains( "!!!" ) );
+
+			//the pickpocket rat: gold, never gear; kill it to get it back
+			Dungeon.gold = 200;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat thief = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat();
+			thief.attackProc( h, 3 );
+			assertTrue( "it took gold: " + Dungeon.gold, Dungeon.gold < 200 && Dungeon.gold > 0 );
+			assertTrue( thief.item instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold );
+			assertEquals( "and it holds exactly what it took", 200 - Dungeon.gold, thief.item.quantity() );
+			assertEquals( thief.FLEEING, thief.state );
+			int left = Dungeon.gold;
+			thief.attackProc( h, 3 );
+			assertEquals( "one theft only", left, Dungeon.gold );
+			Dungeon.gold = 0;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat broke = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat();
+			broke.attackProc( h, 3 );
+			assertNull( "nothing to take", broke.item );
+			assertTrue( thief.description().contains( "!!!" ) == false );
+
+			//the bog newt: every hit poisons
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt newt = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.BogNewt();
+			newt.attackProc( h, 2 );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Poison.class ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Poison.class );
+			assertFalse( newt.name().contains( "!!!" ) );
+		} finally {
+			Dungeon.branch = keepBranch; Dungeon.depth = keepDepth; Dungeon.gold = keepGold;
+			Dungeon.level = lvKeep;
+			h.pos = keepPos; h.HP = keepHP; h.HT = keepHT;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	@Test
+	public void theFieldItemsWork() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepW = h.belongings.weapon;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		Level lvKeep = Dungeon.level;
+		int keepDepth = Dungeon.depth, keepPos = h.pos;
+		Dungeon.generatedLevels.clear();
+		try {
+			//a bandage: stops the bleeding, heals over time, and is used up
+			xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll bandage = (xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) new xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll().quantity( 3 );
+			h.belongings.backpack.items.add( bandage );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ).set( 3 );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
+			bandage.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll.AC_APPLY );
+			assertNull( "the bleeding stops", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Bleeding.class ) );
+			assertNotNull( "and the healing starts", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Healing.class ) );
+			assertEquals( 2, bandage.quantity() );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Healing.class );
+
+			//a whetstone: ten hits, a fifth and two more each, melee or ranged, then it is gone
+			xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone stone = (xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) new xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone().quantity( 2 );
+			h.belongings.backpack.items.add( stone );
+			h.belongings.weapon = null;
+			stone.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.AC_APPLY );
+			assertNull( "no weapon, no edge", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ) );
+			assertEquals( 2, stone.quantity() );
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			stone.execute( h, xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.AC_APPLY );
+			assertEquals( 10, h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ).left() );
+			assertEquals( 1, stone.quantity() );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			for (int i = 0; i < 10; i++) assertEquals( "hit " + (i + 1), 122, xyz.gabriwar.warpedpixeldungeon.items.field.FieldGear.onHit( rat, 100, i % 2 == 0 ) );
+			assertNull( "the edge is spent", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ) );
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.field.FieldGear.onHit( rat, 100, false ) );
+			//a second stone does not stack past the best of the two
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ).set( 4 );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.affect( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ).set( 10 );
+			assertEquals( 10, h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class ).left() );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class );
+
+			//the lucky rat tooth
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.goldBonus( h, 100 ) );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth() );
+			assertEquals( 110, xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.goldBonus( h, 100 ) );
+			assertEquals( "never less than one more coin", 6, xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.goldBonus( h, 5 ) );
+
+			//the smoke flare: blinds what is within two tiles
+			Dungeon.depth = 3;
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			int cell = -1;
+			for (int c = 40; c < level.length() - 40 && cell < 0; c++) if (level.passable[c]) cell = c;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat nearMob = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); nearMob.pos = cell;
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat farMob = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); farMob.pos = cell;
+			for (int c = level.length() - 1; c > 0; c--) if (level.passable[c] && level.distance( c, cell ) > 5) { farMob.pos = c; break; }
+			assertTrue( level.distance( cell, farMob.pos ) > 5 );
+			level.mobs.add( nearMob ); level.mobs.add( farMob );
+			new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare().burst( cell );
+			assertNotNull( "blinded", nearMob.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Blindness.class ) );
+			assertNull( "not the far one", farMob.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Blindness.class ) );
+			assertNull( "nor the hero", h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Blindness.class ) );
+
+			//they all have text, a price, and a place in the drop tables
+			for (Item it : new Item[]{ bandage, stone, new xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare(), new xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth() }) {
+				assertFalse( it.getClass().getSimpleName() + " name", it.name().contains( "!!!" ) );
+				assertFalse( it.getClass().getSimpleName() + " description", it.desc().contains( "!!!" ) );
+				assertTrue( it.getClass().getSimpleName() + " sells", it.value() > 0 );
+			}
+			assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.items.Generator.Category.FIELD.classes.length );
+			int field = 0;
+			xyz.gabriwar.warpedpixeldungeon.items.Generator.fullReset();
+			for (int i = 0; i < 4000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.Generator.random() instanceof xyz.gabriwar.warpedpixeldungeon.items.field.FieldItem) field++;
+			assertTrue( "field items among random drops: " + field + "/4000", field > 150 && field < 900 );
+		} finally {
+			h.belongings.weapon = keepW;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			Dungeon.level = lvKeep; Dungeon.depth = keepDepth; h.pos = keepPos;
+			Dungeon.generatedLevels.clear();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Sharpened.class );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

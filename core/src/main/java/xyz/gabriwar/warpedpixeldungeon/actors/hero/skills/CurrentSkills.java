@@ -622,6 +622,7 @@ public class CurrentSkills {
 			damage = DamageLedger.pop( s.onHitProc(enemy, damage, ranged) );
 		}
 		damage = xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onHit( enemy, damage, ranged );
+		damage = xyz.gabriwar.warpedpixeldungeon.items.field.FieldGear.onHit( enemy, damage, ranged );   //a whetstone's edge
 		return damage;
 	}
 
