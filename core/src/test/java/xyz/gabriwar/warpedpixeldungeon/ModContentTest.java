@@ -3218,7 +3218,7 @@ public class ModContentTest {
 			assertNotNull( chest );
 			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST, chest.type );
 			boolean stone = false, flares = false;
-			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() == 2) flares = true; }
+			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() >= 2) flares = true; }   //a random find can add to the stack
 			assertTrue( "a whetstone and two smoke flares in the chest", stone && flares );
 			int before = level.mobs.size();
 			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
@@ -3267,7 +3267,8 @@ public class ModContentTest {
 			boolean flare2 = false, bandage1 = false; int finds = 0;
 			for (Item it : adv.payout()) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() == 2) flare2 = true; else if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandage1 = true; else finds++; }
 			assertTrue( "two smoke flares and a bandage", flare2 && bandage1 );
-			assertEquals( "and two random finds", 2, finds );
+			assertTrue( "and random finds besides: " + finds, finds >= 1 );   //(a find can itself be a bandage or a flare)
+			assertEquals( "four things in all", 4, adv.payout().size() );
 
 		} finally {
 			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
