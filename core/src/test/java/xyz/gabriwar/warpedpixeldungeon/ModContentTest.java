@@ -3838,6 +3838,83 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void theOutlawsSkillsReallyProcThroughTheHeroesAttack() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass keepSub = h.subClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon keepWeapon = h.belongings.weapon;
+		int keepPos = h.pos;
+		StringBuilder report = new StringBuilder();
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			sk.initSubclassBranch( h );
+			h.heroSkills = sk;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill lucky = null, tap = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) {
+				if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.LuckyStreak) lucky = s;
+				if (s instanceof xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DoubleTap) tap = s;
+			}
+			if (lucky == null || tap == null) {
+				report.append( " the Outlaw's skills are not in the skill tree (lucky=" ).append( lucky != null ).append( ", tap=" ).append( tap != null ).append( ")" );
+			} else {
+				lucky.level = 3; tap.level = 3;
+				xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver r = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver();
+				h.belongings.weapon = r;
+				java.util.HashSet<Integer> none = new java.util.HashSet<>();
+				int crits = 0, doubles = 0, runs = 0;
+				String error = null;
+				for (int i = 0; i < 1200; i++) {
+					h.belongings.thrownWeapon = r.knockBullet();
+					h.extraShotAttack = false;
+					xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+					rat.HT = rat.HP = 1000000;
+					rat.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, none );
+					int before = rat.HP;
+					try {
+						int d = h.attackProc( rat, 100 );
+						runs++;
+						if (d >= 170) crits++;
+						if (rat.HP < before) doubles++;
+					} catch (Throwable thrown) {
+						StackTraceElement[] st = thrown.getStackTrace();
+						error = thrown.getClass().getSimpleName() + " " + thrown.getMessage() + " at " + (st.length > 0 ? st[0] : "?") + " < " + (st.length > 1 ? st[1] : "?");
+						break;
+					}
+				}
+				h.belongings.thrownWeapon = null;
+				if (error != null) report.append( " the hero's attack threw after " ).append( runs ).append( " runs: " ).append( error );
+				else {
+					if (crits == 0) report.append( " Lucky Streak (24%) never crit in " ).append( runs ).append( " shots" );
+					if (doubles == 0) report.append( " Double Tap (30%) never fired a second shot in " ).append( runs ).append( " shots" );
+					report.append( " [crits " ).append( crits ).append( ", double shots " ).append( doubles ).append( " of " ).append( runs ).append( "]" );
+				}
+			}
+		} finally {
+			h.belongings.thrownWeapon = null;
+			h.heroClass = keepClass; h.subClass = keepSub; h.heroSkills = keepSkills;
+			h.belongings.weapon = keepWeapon;
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+		}
+		String r = report.toString();
+		//both must proc: the report only reads "[crits ..]" when nothing is wrong
+		assertTrue( "OUTLAW PROCS:" + r, !r.contains( "never" ) && !r.contains( "threw" ) && !r.contains( "not in the skill tree" ) );
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;
