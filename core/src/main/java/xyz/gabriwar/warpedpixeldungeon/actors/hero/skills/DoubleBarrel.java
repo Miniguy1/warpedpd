@@ -62,6 +62,8 @@ public class DoubleBarrel extends Skill {
 	public boolean doubleShot(){
 		if (level <= 0 || GunSkills.gun() == null) return false;
 		shots++;
-		return shots % (5 - level) == 0;
+		boolean fired = shots % (5 - level) == 0;
+		if (fired) GunSkills.callOut( "Double barrel!" );
+		return fired;
 	}
 }

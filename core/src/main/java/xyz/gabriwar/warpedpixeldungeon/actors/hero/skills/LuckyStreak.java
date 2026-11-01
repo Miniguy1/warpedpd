@@ -57,6 +57,10 @@ public class LuckyStreak extends SubSkill2 {
 	@Override
 	public int onHitProc( Char enemy, int damage, boolean ranged ){
 		if (level <= 0 || !ranged || enemy == null || GunSkills.gun() == null) return damage;
-		return Random.Float() < 0.08f * level ? Math.round( damage * 1.75f ) : damage;
+		if (Random.Float() < 0.08f * level){
+			GunSkills.callOut( "Lucky shot!" );
+			return Math.round( damage * 1.75f );
+		}
+		return damage;
 	}
 }

@@ -56,6 +56,8 @@ public class DoubleTap extends SubSkill1 {
 	//a 10/20/30% chance of a free second shot
 	@Override
 	public boolean doubleShot(){
-		return level > 0 && GunSkills.gun() != null && Random.Float() < 0.10f * level;
+		boolean fired = level > 0 && GunSkills.gun() != null && Random.Float() < 0.10f * level;
+		if (fired) GunSkills.callOut( "Double tap!" );
+		return fired;
 	}
 }

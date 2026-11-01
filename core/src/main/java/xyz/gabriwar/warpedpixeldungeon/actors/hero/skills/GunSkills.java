@@ -127,6 +127,13 @@ public final class GunSkills {
 		}
 	}
 
+	/** a proc you can see: a line in the log and a word floating over the hero */
+	public static void callOut( String text ){
+		GLog.p( text );
+		Hero h = Dungeon.hero;
+		if (h != null && h.sprite != null) h.sprite.showStatus( xyz.gabriwar.warpedpixeldungeon.sprites.CharSprite.POSITIVE, text );
+	}
+
 	/** a firearm in hand with a round in it, else a word to the player and null */
 	public static Gun needLoaded(){
 		Gun g = gun();
