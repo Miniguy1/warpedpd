@@ -3153,7 +3153,7 @@ public class ModContentTest {
 			Dungeon.depth = 3;
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 
 			//the camp: a fire to rest at and a chest of supplies beside it
 			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CAMP );
@@ -3221,7 +3221,7 @@ public class ModContentTest {
 			for (Item it : chest.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone) stone = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare && it.quantity() >= 2) flares = true; }   //a random find can add to the stack
 			assertTrue( "a whetstone and two smoke flares in the chest", stone && flares );
 			int before = level.mobs.size();
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.onParade( h );
 			assertEquals( "the chest is spent", -1, level.paradeChest );
 			assertTrue( "the rats come: " + before + " -> " + level.mobs.size(), level.mobs.size() >= before + 4 );
@@ -3448,7 +3448,7 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 			int pack = h.belongings.backpack.items.size();
 			java.util.ArrayList<Item> items = new java.util.ArrayList<>();
 			items.add( new xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll().quantity( 2 ) );
@@ -3494,7 +3494,7 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 			java.util.HashSet<Integer> taken = new java.util.HashSet<>();
 			a.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken ); taken.add( a.pos );
 			b.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken );
@@ -3606,7 +3606,7 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 			java.util.HashSet<Integer> none = new java.util.HashSet<>();
 			//with no pickaxe there is nothing to hand over
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector pr = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
@@ -3793,7 +3793,7 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
 			java.util.HashSet<Integer> none = new java.util.HashSet<>();
 			//the old man: the pickaxe was taken (and the game went down) before the thanks
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector p = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.OldProspector();
@@ -3837,6 +3837,20 @@ public class ModContentTest {
 		}
 	}
 
+	/** a cell with plenty of room round it (a random free cell can be a dead end with one way out) */
+	private static int openCell( Level level ) {
+		for (int tries = 0; tries < 500; tries++) {
+			int c = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			int open = 0;
+			for (int d : com.watabou.utils.PathFinder.NEIGHBOURS8) {
+				int n = c + d;
+				if (n >= 0 && n < level.length() && level.passable[n] && xyz.gabriwar.warpedpixeldungeon.actors.Actor.findChar( n ) == null) open++;
+			}
+			if (open >= 5) return c;
+		}
+		return xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+	}
+
 	@Test
 	public void theOutlawsSkillsReallyProcThroughTheHeroesAttack() {
 		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
@@ -3853,7 +3867,8 @@ public class ModContentTest {
 			Dungeon.generatedLevels.clear();
 			Level level = Dungeon.newLevel();
 			Dungeon.level = level;
-			h.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			h.pos = openCell( level );
+			h.fieldOfView = new boolean[level.length()];
 			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
 			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.OUTLAW;
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
