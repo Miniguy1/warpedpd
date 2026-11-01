@@ -3122,15 +3122,20 @@ public class ModContentTest {
 		boolean pm = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet, am = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet;
 		try {
 			//which floors: 2 to 4 and 6 to 9, in the dungeon proper only
-			for (int d = 1; d <= 11; d++) assertEquals( "floor " + d, d == 2 || d == 3 || d == 4 || (d >= 6 && d <= 9), xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.eligible( 0, d ) );
+			for (int d = 1; d <= 27; d++) assertEquals( "floor " + d, d >= 2 && d <= 24 && d % 5 != 0, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.eligible( 0, d ) );
 			assertFalse( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.eligible( 1, 3 ) );
 			//each block holds exactly one forced floor, whatever the seed
 			int[] a = new int[3], b = new int[4];
 			for (long seed = 1; seed <= 300; seed++) {
-				int fa = 0, fb = 0, at = -1, bt = -1;
-				for (int d = 1; d <= 11; d++) if (xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.forced( seed, d )) { if (d <= 5) { fa++; at = d; } else { fb++; bt = d; } }
-				assertEquals( 1, fa ); assertEquals( 1, fb );
-				a[at - 2]++; b[bt - 6]++;
+				for (int block = 0; block < 5; block++) {
+					int first = block == 0 ? 2 : 5 * block + 1, last = block == 0 ? 4 : 5 * block + 4;
+					int found = 0, at = -1;
+					for (int d = first - 1; d <= last + 1; d++) if (xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.forced( seed, d )) { found++; at = d; }
+					assertEquals( "block " + block + ", seed " + seed, 1, found );
+					assertTrue( at >= first && at <= last );
+					if (block == 0) a[at - 2]++;
+					if (block == 1) b[at - 6]++;
+				}
 			}
 			for (int n : a) assertTrue( "early block choices " + java.util.Arrays.toString( a ), n > 50 );
 			for (int n : b) assertTrue( "later block choices " + java.util.Arrays.toString( b ), n > 35 );
@@ -3927,6 +3932,114 @@ public class ModContentTest {
 		String r = report.toString();
 		//both must proc: the report only reads "[crits ..]" when nothing is wrong
 		assertTrue( "OUTLAW PROCS:" + r, !r.contains( "never" ) && !r.contains( "threw" ) && !r.contains( "not in the skill tree" ) );
+	}
+
+	@Test
+	public void theEventsReachEveryFloorAndScaleWithDepth() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		boolean pm = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet, am = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet;
+		try {
+			//the numbers
+			assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 3 ) ); assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 9 ) );
+			assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 10 ) ); assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 19 ) );
+			assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 20 ) ); assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( 24 ) );
+			double g3 = 0, g22 = 0;
+			for (int i = 0; i < 400; i++) { g3 += xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.goldFor( 3 ); g22 += xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.goldFor( 22 ); }
+			assertTrue( "gold grows with depth: " + g3 / 400 + " -> " + g22 / 400, g22 / g3 > 3 );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.gearFor( 3, true ) instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.gearFor( 22, true ) instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.MeleeWeapon );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.gearFor( 22, false ) instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor );
+			//every event is in the pick
+			java.util.Set<Integer> picked = new java.util.HashSet<>();
+			for (int i = 0; i < 400; i++) picked.add( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.pickEvent() );
+			assertEquals( "all seven events come up: " + picked, 7, picked.size() );
+
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet = true; xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet = true;
+			h.pos = openCell( level );
+			for (int depth : new int[]{ 3, 18, 23 }) {
+				Dungeon.depth = depth;
+				int finds = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.findsFor( depth );
+
+				//the supply cache
+				level.heaps.clear(); level.mobs.clear();
+				xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CACHE );
+				assertEquals( "cache at " + depth, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CACHE, level.earlyEvent );
+				xyz.gabriwar.warpedpixeldungeon.items.Heap cache = null;
+				for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) if (hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST) cache = hp;
+				assertNotNull( cache );
+				boolean gold = false; int bandages = 0;
+				for (Item it : cache.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandages += it.quantity(); }
+				assertTrue( "cache has gold", gold );
+				assertTrue( "bandages scale: " + bandages + " at " + depth, bandages >= 1 + depth / 8 );
+				assertTrue( "finds scale: " + cache.items.size() + " items at " + depth, cache.items.size() >= Math.min( finds, 2 ) + 1 );
+
+				//the guarded hoard
+				level.heaps.clear(); level.mobs.clear();
+				xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.HOARD );
+				assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.HOARD, level.earlyEvent );
+				xyz.gabriwar.warpedpixeldungeon.items.Heap hoard = null;
+				for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) if (hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.CHEST) hoard = hp;
+				assertNotNull( hoard );
+				assertTrue( "guards: " + level.mobs.size() + " at " + depth, level.mobs.size() >= 2 );
+				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob g : level.mobs) assertTrue( "a guard stands by the chest", level.distance( g.pos, hoard.pos ) <= 3 );
+
+				//the fallen hero's stash: depth-tier gear
+				level.heaps.clear(); level.mobs.clear();
+				xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.STASH );
+				assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.STASH, level.earlyEvent );
+				xyz.gabriwar.warpedpixeldungeon.items.Heap stash = null;
+				for (xyz.gabriwar.warpedpixeldungeon.items.Heap hp : level.heaps.valueList()) if (hp.type == xyz.gabriwar.warpedpixeldungeon.items.Heap.Type.SKELETON) stash = hp;
+				assertNotNull( stash );
+				boolean weapon = false, armor = false;
+				for (Item it : stash.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.weapon.Weapon) weapon = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.armor.Armor) armor = true; }
+				assertTrue( "a weapon and an armor in the remains", weapon && armor );
+
+				//the mimic
+				level.heaps.clear(); level.mobs.clear();
+				xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.MIMIC );
+				assertEquals( xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.MIMIC, level.earlyEvent );
+				boolean mimic = false;
+				for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mimic) mimic = true;
+				assertTrue( "a mimic waits on the floor", mimic );
+			}
+
+			//below the early floors, the parade and the cave-in send the floor's own creatures, not rats
+			Dungeon.depth = 18;
+			level.heaps.clear(); level.mobs.clear();
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.PARADE );
+			h.pos = openCell( level );
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.onParade( h );
+			assertTrue( "the walls open: " + level.mobs.size(), level.mobs.size() >= 4 );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) assertFalse( "no rats down here: " + m.getClass().getSimpleName(), m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat || m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.PickpocketRat );
+			level.heaps.clear(); level.mobs.clear();
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.apply( level, xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.CAVE_IN );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile pile = null;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) if (m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile) pile = (xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile) m;
+			assertNotNull( pile );
+			int cell = pile.pos;
+			for (int i = 0; i < xyz.gabriwar.warpedpixeldungeon.actors.mobs.npcs.RubblePile.TURNS; i++) pile.dig();
+			pile.uncover();
+			assertTrue( "the nest: " + level.mobs.size(), level.mobs.size() >= 3 );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob m : level.mobs) assertFalse( "no rats down here: " + m.getClass().getSimpleName(), m instanceof xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap rubbleStash = level.heaps.get( cell );
+			assertNotNull( rubbleStash );
+			int items = 0; boolean sg = false;
+			for (Item it : rubbleStash.items) { items++; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) sg = true; }
+			assertTrue( "a bigger stash down here: " + items, sg && items >= 3 );
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+			xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.prospectorMet = pm; xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.adventurerMet = am;
+		}
 	}
 
 	@Test

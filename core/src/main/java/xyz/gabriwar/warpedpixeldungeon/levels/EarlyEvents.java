@@ -52,25 +52,78 @@ public final class EarlyEvents {
 
 	private EarlyEvents(){}
 
-	public static final int NONE = 0, CAMP = 1, CAVE_IN = 2, PARADE = 3;
+	public static final int NONE = 0, CAMP = 1, CAVE_IN = 2, PARADE = 3, CACHE = 4, HOARD = 5, STASH = 6, MIMIC = 7;
 
 	/** once a run each */
 	public static boolean prospectorMet = false, adventurerMet = false;
 
+	/** every ordinary floor of the dungeon proper, from the second to the last before the final boss (not the boss floors) */
 	public static boolean eligible( int branch, int depth ) {
-		return branch == 0 && (depth == 2 || depth == 3 || depth == 4 || (depth >= 6 && depth <= 9));
+		return branch == 0 && depth >= 2 && depth <= 24 && depth % 5 != 0;
 	}
 
-	/** the one floor of its block that always holds an event: 2 to 4, or 6 to 9 */
+	/** the one floor of each block of five (2 to 4, 6 to 9, 11 to 14, 16 to 19, 21 to 24) that always holds an event */
 	public static boolean forced( long seed, int depth ) {
 		if (!eligible( 0, depth )) return false;
-		int block = depth <= 5 ? 0 : 1;
+		int block = (depth - 1) / 5;
 		long h = seed * 0x9E3779B97F4A7C15L + (block + 7) * 0xBF58476D1CE4E5B9L;
 		h ^= h >>> 31;
 		h *= 0xD6E8FEB86659FD93L;
 		h ^= h >>> 29;
+		int first = block == 0 ? 2 : 5 * block + 1;
 		int idx = (int) Math.floorMod( h, block == 0 ? 3L : 4L );
-		return depth == (block == 0 ? 2 : 6) + idx;
+		return depth == first + idx;
+	}
+
+	/** which event: the camp, the cave-in and the parade, the supply cache (the commonest), the guarded hoard, the fallen hero's stash and the mimic */
+	public static int pickEvent() {
+		int[] w = { 0, 2, 2, 2, 3, 2, 2, 2 };
+		int total = 0;
+		for (int e = 1; e < w.length; e++) total += w[e];
+		int r = Random.Int( total );
+		for (int e = 1; e < w.length; e++) {
+			if (r < w[e]) return e;
+			r -= w[e];
+		}
+		return CACHE;
+	}
+
+	//---- what an event pays and what it sends, by depth ----
+
+	/** gold for this floor: it grows with depth */
+	public static int goldFor( int depth ) {
+		return Math.max( 10, Math.round( (30 + 8 * Math.max( 1, depth )) * Random.Float( 0.8f, 1.2f ) ) );
+	}
+
+	/** how many random finds an event pays: 2 up to floor 9, 3 from 10, 4 from 20 */
+	public static int findsFor( int depth ) {
+		return 2 + Math.max( 0, depth ) / 10;
+	}
+
+	/** a weapon or an armor of the floor's own tier */
+	public static xyz.gabriwar.warpedpixeldungeon.items.Item gearFor( int depth, boolean weapon ) {
+		if (!weapon) return Generator.random( Generator.Category.ARMOR );
+		Generator.Category c = depth <= 4 ? Generator.Category.WEP_T2 : depth <= 9 ? Generator.Category.WEP_T3
+				: depth <= 14 ? Generator.Category.WEP_T4 : Generator.Category.WEP_T5;
+		return Generator.random( c );
+	}
+
+	/** n of the floor's own creatures, around a cell */
+	public static void spawnNatives( Level lv, int around, int n ) {
+		java.util.ArrayList<Class<? extends Mob>> rotation = MobSpawner.getMobRotation( Dungeon.depth );
+		for (int i = 0; i < n && rotation != null && !rotation.isEmpty(); i++) {
+			spawnAround( lv, around, Random.element( rotation ), 1 );
+		}
+	}
+
+	/** what lives behind rubble: rats on the early floors, the floor's own creatures below them */
+	public static void nest( Level level, int cell ) {
+		if (Dungeon.depth <= 9) {
+			spawnAround( level, cell, Rat.class, 2 );
+			spawnAround( level, cell, PowderRat.class, 1 );
+		} else {
+			spawnNatives( level, cell, 3 + Dungeon.depth / 6 );
+		}
 	}
 
 	/** a newly built floor: an event (not on a floor the cycle events already hold), and maybe a visitor */
@@ -78,7 +131,7 @@ public final class EarlyEvents {
 		if (!eligible( Dungeon.branch, Dungeon.depth )) return;
 		boolean force = forced( Dungeon.seed, Dungeon.depth );
 		if (level.climbEvent == ClimbEvents.NONE && (force || Random.Float() < 0.20f)) {
-			apply( level, 1 + Random.Int( 3 ) );
+			apply( level, pickEvent() );
 		}
 		if (!prospectorMet && Dungeon.depth <= 4 && (Dungeon.depth == 4 || Random.Float() < 0.40f)) spawnProspector( level );
 		if (!adventurerMet && Dungeon.depth >= 3 && Dungeon.depth <= 8 && (Dungeon.depth == 8 || Random.Float() < 0.30f)) spawnAdventurer( level );
@@ -94,9 +147,9 @@ public final class EarlyEvents {
 				AbandonedCamp camp = new AbandonedCamp();
 				camp.pos = c;
 				level.mobs.add( camp );
-				Heap h = level.drop( Generator.random(), chest );
-				h = level.drop( Generator.random(), chest );
-				h = level.drop( new BandageRoll(), chest );
+				Heap h = null;
+        for (int i = 0; i < findsFor( Dungeon.depth ); i++) h = level.drop( Generator.random(), chest );
+        h = level.drop( new BandageRoll().quantity( 1 + Dungeon.depth / 8 ), chest );
 				h.type = Heap.Type.CHEST;
 				break;
 			}
@@ -115,18 +168,72 @@ public final class EarlyEvents {
 			case PARADE: {
 				int c = freeCell( level );
 				if (c == -1) { level.earlyEvent = NONE; return; }
-				Heap h = level.drop( Generator.random(), c );
-				h = level.drop( Generator.random(), c );
-				h = level.drop( new Whetstone(), c );
+				Heap h = null;
+        for (int i = 0; i < findsFor( Dungeon.depth ); i++) h = level.drop( Generator.random(), c );
+        h = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( goldFor( Dungeon.depth ) ), c );
+        h = level.drop( new Whetstone(), c );
 				h = level.drop( new SmokeFlare().quantity( 2 ), c );
 				h.type = Heap.Type.CHEST;
 				level.paradeChest = c;
 				break;
 			}
-			default:
-				level.earlyEvent = NONE;
-		}
-	}
+			case CACHE: {
+        int c = freeCell( level );
+        if (c == -1) { level.earlyEvent = NONE; return; }
+        Heap h = null;
+        for (int i = 0; i < findsFor( Dungeon.depth ); i++) h = level.drop( Generator.random(), c );
+        h = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( goldFor( Dungeon.depth ) ), c );
+        h = level.drop( new BandageRoll().quantity( 1 + Dungeon.depth / 8 ), c );
+        h.type = Heap.Type.CHEST;
+        break;
+      }
+      case HOARD: {
+        int c = freeCell( level );
+        if (c == -1) { level.earlyEvent = NONE; return; }
+        Heap h = null;
+        for (int i = 0; i < findsFor( Dungeon.depth ) + 1; i++) h = level.drop( Generator.random(), c );
+        h = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( Math.round( goldFor( Dungeon.depth ) * 1.5f ) ), c );
+        h = level.drop( new BandageRoll().quantity( 1 + Dungeon.depth / 8 ), c );
+        h.type = Heap.Type.CHEST;
+        //its guards sleep around it: more of them, and tougher ones, the deeper the floor
+        java.util.ArrayList<Class<? extends Mob>> rotation = MobSpawner.getMobRotation( Dungeon.depth );
+        HashSet<Integer> taken = new HashSet<>();
+        taken.add( c );
+        for (int i = 0; i < 2 + Dungeon.depth / 8 && rotation != null && !rotation.isEmpty(); i++) {
+          Mob m = Reflection.newInstance( Random.element( rotation ) );
+          int at = neighbour( level, c, taken );
+          if (m == null || at == -1) continue;
+          taken.add( at );
+          m.pos = at;
+          level.mobs.add( m );
+        }
+        break;
+      }
+      case STASH: {
+        int c = freeCell( level );
+        if (c == -1) { level.earlyEvent = NONE; return; }
+        Heap h = level.drop( gearFor( Dungeon.depth, true ), c );
+        h = level.drop( gearFor( Dungeon.depth, false ), c );
+        h = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( goldFor( Dungeon.depth ) ), c );
+        h.type = Heap.Type.SKELETON;
+        break;
+      }
+      case MIMIC: {
+        int c = freeCell( level );
+        if (c == -1) { level.earlyEvent = NONE; return; }
+        java.util.ArrayList<xyz.gabriwar.warpedpixeldungeon.items.Item> prize = new java.util.ArrayList<>();
+        for (int i = 0; i < findsFor( Dungeon.depth ); i++) prize.add( Generator.random() );
+        prize.add( new xyz.gabriwar.warpedpixeldungeon.items.Gold( goldFor( Dungeon.depth ) ) );
+        xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mimic mimic = xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mimic.spawnAt( c, prize.toArray( new xyz.gabriwar.warpedpixeldungeon.items.Item[0] ) );
+        if (mimic == null) { level.earlyEvent = NONE; return; }
+        mimic.pos = c;
+        level.mobs.add( mimic );
+        break;
+      }
+      default:
+        level.earlyEvent = NONE;
+    }
+  }
 
 	/** the first arrival: the hero is told what this floor holds */
 	public static void announce( Level level ) {
@@ -136,6 +243,10 @@ public final class EarlyEvents {
 			case CAMP: GLog.p( "The smell of old woodsmoke: someone has made a camp on this floor." ); break;
 			case CAVE_IN: GLog.w( "Dust hangs in the air. Part of this floor has caved in." ); break;
 			case PARADE: GLog.w( "A chest sits out in the open. The walls are very quiet." ); break;
+      case CACHE: GLog.p( "A forgotten chest is tucked away somewhere on this floor." ); break;
+      case HOARD: GLog.w( "Something is guarding a stash on this floor." ); break;
+      case STASH: GLog.p( "A fallen adventurer lies somewhere on this floor, still holding their gear." ); break;
+      case MIMIC: GLog.w( "A chest sits out here unguarded. It seems too good to be true." ); break;
 			default:
 		}
 	}
@@ -145,10 +256,15 @@ public final class EarlyEvents {
 		Level lv = Dungeon.level;
 		if (lv == null) return;
 		lv.paradeChest = -1;
-		GLog.n( "Squeaking, scratching: the walls are full of rats!" );
-		spawnAround( lv, hero.pos, Rat.class, 2 );
-		spawnAround( lv, hero.pos, PowderRat.class, 2 );
-		spawnAround( lv, hero.pos, PickpocketRat.class, 1 );
+		if (Dungeon.depth <= 9) {
+      GLog.n( "Squeaking, scratching: the walls are full of rats!" );
+      spawnAround( lv, hero.pos, Rat.class, 2 );
+      spawnAround( lv, hero.pos, PowderRat.class, 2 );
+      spawnAround( lv, hero.pos, PickpocketRat.class, 1 );
+    } else {
+      GLog.n( "The walls tear open: the floor's creatures pour out!" );
+      spawnNatives( lv, hero.pos, 4 + Dungeon.depth / 5 );
+    }
 	}
 
 	/** an old man who has lost his pickaxe on this floor, and the pickaxe lying somewhere else on it */

@@ -96,11 +96,10 @@ public class RubblePile extends NPC {
 		leave();
 		if (level == null) return;
 		Heap heap = null;
-		for (int i = 0; i < 2; i++) heap = level.drop( Generator.random(), cell );
-		heap = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( 20 + 8 * Math.max( 1, Dungeon.depth ) ), cell );
-		heap = level.drop( new BandageRoll(), cell );
-		EarlyEvents.spawnAround( level, cell, xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat.class, 2 );
-		EarlyEvents.spawnAround( level, cell, xyz.gabriwar.warpedpixeldungeon.actors.mobs.PowderRat.class, 1 );
+		for (int i = 0; i < EarlyEvents.findsFor( Dungeon.depth ); i++) heap = level.drop( Generator.random(), cell );
+		heap = level.drop( new xyz.gabriwar.warpedpixeldungeon.items.Gold( EarlyEvents.goldFor( Dungeon.depth ) ), cell );
+		heap = level.drop( new BandageRoll().quantity( 1 + Dungeon.depth / 8 ), cell );
+		EarlyEvents.nest( level, cell );
 		if (com.watabou.noosa.Game.scene() instanceof GameScene) GLog.w( Messages.get( this, "rats" ) );
 	}
 

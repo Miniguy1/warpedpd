@@ -104,7 +104,7 @@ public class AbandonedCamp extends NPC {
 			patrolSent = true;
 			if (com.watabou.noosa.Game.scene() instanceof GameScene && Dungeon.hero != null) {
 				GLog.n( Messages.get( this, "patrol" ) );
-				BossMutation.summon( Dungeon.hero, 2 );
+				BossMutation.summon( Dungeon.hero, 2 + Dungeon.depth / 10 );
 			}
 		}
 	}
