@@ -3501,8 +3501,13 @@ public class ModContentTest {
 			Dungeon.level = level;
 			h.pos = openCell( level );
 			java.util.HashSet<Integer> taken = new java.util.HashSet<>();
-			a.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken ); taken.add( a.pos );
-			b.pos = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, taken );
+			java.util.ArrayList<Integer> beside = new java.util.ArrayList<>();
+			for (int n : new int[]{ h.pos + 1, h.pos - 1, h.pos + level.width(), h.pos - level.width() }) {
+				if (level.passable[n] && xyz.gabriwar.warpedpixeldungeon.actors.Actor.findChar( n ) == null) beside.add( n );
+			}
+			assertTrue( "room beside the hero", beside.size() >= 2 );
+			a.pos = beside.get( 0 );
+			b.pos = beside.get( 1 );
 			assertTrue( a.pos > 0 && b.pos > 0 );
 			xyz.gabriwar.warpedpixeldungeon.actors.Actor.add( a );
 			xyz.gabriwar.warpedpixeldungeon.actors.Actor.add( b );
@@ -3851,7 +3856,11 @@ public class ModContentTest {
 				int n = c + d;
 				if (n >= 0 && n < level.length() && level.passable[n] && xyz.gabriwar.warpedpixeldungeon.actors.Actor.findChar( n ) == null) open++;
 			}
-			if (open >= 5) return c;
+			int straight = 0;
+			for (int n : new int[]{ c + 1, c - 1, c + level.width(), c - level.width() }) {
+				if (n >= 0 && n < level.length() && level.passable[n] && xyz.gabriwar.warpedpixeldungeon.actors.Actor.findChar( n ) == null) straight++;
+			}
+			if (open >= 5 && straight >= 3) return c;
 		}
 		return xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
 	}
