@@ -2249,4 +2249,10 @@ public class ItemSpriteSheet {
     assignItemRect(SMOKE_FLARE, 14, 15);
     assignItemRect(RAT_TOOTH, 10, 16);
   }
+
+  private static final int OW_BAGS      =                            xy(1, 75);   //16 slots: loot bags (drawn by script)
+  public static final int WHITE_BAG           = OW_BAGS+0;
+  static {
+    assignItemRect(WHITE_BAG, 13, 15);
+  }
 }

@@ -1410,6 +1410,7 @@ public abstract class Mob extends Char {
 		if (Dungeon.level != null) xyz.gabriwar.warpedpixeldungeon.levels.Delves.onDeath( this );
 		//a bounty's hunter, or a boss of a later cycle, pays its hoard
 		xyz.gabriwar.warpedpixeldungeon.Cycle.onDeath( this );
+		xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( this );   //the rarest drop
 
 		if (cause == Chasm.class){
 			//50% chance to round up, 50% to round down

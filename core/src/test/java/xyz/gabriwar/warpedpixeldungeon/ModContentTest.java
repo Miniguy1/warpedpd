@@ -4043,6 +4043,109 @@ public class ModContentTest {
 	}
 
 	@Test
+	public void whiteBagsDropAtTheRightRatesAndHoldTheRightThings() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		int keepPos = h.pos;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		try {
+			//who can drop which bag
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( rat ) );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo() ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat elite = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.make( elite );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( elite ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat decoy = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); decoy.EXP = 0;
+			assertEquals( "a summon that pays no experience drops nothing", -1, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( decoy ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat ally = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(); ally.alignment = xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ALLY;
+			assertEquals( -1, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( ally ) );
+			assertEquals( -1, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.sourceOf( null ) );
+
+			//the rates: a boss most, an elite far less, anything else almost never
+			assertEquals( 0.07f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS ), 0.0001f );
+			assertEquals( 0.007f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ), 0.0001f );
+			assertEquals( 0.0004f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ), 0.00001f );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS ) > xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ) && xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ) > xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ) );
+			assertEquals( 0f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( -1 ), 0f );
+			int boss = 0, el = 0, norm = 0;
+			for (int i = 0; i < 20000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.rolls( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS )) boss++;
+			for (int i = 0; i < 200000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.rolls( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE )) el++;
+			for (int i = 0; i < 400000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.rolls( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL )) norm++;
+			assertEquals( "bosses: " + boss + "/20000", 1400, boss, 280 );
+			assertEquals( "elites: " + el + "/200000", 1400, el, 280 );
+			assertEquals( "ordinary enemies: " + norm + "/400000", 160, norm, 60 );
+
+			//what they hold, with an empty pack so no piece is already owned
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MAGE;
+			h.belongings.backpack.items.clear();
+			for (int cycle : new int[]{ 0, 3 }) {
+				Cycle.number = cycle;
+				int cap = xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.maxTier();
+				java.util.ArrayList<Item> b = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS );
+				assertEquals( 2, b.size() );
+				int set = xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( b.get( 0 ).getClass() );
+				assertTrue( "a class piece: " + b.get( 0 ).getClass().getSimpleName(), set >= 0 );
+				assertEquals( "the top tier open (cycle " + cycle + ")", cap, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierOfSet( set ) );
+				assertTrue( b.get( 1 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard );
+				assertEquals( 3 + cycle, b.get( 1 ).quantity() );
+				java.util.ArrayList<Item> e = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE );
+				assertEquals( 2, e.size() );
+				assertEquals( "an elite's piece is a tier lower", Math.max( 6, cap - 1 ), xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierOfSet( xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( e.get( 0 ).getClass() ) ) );
+				assertEquals( 1 + cycle / 2, e.get( 1 ).quantity() );
+				for (int i = 0; i < 60; i++) {
+					int n = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ).size();
+					assertTrue( "one or two items: " + n, n == 1 || n == 2 );
+				}
+			}
+
+			//on the floor: a glowing bag that opens when it is taken
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = openCell( level );
+			int at = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.neighbour( level, h.pos, new java.util.HashSet<>() );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap heap = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.drop( at, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS );
+			assertNotNull( heap );
+			assertTrue( heap.peek() instanceof xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag );
+			xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag bag = (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag) heap.peek();
+			assertNotNull( "it glows", bag.glowing() );
+			assertEquals( 2, bag.contents().size() );
+			assertEquals( 0, bag.value() );
+			assertFalse( bag.name().contains( "!!!" ) );
+			assertTrue( bag.desc(), bag.desc().contains( "boss" ) && !bag.desc().contains( "!!!" ) );
+			//it is saved with what is inside
+			com.watabou.utils.Bundle bd = new com.watabou.utils.Bundle();
+			bag.storeInBundle( bd );
+			xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag back = new xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag();
+			back.restoreFromBundle( bd );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS, back.source() );
+			assertEquals( 2, back.contents().size() );
+			assertEquals( bag.contents().get( 0 ).getClass(), back.contents().get( 0 ).getClass() );
+			//opening: it all goes into the pack, and the bag is empty
+			int pack = h.belongings.backpack.items.size();
+			java.util.ArrayList<Item> given = bag.open( h );
+			assertEquals( 2, given.size() );
+			assertEquals( "two things came into the pack", pack + 2, h.belongings.backpack.items.size() );
+			assertTrue( bag.contents().isEmpty() );
+			//a bag made by hand (the debug menu) fills itself when opened
+			xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag blank = new xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag();
+			assertTrue( blank.open( h ).size() >= 1 );
+		} finally {
+			h.heroClass = keepClass;
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.pos = keepPos;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+		}
+	}
+
+	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;
 		long keep = Dungeon.seed;

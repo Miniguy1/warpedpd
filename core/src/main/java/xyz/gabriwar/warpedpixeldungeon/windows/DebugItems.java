@@ -966,6 +966,7 @@ final class DebugItems {
         xyz.gabriwar.warpedpixeldungeon.items.field.Whetstone.class,
         xyz.gabriwar.warpedpixeldungeon.items.field.SmokeFlare.class,
         xyz.gabriwar.warpedpixeldungeon.items.field.LuckyRatTooth.class,
+        xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.class,
         xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Derringer.class,
         xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver.class,
         xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Carbine.class,
