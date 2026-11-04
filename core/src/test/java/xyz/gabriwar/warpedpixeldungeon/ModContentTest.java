@@ -4173,7 +4173,7 @@ public class ModContentTest {
 		xyz.gabriwar.warpedpixeldungeon.items.artifacts.Artifact kart = h.belongings.artifact;
 		xyz.gabriwar.warpedpixeldungeon.items.KindofMisc kmisc = h.belongings.misc;
 		xyz.gabriwar.warpedpixeldungeon.items.rings.Ring kring = h.belongings.ring;
-		xyz.gabriwar.warpedpixeldungeon.items.weapon.missiles.MissileWeapon kthrown = h.belongings.thrownWeapon;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kthrown = h.belongings.thrownWeapon;
 		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
 		int keepHP = h.HP, keepHT = h.HT, keepPos = h.pos;
 		try {
