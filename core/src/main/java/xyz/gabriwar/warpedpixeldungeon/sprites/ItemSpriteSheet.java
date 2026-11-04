@@ -2255,4 +2255,20 @@ public class ItemSpriteSheet {
   static {
     assignItemRect(WHITE_BAG, 13, 15);
   }
+
+  private static final int OW_LEGEND    =                            xy(1, 76);   //16 slots: the legendaries (drawn by script)
+  public static final int DAWNRENDER          = OW_LEGEND+0;
+  public static final int WIDOWMAKER          = OW_LEGEND+1;
+  public static final int MANTLE_OF_ECHOES    = OW_LEGEND+2;
+  public static final int GILDED_SIGNET       = OW_LEGEND+3;
+  public static final int PHOENIX_FEATHER     = OW_LEGEND+4;
+  public static final int GALE_BOOTS          = OW_LEGEND+5;
+  static {
+    assignItemRect(DAWNRENDER, 15, 16);
+    assignItemRect(WIDOWMAKER, 14, 15);
+    assignItemRect(MANTLE_OF_ECHOES, 15, 16);
+    assignItemRect(GILDED_SIGNET, 13, 15);
+    assignItemRect(PHOENIX_FEATHER, 13, 16);
+    assignItemRect(GALE_BOOTS, 15, 14);
+  }
 }

@@ -407,7 +407,8 @@ public class GearSets {
 		if (e.lifesteal > 0f && h.isAlive()) {
 			heal( h, Math.max( 1, Math.round( out * e.lifesteal ) ) );
 		}
-		return out;
+		out = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.outgoing( h, enemy, out );   //the legendaries
+    return out;
 	}
 
 	public static class LastStandCooldown extends FlavourBuff {}
@@ -429,12 +430,13 @@ public class GearSets {
 				striker.damage( Math.max( 1, Math.round( in * e.thorns ) ), h );
 			}
 		}
-		return in;
+		in = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.incoming( h, in, src );   //the legendaries
+    return in;
 	}
 
-	public static float evasionMultiplier( Hero h ) { return of( h ).evasion; }
+	public static float evasionMultiplier( Hero h ) { return of( h ).evasion * xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.evasion( h ); }
 	public static float accuracyMultiplier( Hero h ) { return of( h ).accuracy; }
-	public static float speedMultiplier( Hero h ) { return of( h ).speed; }
+	public static float speedMultiplier( Hero h ) { return of( h ).speed * xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.speed( h ); }
 	public static float expMultiplier( Hero h ) { return of( h ).exp; }
 
 	// ---- the Mage set's wands ----

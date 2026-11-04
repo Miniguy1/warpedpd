@@ -814,6 +814,7 @@ public class CurrentSkills {
 		try {
 			for (Skill s : allSkills) if (s.level > 0) s.onKill( mob, ranged );
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onKill( mob, ranged );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( mob );
 		} finally {
 			killDispatch--;
 		}

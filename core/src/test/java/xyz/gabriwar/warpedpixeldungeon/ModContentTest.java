@@ -4051,6 +4051,11 @@ public class ModContentTest {
 		}
 	}
 
+	private static boolean isLegendary( Item it ) {
+		for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL) if (c == it.getClass()) return true;
+		return false;
+	}
+
 	@Test
 	public void whiteBagsDropAtTheRightRatesAndHoldTheRightThings() {
 		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
@@ -4092,22 +4097,26 @@ public class ModContentTest {
 			h.belongings.backpack.items.clear();
 			for (int cycle : new int[]{ 0, 3 }) {
 				Cycle.number = cycle;
-				int cap = xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot.maxTier();
+				java.util.ArrayList<Item> all = new java.util.ArrayList<>();
 				java.util.ArrayList<Item> b = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS );
 				assertEquals( 2, b.size() );
-				int set = xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( b.get( 0 ).getClass() );
-				assertTrue( "a class piece: " + b.get( 0 ).getClass().getSimpleName(), set >= 0 );
-				assertEquals( "the top tier open (cycle " + cycle + ")", cap, xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierOfSet( set ) );
+				assertTrue( "a boss bag holds a legendary: " + b.get( 0 ).getClass().getSimpleName(), isLegendary( b.get( 0 ) ) );
+				if (b.get( 0 ).isUpgradable()) assertEquals( "at +3", 3, b.get( 0 ).level() );
 				assertTrue( b.get( 1 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard );
 				assertEquals( 3 + cycle, b.get( 1 ).quantity() );
 				java.util.ArrayList<Item> e = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE );
 				assertEquals( 2, e.size() );
-				assertEquals( "an elite's piece is a tier lower", Math.max( 6, cap - 1 ), xyz.gabriwar.warpedpixeldungeon.items.GearSets.tierOfSet( xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( e.get( 0 ).getClass() ) ) );
+				assertTrue( "an elite bag holds a legendary too", isLegendary( e.get( 0 ) ) );
+				assertEquals( "but a plainer one: +0", 0, e.get( 0 ).level() );
 				assertEquals( 1 + cycle / 2, e.get( 1 ).quantity() );
-				for (int i = 0; i < 60; i++) {
-					int n = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ).size();
-					assertTrue( "one or two items: " + n, n == 1 || n == 2 );
+				all.addAll( b ); all.addAll( e );
+				for (int i = 0; i < 80; i++) {
+					java.util.ArrayList<Item> n = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL );
+					assertEquals( "the smallest bag holds one thing", 1, n.size() );
+					assertTrue( n.get( 0 ).getClass().getSimpleName(), isLegendary( n.get( 0 ) ) || n.get( 0 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.scrolls.ScrollOfUpgrade );
+					all.addAll( n );
 				}
+				for (Item it : all) assertEquals( "no tiered set piece in a white bag: " + it.getClass().getSimpleName(), -1, xyz.gabriwar.warpedpixeldungeon.items.GearSets.setOf( it.getClass() ) );
 			}
 
 			//on the floor: a glowing bag that opens when it is taken
@@ -4151,6 +4160,151 @@ public class ModContentTest {
 			h.pos = keepPos;
 			h.belongings.backpack.items.clear();
 			h.belongings.backpack.items.addAll( keepPack );
+		}
+	}
+
+	@Test
+	public void theLegendariesWorkThroughTheHeroesHooks() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kw = h.belongings.weapon;
+		xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ka = h.belongings.armor;
+		xyz.gabriwar.warpedpixeldungeon.items.artifacts.Artifact kart = h.belongings.artifact;
+		xyz.gabriwar.warpedpixeldungeon.items.KindofMisc kmisc = h.belongings.misc;
+		xyz.gabriwar.warpedpixeldungeon.items.rings.Ring kring = h.belongings.ring;
+		xyz.gabriwar.warpedpixeldungeon.items.weapon.missiles.MissileWeapon kthrown = h.belongings.thrownWeapon;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		int keepHP = h.HP, keepHT = h.HT, keepPos = h.pos;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = openCell( level );
+			h.HT = 100; h.HP = 100;
+			h.belongings.weapon = null; h.belongings.armor = null; h.belongings.artifact = null; h.belongings.misc = null; h.belongings.ring = null;
+			h.belongings.thrownWeapon = null;
+			h.belongings.backpack.items.clear();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
+
+			//Dawnrender: the fifth blow bursts onto the others next to you, and heals
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Dawnrender();
+			java.util.ArrayList<Integer> beside = new java.util.ArrayList<>();
+			for (int n : new int[]{ h.pos + 1, h.pos - 1, h.pos + level.width(), h.pos - level.width() }) if (level.passable[n]) beside.add( n );
+			assertTrue( beside.size() >= 2 );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat a = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), b = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			a.HT = a.HP = 1000; b.HT = b.HP = 1000;
+			a.pos = beside.get( 0 ); b.pos = beside.get( 1 );
+			level.mobs.add( a ); level.mobs.add( b );
+			h.HP = 50;
+			for (int i = 1; i <= 4; i++) {
+				assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, a, 100 ) );
+				assertEquals( "no burst before the fifth blow", 1000, b.HP );
+			}
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, a, 100 ) );
+			assertEquals( "the fifth bursts onto the enemy beside", 900, b.HP );
+			assertEquals( "and heals 5% of the health", 55, h.HP );
+			h.belongings.thrownWeapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().knockBullet();
+			for (int i = 0; i < 12; i++) assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, a, 100 ) );
+			assertEquals( "a shot is not a blow", 900, b.HP );
+			h.belongings.thrownWeapon = null;
+			level.mobs.remove( a ); level.mobs.remove( b );
+
+			//Widowmaker: a finisher, and a refund for a kill
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Widowmaker w = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Widowmaker();
+			h.belongings.weapon = w;
+			h.belongings.thrownWeapon = w.knockBullet();
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat low = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), full = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			low.HT = 100; low.HP = 40; full.HT = 100; full.HP = 100;
+			assertEquals( "+40% under half health", 140, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, low, 100 ) );
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, full, 100 ) );
+			h.belongings.thrownWeapon = null;
+			assertEquals( "not for a blow", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, low, 100 ) );
+			while (w.round() > 2) w.useRound();
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertEquals( "a kill refunds a round", 3, w.round() );
+			h.belongings.weapon = null;
+
+			//the Mantle of Echoes: a blow turned aside one time in seven, the rest echoed back
+			h.belongings.armor = new xyz.gabriwar.warpedpixeldungeon.items.legendary.MantleOfEchoes();
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat striker = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			striker.HT = striker.HP = 1000000;
+			int turned = 0, landed = 0, before = striker.HP;
+			for (int i = 0; i < 4000; i++) {
+				int in = xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 100, striker );
+				if (in == 0) turned++; else { assertEquals( 100, in ); landed++; }
+			}
+			assertEquals( "turned aside: " + turned + "/4000", 0.15, turned / 4000.0, 0.03 );
+			assertEquals( "every blow that landed echoed 30%", 30 * landed, before - striker.HP );
+			h.belongings.armor = null;
+			assertEquals( "nothing without it", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 100, striker ) );
+
+			//the Gilded Signet: more gold, and a barrier for a kill
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.GildedSignet ring = new xyz.gabriwar.warpedpixeldungeon.items.legendary.GildedSignet();
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.goldBonus( h, 100 ) );
+			h.belongings.ring = ring;
+			assertEquals( "+50% gold", 150, xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.goldBonus( h, 100 ) );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertTrue( "a barrier for the kill: " + h.shielding(), h.shielding() >= 4 );
+			h.belongings.ring = null;
+			h.belongings.misc = ring;
+			assertEquals( "on the other finger too", 150, xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.goldBonus( h, 100 ) );
+			h.belongings.misc = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+
+			//the Phoenix Feather: once on each floor
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.PhoenixFeather() );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
+			Dungeon.depth = 3; h.HP = 30;
+			assertEquals( "a killing blow is turned aside", 0, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, null ) );
+			assertEquals( "and you stand at half health", 50, h.HP );
+			h.HP = 30;
+			assertEquals( "only once on a floor", 1000, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, null ) );
+			Dungeon.depth = 4; h.HP = 30;
+			assertEquals( "and again on the next", 0, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, null ) );
+			Dungeon.depth = 5; h.HP = 100;
+			assertEquals( "a blow that does not kill is untouched", 40, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 40, null ) );
+			h.belongings.backpack.items.clear();
+			Dungeon.depth = 6; h.HP = 30;
+			assertEquals( "nothing without it", 1000, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 1000, null ) );
+
+			//the Boots of the Gale
+			float sp = xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier( h ), ev = xyz.gabriwar.warpedpixeldungeon.items.GearSets.evasionMultiplier( h );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.GaleBoots() );
+			assertEquals( "+30% speed", sp * 1.3f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier( h ), 0.001f );
+			assertEquals( "+20% evasion", ev * 1.2f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.evasionMultiplier( h ), 0.001f );
+			h.belongings.backpack.items.clear();
+			assertEquals( sp, xyz.gabriwar.warpedpixeldungeon.items.GearSets.speedMultiplier( h ), 0.001f );
+
+			//every legendary has a name, a description, a glow and no price
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL) {
+				Item it = (Item) com.watabou.utils.Reflection.newInstance( c );
+				assertNotNull( c.getSimpleName(), it );
+				assertFalse( c.getSimpleName() + " name", it.name().contains( "!!!" ) );
+				assertTrue( c.getSimpleName() + " desc: " + it.desc(), !it.desc().contains( "!!!" ) && it.desc().contains( "white bag" ) );
+				assertNotNull( c.getSimpleName() + " glow", it.glowing() );
+				assertEquals( c.getSimpleName() + " cannot be sold", 0, it.value() );
+			}
+			//rolling: one you do not have, and none once you have them all
+			h.belongings.backpack.items.clear();
+			java.util.Set<Class<?>> seen = new java.util.HashSet<>();
+			for (int i = 0; i < 300; i++) { Item it = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.roll( 0 ); assertNotNull( it ); seen.add( it.getClass() ); }
+			assertEquals( "all six come up", 6, seen.size() );
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL) h.belongings.backpack.items.add( (Item) com.watabou.utils.Reflection.newInstance( c ) );
+			assertNull( "all owned: none left to give", xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.roll( 0 ) );
+		} finally {
+			h.belongings.weapon = kw; h.belongings.armor = ka; h.belongings.artifact = kart; h.belongings.misc = kmisc; h.belongings.ring = kring;
+			h.belongings.thrownWeapon = kthrown;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			h.HP = keepHP; h.HT = keepHT; h.pos = keepPos;
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
 		}
 	}
 

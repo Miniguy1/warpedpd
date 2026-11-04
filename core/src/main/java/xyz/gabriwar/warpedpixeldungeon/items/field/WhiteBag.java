@@ -41,6 +41,7 @@ import xyz.gabriwar.warpedpixeldungeon.items.CycleShard;
 import xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot;
 import xyz.gabriwar.warpedpixeldungeon.items.Heap;
 import xyz.gabriwar.warpedpixeldungeon.items.Item;
+import xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary;
 import xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents;
 import xyz.gabriwar.warpedpixeldungeon.messages.Messages;
 import xyz.gabriwar.warpedpixeldungeon.scenes.GameScene;
@@ -52,8 +53,7 @@ import xyz.gabriwar.warpedpixeldungeon.utils.GLog;
  * The white bag: the rarest drop. A glowing white sack that opens when the hero walks onto it, and puts what it holds
  * straight into the pack (beside the hero if the pack is full). It never stays in the inventory.
  *
- * From a boss: a small chance, and the best: a piece of the hero's class set of the highest tier now open, a level or two
- * better, and shards. From an elite: a much lower chance, and less: a piece a tier lower, and a few shards. From any other
+ * From a boss: a small chance, and the best: a piece of the hero's class set of a legendary at +3, and shards. From an elite: a much lower chance, and less: a piece a tier lower, and a few shards. From any other
  * enemy: an incredibly low chance, and one or two items of the floor's ordinary quality.
  */
 public class WhiteBag extends Item {
@@ -168,16 +168,19 @@ public class WhiteBag extends Item {
 		Hero h = Dungeon.hero;
 		int cap = EndgameLoot.maxTier();
 		boolean haveClass = h != null && h.heroClass != null;
+		//a white bag holds a legendary (never a tiered piece: those drop the ordinary way); with every legendary owned, shards stand in
 		if (source == BOSS) {
-			if (haveClass) out.add( EndgameLoot.rollClassSet( h.heroClass, cap, 1 + Random.Int( 2 ) ) );
+			Item l = Legendary.roll( 3 );
+			out.add( l != null ? l : new CycleShard().quantity( 8 + 2 * Cycle.number ) );
 			out.add( new CycleShard().quantity( 3 + Cycle.number ) );
 		} else if (source == ELITE) {
-			if (haveClass) out.add( EndgameLoot.rollClassSet( h.heroClass, Math.max( 6, cap - 1 ), 0 ) );
+			Item l = Legendary.roll( 0 );
+			out.add( l != null ? l : new CycleShard().quantity( 4 + Cycle.number ) );
 			out.add( new CycleShard().quantity( 1 + Cycle.number / 2 ) );
 		} else {
-			int n = 1 + Random.Int( 2 );
-			float rating = Cycle.lootRating( Math.max( 1, Cycle.number ), Math.max( 1, Dungeon.depth ) );
-			for (int i = 0; i < n; i++) out.add( EndgameLoot.rollRated( rating ) );
+			//the smallest bag: half the time a legendary, half the time one or two scrolls of upgrade
+			Item l = Random.Int( 2 ) == 0 ? Legendary.roll( 0 ) : null;
+			out.add( l != null ? l : new xyz.gabriwar.warpedpixeldungeon.items.scrolls.ScrollOfUpgrade().quantity( 1 + Random.Int( 2 ) ) );
 		}
 		for (Item it : out) it.identify();
 		return out;
