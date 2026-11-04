@@ -48,6 +48,12 @@ public class Widowmaker extends Gun {
 		return Math.max( 0, level() ) / 2;
 	}
 
+	//unique: it cannot be sold
+	@Override
+	public int value() {
+		return 0;
+	}
+
 	@Override
 	public ItemSprite.Glowing glowing() {
 		return new ItemSprite.Glowing( 0xFFD24A, 1.6f );

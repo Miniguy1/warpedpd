@@ -3987,7 +3987,7 @@ public class ModContentTest {
 				for (Item it : cache.items) { if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) gold = true; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll) bandages += it.quantity(); }
 				assertTrue( "cache has gold", gold );
 				assertTrue( "bandages scale: " + bandages + " at " + depth, bandages >= 1 + depth / 8 );
-				assertTrue( "finds scale: " + cache.items.size() + " items at " + depth, cache.items.size() >= Math.min( finds, 2 ) + 1 );
+				assertTrue( "finds scale: " + cache.items.size() + " items at " + depth, cache.items.size() >= 2 );   //(a random find can merge into a stack)
 
 				//the guarded hoard
 				level.heaps.clear(); level.mobs.clear();

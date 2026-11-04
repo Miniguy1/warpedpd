@@ -37,6 +37,12 @@ public class MantleOfEchoes extends Armor {
 		super( 4 );
 	}
 
+	//unique: it cannot be sold
+	@Override
+	public int value() {
+		return 0;
+	}
+
 	@Override
 	public ItemSprite.Glowing glowing() {
 		return new ItemSprite.Glowing( 0xFFD24A, 1.6f );
