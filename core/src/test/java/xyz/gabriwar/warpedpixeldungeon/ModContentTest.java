@@ -4200,6 +4200,7 @@ public class ModContentTest {
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
 			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
 
+			level.mobs.clear();   //no real creature beside the hero to be caught in the burst
 			//Dawnrender: the fifth blow bursts onto the others next to you, and heals
 			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Dawnrender();
 			java.util.ArrayList<Integer> beside = new java.util.ArrayList<>();
