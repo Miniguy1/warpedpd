@@ -4937,7 +4937,8 @@ public class ModContentTest {
 			assertEquals( "the burst: half to the enemy beside", Math.max( 1, Math.round( dealt * 0.5f ) ), 100000 - other.HP );
 			assertEquals( "and nothing to one farther off", 100000, far.HP );
 			assertEquals( "a dead or missing target takes nothing", 0, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.land( h, 3, null ) );
-			assertFalse( new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt().desc().contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( bolt, "desc" ).contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( bolt, "prompt" ).contains( "!!!" ) );
 		} finally {
 			h.heroClass = keepClass; h.heroSkills = keepSkills;
 			h.lvl = keepLvl; h.MP = keepMP; h.MT = keepMT; h.pos = keepPos;
