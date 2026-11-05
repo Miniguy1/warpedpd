@@ -94,6 +94,9 @@ public class VaultMirror extends NPC {
 					reward = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().upgrade(3).identify(false);
 					((MeleeWeapon)reward).enchant();
 					break;
+				case MONK:
+					reward = new xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfForce().upgrade(3).identify(false);
+					break;
 				case CLERIC:
 					reward = new HolyTome().upgrade(8).identify(false);
 					((HolyTome) reward).directCharge(8);
@@ -126,6 +129,7 @@ public class VaultMirror extends NPC {
 								break;
 							case DUELIST:
 							case GUNSLINGER:
+							case MONK:
 								sceneText += Messages.get(VaultMirror.class, "scene_duelist");
 								break;
 							case CLERIC:

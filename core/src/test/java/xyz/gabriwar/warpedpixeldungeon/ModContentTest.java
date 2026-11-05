@@ -4581,6 +4581,182 @@ public class ModContentTest {
 		}
 	}
 
+	private static xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill monkSkill( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk, Class<?> c ) {
+		for (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill s : sk.skillsOfTree()) if (s.getClass() == c) return s;
+		throw new AssertionError( "no " + c.getSimpleName() + " in the tree" );
+	}
+
+	@Test
+	public void theMonkFightsWithKiAndPassiveAuras() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass keepSub = h.subClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kw = h.belongings.weapon;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kthrown = h.belongings.thrownWeapon;
+		int keepLvl = h.lvl, keepHP = h.HP, keepHT = h.HT, keepPos = h.pos;
+		try {
+			//the class itself
+			assertEquals( 2, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.subClasses().length );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.subClasses()[0] );
+			assertEquals( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.STORM_FIST, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.subClasses()[1] );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.title().contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.shortDesc().contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.desc().contains( "!!!" ) );
+			assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.armorAbilities().length );
+			for (String asset : new String[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.spritesheet(), xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.splashArt() }) {
+				assertTrue( "asset " + asset, new java.io.File( "src/main/assets/" + asset ).exists() );
+			}
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY.title().contains( "!!!" ) );
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.STORM_FIST.shortDesc().contains( "!!!" ) );
+
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			level.mobs.clear();
+			h.pos = openCell( level );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.NONE;
+			h.lvl = 10;
+			h.HT = 100; h.HP = 100;
+			h.belongings.weapon = null;
+			h.belongings.thrownWeapon = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			h.heroSkills = sk;
+			Buff_detach( h );
+
+			//bare fists, growing with the level: 3 + half the level up to 8 + the level
+			int lo = 999, hi = 0;
+			for (int i = 0; i < 600; i++) { int d = xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfForce.damageRoll( h ); lo = Math.min( lo, d ); hi = Math.max( hi, d ); }
+			assertTrue( "fists at level 10: " + lo + ".." + hi, lo >= 8 && hi <= 18 && hi > lo );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			int plainHi = 0;
+			for (int i = 0; i < 300; i++) plainHi = Math.max( plainHi, xyz.gabriwar.warpedpixeldungeon.items.rings.RingOfForce.damageRoll( h ) );
+			assertTrue( "other classes keep their weak fists: " + plainHi, plainHi < 8 );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+
+			//ki: built by hand, capped, fed by landed fists
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki k = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.ki( h );
+			assertNotNull( k );
+			assertEquals( 0, k.stacks() );
+			k.gain( 3 );
+			assertEquals( 3, k.stacks() );
+			k.gain( 100 );
+			assertEquals( "ten at most", 10, k.max() );
+			assertEquals( 10, k.stacks() );
+			k.spend( 100 );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat r = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			r.HT = r.HP = 100000;
+			assertEquals( "no ki yet", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			assertEquals( "that fist fed a stack", 1, k.stacks() );
+			assertEquals( "one stack: 3% more", 103, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			assertEquals( 2, k.stacks() );
+			k.gain( 100 );
+			assertEquals( "ten stacks: 30% more", 130, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			h.belongings.thrownWeapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().knockBullet();
+			assertEquals( "a shot is not a fist", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			h.belongings.thrownWeapon = null;
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.Dagger();
+			assertEquals( "nor is a dagger", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			h.belongings.weapon = null;
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.WARRIOR;
+			assertEquals( "and other classes have no ki", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			//the innate protection: a point off every blow for each three stacks
+			k.spend( 100 ); k.gain( 9 );
+			assertEquals( "nine ki: 3 off", 17, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+			k.spend( 100 ); k.gain( 2 );
+			assertEquals( "two ki: nothing yet", 20, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+
+			//the passive auras, through the skill aggregators the hero really uses
+			k.spend( 100 ); k.gain( 100 );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBurningPalm.class ).level = 3;
+			assertEquals( "burning palm at ten ki: +48%", 1.48f, sk.allDamageModifier( false ), 0.001f );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiMountain.class ).level = 2;
+			assertEquals( "mountain stance: every aura 30% stronger", 1f + 0.48f * 1.3f, sk.allDamageModifier( false ), 0.001f );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiMountain.class ).level = 0;
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBurningPalm.class ).level = 0;
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiIronSkin.class ).level = 3;
+			assertEquals( "iron skin: 3 plus a quarter a stack, a level", 11, 30 - sk.allIncomingDamage( 30, null ) );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiIronSkin.class ).level = 0;
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAscendance.class ).level = 3;
+			assertEquals( "ascendance at ten ki: +90%", 1.9f, sk.allDamageModifier( false ), 0.001f );
+			assertTrue( "a full stack of ki cannot miss", sk.anySureHit( r ) );
+			k.spend( 3 );
+			assertFalse( "but not with less", sk.anySureHit( r ) );
+			k.gain( 100 );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAscendance.class ).level = 0;
+			//the aura of warding strikes the attacker back
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraWarding.class ).level = 3;
+			int before = r.HP;
+			sk.allOnDefend( r, 100 );
+			assertEquals( "warding: 30% of a blow comes back", 30, before - r.HP );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraWarding.class ).level = 0;
+			//the aura of wrath burns what stands beside you, every turn
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat beside = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			beside.HT = beside.HP = 1000;
+			beside.pos = h.pos + (level.passable[h.pos + 1] ? 1 : -1);
+			level.mobs.add( beside );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraWrath.class ).level = 2;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.auras( h, k );
+			assertEquals( "2 plus a third of ten ki", 5, 1000 - beside.HP );
+			k.spend( 100 ); k.gain( 4 );
+			int hp = beside.HP;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.auras( h, k );
+			assertEquals( "not below five ki", hp, beside.HP );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraWrath.class ).level = 0;
+			level.mobs.clear();
+			//the aura of renewal heals as you stand
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraRenewal.class ).level = 3;
+			h.HP = 50;
+			k.renew = 0;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.auras( h, k );
+			assertEquals( "not yet", 50, h.HP );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.auras( h, k );
+			assertEquals( "3 health on the second turn", 53, h.HP );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiAuraRenewal.class ).level = 0;
+
+			//the subclasses' own skills are in the tree and do their work
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY;
+			sk.initSubclassBranch( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill bulwark = monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBulwark.class );
+			bulwark.level = 3;
+			h.HP = 50;
+			k.spend( 100 );
+			bulwark.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), false );
+			assertEquals( "a kill heals 6% at level 3", 56, h.HP );
+			assertEquals( "and feeds a stack", 1, k.stacks() );
+			bulwark.level = 0;
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.STORM_FIST;
+			sk.initSubclassBranch( h );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiThunderclap.class );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiOverload.class );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiRapidPalms.class );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill rapid = monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiRapidPalms.class );
+			rapid.level = 3;
+			k.spend( 100 );
+			xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 );
+			assertEquals( "rapid palms: a fist feeds 1 plus 2 extra stacks", 3, k.stacks() );
+			rapid.level = 0;
+		} finally {
+			h.heroClass = keepClass; h.subClass = keepSub; h.heroSkills = keepSkills;
+			h.belongings.weapon = kw; h.belongings.thrownWeapon = kthrown;
+			h.lvl = keepLvl; h.HP = keepHP; h.HT = keepHT; h.pos = keepPos;
+			Buff_detach( h );
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
+	private static void Buff_detach( Hero h ) {
+		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
+	}
+
 	@Test
 	public void theDarkMinesHoldTheNewLoot() {
 		int total = 0;

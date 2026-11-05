@@ -567,6 +567,8 @@ public enum Icons {
 				return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME);
 			case GUNSLINGER:
 				return new ItemSprite(ItemSpriteSheet.SHOOT_GUN);
+			case MONK:
+				return new ItemSprite(ItemSpriteSheet.GLOVES);
 			default:
 				return null;
 		}

@@ -74,6 +74,7 @@ public class Badges {
 		MASTERY_DUELIST,
 		MASTERY_CLERIC,
 		MASTERY_GUNSLINGER,
+		MASTERY_MONK_CLASS,
 		FOUND_RATMOGRIFY,
 
 		//bronze
@@ -132,6 +133,7 @@ public class Badges {
 		BOSS_SLAIN_1_DUELIST,
 		BOSS_SLAIN_1_CLERIC,
 		BOSS_SLAIN_1_GUNSLINGER,
+		BOSS_SLAIN_1_MONK_CLASS,
 		BOSS_SLAIN_1_ALL_CLASSES    ( 54, BadgeType.GLOBAL ),
 		RESEARCHER_2                ( 55, BadgeType.JOURNAL ),
 		GAMES_PLAYED_2              ( 56, BadgeType.GLOBAL ),
@@ -182,6 +184,7 @@ public class Badges {
 		VICTORY_DUELIST,
 		VICTORY_CLERIC,
 		VICTORY_GUNSLINGER,
+		VICTORY_MONK_CLASS,
 		VICTORY_ALL_CLASSES         ( 103, BadgeType.GLOBAL ),
 		DEATH_FROM_ALL              ( 104, BadgeType.GLOBAL ),
 		BOSS_SLAIN_3_GLADIATOR,
@@ -976,6 +979,7 @@ public class Badges {
 		firstBossClassBadges.put(HeroClass.DUELIST, Badge.BOSS_SLAIN_1_DUELIST);
 		firstBossClassBadges.put(HeroClass.CLERIC, Badge.BOSS_SLAIN_1_CLERIC);
 		firstBossClassBadges.put(HeroClass.GUNSLINGER, Badge.BOSS_SLAIN_1_GUNSLINGER);
+		firstBossClassBadges.put(HeroClass.MONK, Badge.BOSS_SLAIN_1_MONK_CLASS);
 	}
 
 	private static LinkedHashMap<HeroClass, Badge> victoryClassBadges = new LinkedHashMap<>();
@@ -987,6 +991,7 @@ public class Badges {
 		victoryClassBadges.put(HeroClass.DUELIST, Badge.VICTORY_DUELIST);
 		victoryClassBadges.put(HeroClass.CLERIC, Badge.VICTORY_CLERIC);
 		victoryClassBadges.put(HeroClass.GUNSLINGER, Badge.VICTORY_GUNSLINGER);
+		victoryClassBadges.put(HeroClass.MONK, Badge.VICTORY_MONK_CLASS);
 	}
 
 	private static LinkedHashMap<HeroSubClass, Badge> thirdBossSubclassBadges = new LinkedHashMap<>();
@@ -1127,6 +1132,9 @@ public class Badges {
 				break;
 			case GUNSLINGER:
 				badge = Badge.MASTERY_GUNSLINGER;
+				break;
+			case MONK:
+				badge = Badge.MASTERY_MONK_CLASS;
 				break;
 		}
 		

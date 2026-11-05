@@ -152,6 +152,9 @@ abstract public class ClassArmor extends Armor {
 			case GUNSLINGER:
 				classArmor = new GunslingerArmor();
 				break;
+			case MONK:
+				classArmor = new WarriorArmor();
+				break;
 		}
 		
 		classArmor.level(armor.trueLevel());

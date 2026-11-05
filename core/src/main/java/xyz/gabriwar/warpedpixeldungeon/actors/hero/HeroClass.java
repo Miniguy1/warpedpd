@@ -22,6 +22,7 @@
 package xyz.gabriwar.warpedpixeldungeon.actors.hero;
 
 import xyz.gabriwar.warpedpixeldungeon.Assets;
+import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
 import xyz.gabriwar.warpedpixeldungeon.Badges;
 import xyz.gabriwar.warpedpixeldungeon.Challenges;
 import xyz.gabriwar.warpedpixeldungeon.Dungeon;
@@ -92,7 +93,8 @@ public enum HeroClass {
 	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
 	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK ),
 	CLERIC( HeroSubClass.PRIEST, HeroSubClass.PALADIN ),
-	GUNSLINGER( HeroSubClass.OUTLAW, HeroSubClass.DEMOLITIONIST );
+	GUNSLINGER( HeroSubClass.OUTLAW, HeroSubClass.DEMOLITIONIST ),
+	MONK( HeroSubClass.IRON_BODY, HeroSubClass.STORM_FIST );
 
 	private HeroSubClass[] subClasses;
 
@@ -159,6 +161,9 @@ public enum HeroClass {
 			case GUNSLINGER:
 				initGunslinger( hero );
 				break;
+			case MONK:
+				initMonk( hero );
+				break;
 		}
 
 		// skill tree: fresh run, fresh points, class-matched tree
@@ -176,6 +181,7 @@ public enum HeroClass {
 			case DUELIST:  hero.MP = hero.MT = 25; break;
 			case CLERIC:   hero.MP = hero.MT = 40; break;
 			case GUNSLINGER: hero.MP = hero.MT = 30; break;
+			case MONK: hero.MP = hero.MT = 30; break;
 		}
 
 		if (WPDSettings.quickslotWaterskin()) {
@@ -205,6 +211,8 @@ public enum HeroClass {
 				return Badges.Badge.MASTERY_CLERIC;
 			case GUNSLINGER:
 				return Badges.Badge.MASTERY_GUNSLINGER;
+			case MONK:
+				return Badges.Badge.MASTERY_MONK_CLASS;
 		}
 		return null;
 	}
@@ -299,6 +307,17 @@ public enum HeroClass {
 		new ScrollOfRage().identify();
 	}
 
+	private static void initMonk( Hero hero ) {
+
+		//no weapon: bare fists
+		hero.belongings.weapon = null;
+		new xyz.gabriwar.warpedpixeldungeon.items.field.BandageRoll().quantity( 2 ).identify().collect();
+		Buff.affect( hero, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
+
+		new PotionOfHealing().identify();
+		new ScrollOfRage().identify();
+	}
+
 	private static void initCleric( Hero hero ) {
 
 		(hero.belongings.weapon = new Cudgel()).identify();
@@ -344,6 +363,8 @@ public enum HeroClass {
 				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
 			case GUNSLINGER:
 				return new ArmorAbility[]{new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.Barrage(), new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.SmokeAndMirrors(), new xyz.gabriwar.warpedpixeldungeon.actors.hero.abilities.gunslinger.HailOfLead()};
+			case MONK:
+				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Endure()};
 			case CLERIC:
 				return new ArmorAbility[]{new AscendedForm(), new Trinity(), new PowerOfMany()};
 		}
@@ -365,6 +386,8 @@ public enum HeroClass {
 				return Assets.Sprites.CLERIC;
 			case GUNSLINGER:
 				return Assets.Sprites.GUNSLINGER;
+			case MONK:
+				return Assets.Sprites.MONK_HERO;
 		}
 	}
 
@@ -384,6 +407,8 @@ public enum HeroClass {
 				return Assets.Splashes.CLERIC;
 			case GUNSLINGER:
 				return Assets.Splashes.GUNSLINGER;
+			case MONK:
+				return Assets.Splashes.MONK_HERO;
 		}
 	}
 	
@@ -405,6 +430,8 @@ public enum HeroClass {
 			case CLERIC:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_CLERIC);
 			case GUNSLINGER:
+				return true;
+			case MONK:
 				return true;
 		}
 	}

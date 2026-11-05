@@ -254,6 +254,18 @@ public class CurrentSkills {
 				break;
 			}
 
+			case MONK: {
+				branchPA = new MonkPassiveA();
+				setBranch(passiveASkills, new KiIronSkin(), new KiBurningPalm(), new KiStillWater(), new KiMountain());
+				branchPB = new MonkPassiveB();
+				setBranch(passiveBSkills, new KiFlowing(), new KiStonefist(), new KiQuietMind(), new KiInnerFire());
+				branchA = new MonkActive();
+				setBranch(activeSkills, new KiAuraWarding(), new KiAuraWrath(), new KiAuraRenewal());
+				branchD = new MonkFourth();
+				setBranch(fourthSkills, new KiMastery(), new KiDiamondBody(), new KiAscendance());
+				break;
+			}
+
 			case CLERIC: {
 				Skill ascetic = new AsceticVow(), tithe = new BloodTithe();
 				Skill zeal = new CrusadersZeal(), faithShield = new ShieldOfTheFaithful();
@@ -392,7 +404,13 @@ public class CurrentSkills {
 			case DEMOLITIONIST:
 				Collections.addAll(skills, new BlastRounds(), new ClusterShot(), new Shrapnel());
 				break;
-			case PRIEST:
+			case IRON_BODY:
+        Collections.addAll(skills, new KiBedrock(), new KiUnyielding(), new KiBulwark());
+        break;
+      case STORM_FIST:
+        Collections.addAll(skills, new KiRapidPalms(), new KiThunderclap(), new KiOverload());
+        break;
+      case PRIEST:
 				Collections.addAll(skills, new Litany(), new MassHeal(), new Purify());
 				break;
 			case PALADIN:

@@ -152,6 +152,7 @@ public class Blacksmith extends NPC {
 			case DUELIST:   msg1 += Messages.get(Blacksmith.this, "intro_quest_duelist"); break;
 			case CLERIC:    msg1 += Messages.get(Blacksmith.this, "intro_quest_cleric"); break;
 			case GUNSLINGER: msg1 += Messages.get(Blacksmith.this, "intro_quest_duelist"); break;
+			case MONK: msg1 += Messages.get(Blacksmith.this, "intro_quest_duelist"); break;
 		}
 		msg1 += "\n\n" + Messages.get(Blacksmith.this, "intro_quest_start");
 

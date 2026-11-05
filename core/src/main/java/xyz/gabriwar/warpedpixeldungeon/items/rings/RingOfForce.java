@@ -101,7 +101,8 @@ public class RingOfForce extends Ring {
 			return dmg;
 		} else {
 			//attack without any ring of force influence
-			return Hero.heroDamageIntRange(1, Math.max(hero.STR()-8, 1));
+			if (hero.heroClass == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK) return xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.fistRoll(hero);
+      return Hero.heroDamageIntRange(1, Math.max(hero.STR()-8, 1));
 		}
 	}
 

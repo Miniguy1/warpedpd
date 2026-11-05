@@ -408,6 +408,7 @@ public class GearSets {
 			heal( h, Math.max( 1, Math.round( out * e.lifesteal ) ) );
 		}
 		out = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.outgoing( h, enemy, out );   //the legendaries
+    out = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.outgoing( h, enemy, out );   //the monk's ki
     return out;
 	}
 
@@ -431,6 +432,7 @@ public class GearSets {
 			}
 		}
 		in = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.incoming( h, in, src );   //the legendaries
+    in = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.incoming( h, in );   //the monk's ki
     return in;
 	}
 

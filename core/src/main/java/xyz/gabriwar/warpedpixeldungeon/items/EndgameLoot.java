@@ -158,6 +158,7 @@ public class EndgameLoot {
 			case ROGUE:    family = 2; break;
 			case HUNTRESS: family = 3; break;
 			case DUELIST:  family = 4; break;
+			case MONK:     family = 4; break;
 			case CLERIC:   family = 5; break;
 		}
 		int first = tier >= 9 ? GearSets.FIRST_T9 : tier == 8 ? GearSets.FIRST_T8 : tier == 7 ? GearSets.FIRST_T7 : 6;
@@ -205,6 +206,7 @@ public class EndgameLoot {
 			case ROGUE:    return fromSet( 8 );
 			case HUNTRESS: return fromSet( 9 );
 			case DUELIST:  return fromSet( 10 );
+			case MONK:     return fromSet( 10 );
 			case CLERIC:   return fromSet( 11 );
 			case GUNSLINGER: return fromSet( GearSets.GUN_FIRST );
 		}

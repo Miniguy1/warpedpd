@@ -51,7 +51,10 @@ public enum HeroSubClass {
 	PALADIN(HeroIcon.PALADIN),
 
 	OUTLAW(HeroIcon.CHAMPION),
-	DEMOLITIONIST(HeroIcon.MONK);
+	DEMOLITIONIST(HeroIcon.MONK),
+
+	IRON_BODY(HeroIcon.PALADIN),
+	STORM_FIST(HeroIcon.CHAMPION);
 
 	int icon;
 
