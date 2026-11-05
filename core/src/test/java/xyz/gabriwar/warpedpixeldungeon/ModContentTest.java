@@ -5155,6 +5155,47 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void theMonkIsNoMoreHiddenThanAnyOtherClass() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		java.util.ArrayList<xyz.gabriwar.warpedpixeldungeon.items.Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kw = h.belongings.weapon;
+		java.util.ArrayList<Object> keepBuffs = new java.util.ArrayList<>( h.buffs() );
+		StringBuilder seen = new StringBuilder();
+		try {
+			Buff_detach( h );
+			float base = Float.NaN;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass cls : xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values()) {
+				h.heroClass = cls;
+				h.heroSkills = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+				h.heroSkills.init( h );
+				float st = h.stealth();
+				seen.append( " " ).append( cls ).append( "=" ).append( st );
+				if (Float.isNaN( base )) base = st;
+				assertEquals( "stealth of " + cls + " differs from the first class:" + seen, base, st, 0.0001f );
+			}
+			//the Monk's starting state: nothing that changes how enemies notice him
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			h.heroSkills = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			h.heroSkills.init( h );
+			float before = h.stealth();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.initHero( h );
+			assertEquals( "stealth after the Monk's start", before, h.stealth(), 0.0001f );
+			StringBuilder buffs = new StringBuilder();
+			for (xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff b : h.buffs()) buffs.append( b.getClass().getSimpleName() ).append( " " );
+			assertEquals( "the Monk starts with only his ki buff (any other buff here would be a surprise): " + buffs, 1, h.buffs().size() );
+			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class ) );
+			assertEquals( "his skills add no stealth", 0f, h.heroSkills.allStealth(), 0.0001f );
+		} finally {
+			h.heroClass = keepClass; h.heroSkills = keepSkills; h.belongings.weapon = kw;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			Buff_detach( h );
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}
