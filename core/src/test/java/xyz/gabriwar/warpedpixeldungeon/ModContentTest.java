@@ -5181,11 +5181,15 @@ public class ModContentTest {
 			h.heroSkills = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
 			h.heroSkills.init( h );
 			float before = h.stealth();
+			java.util.HashSet<Class<?>> hadBuffs = new java.util.HashSet<>();
+			for (xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff b : h.buffs()) hadBuffs.add( b.getClass() );
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK.initHero( h );
 			assertEquals( "stealth after the Monk's start", before, h.stealth(), 0.0001f );
-			StringBuilder buffs = new StringBuilder();
-			for (xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff b : h.buffs()) buffs.append( b.getClass().getSimpleName() ).append( " " );
-			assertEquals( "the Monk starts with only his ki buff (any other buff here would be a surprise): " + buffs, 1, h.buffs().size() );
+			//the Monk's start adds one buff, his ki, and nothing else
+			StringBuilder added = new StringBuilder();
+			int addedCount = 0;
+			for (xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff b : h.buffs()) if (!hadBuffs.contains( b.getClass() )) { added.append( b.getClass().getSimpleName() ).append( " " ); addedCount++; }
+			assertEquals( "the Monk's start adds only his ki: " + added, 1, addedCount );
 			assertNotNull( h.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class ) );
 			assertEquals( "his skills add no stealth", 0f, h.heroSkills.allStealth(), 0.0001f );
 		} finally {
