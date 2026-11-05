@@ -4877,6 +4877,77 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void kiBoltScalesWithKiAndCostsAGoodPartOfTheMana() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		int keepLvl = h.lvl, keepMP = h.MP, keepMT = h.MT, keepPos = h.pos;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			level.mobs.clear();
+			h.pos = openCell( level );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			h.lvl = 10;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			h.heroSkills = sk;
+			Buff_detach( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki k = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.ki( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt bolt = (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt) monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.class );
+			//the cost: 14, 12, 10 of a 30-point pool; the range: 6, 7, 8
+			bolt.level = 1; assertEquals( 14, bolt.getManaCost() ); assertEquals( 6, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.range( 1 ) );
+			bolt.level = 2; assertEquals( 12, bolt.getManaCost() ); assertEquals( 7, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.range( 2 ) );
+			bolt.level = 3; assertEquals( 10, bolt.getManaCost() ); assertEquals( 8, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.range( 3 ) );
+			//it can be cast only with the skill and enough mana
+			h.MT = 30; h.MP = 30;
+			bolt.level = 1;
+			assertTrue( bolt.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill.AC_CAST ) );
+			h.MP = 13;
+			assertFalse( "not enough mana", bolt.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill.AC_CAST ) );
+			h.MP = 30; bolt.level = 0;
+			assertFalse( "not before it is learned", bolt.actions( h ).contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill.AC_CAST ) );
+			//it scales with ki and with the skill
+			k.spend( 100 );
+			assertEquals( "no ki, level 1", 1.2f, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.power( h, 1 ), 0.001f );
+			k.gain( 100 );
+			assertEquals( "ten ki, level 3: 2.2 x 1.6", 3.52f, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.power( h, 3 ), 0.001f );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiMountain.class ).level = 2;
+			assertEquals( "and a mountain stance makes it stronger", 3.52f * 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.power( h, 3 ), 0.001f );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiMountain.class ).level = 0;
+			int lo = 9999, hi = 0;
+			for (int i = 0; i < 400; i++) { int d = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.damage( h, 3 ); lo = Math.min( lo, d ); hi = Math.max( hi, d ); }
+			assertTrue( "a level 3 bolt at full ki, fists 8-18: " + lo + ".." + hi, lo >= 28 && hi <= 64 && hi > lo );
+			//it lands, through armor, and at the top level it bursts
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat main = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), other = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), far = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			main.HT = main.HP = 100000; other.HT = other.HP = 100000; far.HT = far.HP = 100000;
+			main.pos = h.pos + 3; other.pos = main.pos + 1; far.pos = main.pos + 6;
+			level.mobs.add( main ); level.mobs.add( other ); level.mobs.add( far );
+			int dealt = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.land( h, 2, main );
+			assertEquals( "the target took what it reported", dealt, 100000 - main.HP );
+			assertEquals( "no burst below the top level", 100000, other.HP );
+			main.HP = main.HT;
+			dealt = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.land( h, 3, main );
+			assertEquals( "the target", dealt, 100000 - main.HP );
+			assertEquals( "the burst: half to the enemy beside", Math.max( 1, Math.round( dealt * 0.5f ) ), 100000 - other.HP );
+			assertEquals( "and nothing to one farther off", 100000, far.HP );
+			assertEquals( "a dead or missing target takes nothing", 0, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.land( h, 3, null ) );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt().desc().contains( "!!!" ) );
+		} finally {
+			h.heroClass = keepClass; h.heroSkills = keepSkills;
+			h.lvl = keepLvl; h.MP = keepMP; h.MT = keepMT; h.pos = keepPos;
+			Buff_detach( h );
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}

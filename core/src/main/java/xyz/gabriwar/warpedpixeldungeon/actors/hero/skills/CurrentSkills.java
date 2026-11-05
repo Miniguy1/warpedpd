@@ -260,7 +260,7 @@ public class CurrentSkills {
 				branchPB = new MonkPassiveB();
 				setBranch(passiveBSkills, new KiFlowing(), new KiStonefist(), new KiQuietMind(), new KiInnerFire());
 				branchA = new MonkActive();
-				setBranch(activeSkills, new KiAuraWarding(), new KiAuraWrath(), new KiAuraRenewal());
+				setBranch(activeSkills, new KiBolt(), new KiAuraWarding(), new KiAuraWrath(), new KiAuraRenewal());
 				branchD = new MonkFourth();
 				setBranch(fourthSkills, new KiMastery(), new KiDiamondBody(), new KiAscendance());
 				break;
