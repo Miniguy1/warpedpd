@@ -4358,11 +4358,11 @@ public class ModContentTest {
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
 			rat.pos = at;
 			for (int i = 0; i < 20000; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( rat );
-			assertEquals( "a rat never drops a white bag", 0, level.heaps.size() );
+			assertEquals( "a rat never drops a white bag", 0, level.heaps.valueList().size() );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
 			goo.pos = at;
-			for (int i = 0; i < 400 && level.heaps.size() == 0; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( goo );
-			assertTrue( "a listed boss drops one in the end", level.heaps.size() > 0 );
+			for (int i = 0; i < 400 && level.heaps.valueList().size() == 0; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( goo );
+			assertTrue( "a listed boss drops one in the end", level.heaps.valueList().size() > 0 );
 			xyz.gabriwar.warpedpixeldungeon.items.Heap hp = level.heaps.valueList().get( 0 );
 			assertTrue( hp.peek() instanceof xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag );
 			xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag bag = (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag) hp.peek();
