@@ -5130,6 +5130,7 @@ public class ModContentTest {
 			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_ECHO, 2 );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat weak = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
 			weak.HT = weak.HP = 1;
+			weak.EXP = 0;   //no experience: that award draws on the hero's on-screen sprite
 			weak.pos = h.pos + 2;
 			level.mobs.add( weak );
 			h.MP = 10;
