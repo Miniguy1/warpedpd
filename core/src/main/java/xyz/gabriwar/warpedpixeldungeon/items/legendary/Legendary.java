@@ -82,20 +82,55 @@ public final class Legendary {
 		return roll( plus, null );
 	}
 
+	private static final String[] ROMAN = { "", "I", "II", "III", "IV" };
+
+	/** the starting upgrade of a legendary of this rank: +1, +2, +3, +5 */
+	public static int levelFor( int rank ){
+		return rank <= 1 ? 1 : rank == 2 ? 2 : rank == 3 ? 3 : 5;
+	}
+
+	/** how often a rank turns up when a bag is made by hand: the weaker ones far more */
+	private static int weight( int rank ){
+		return rank <= 1 ? 8 : rank == 2 ? 4 : rank == 3 ? 2 : 1;
+	}
+
+	/** its colour: pale gold, blue, violet, flame */
+	public static int glowFor( Class<?> c ){
+		int r = LootTable.rankOf( c );
+		return r <= 1 ? 0xFFE08A : r == 2 ? 0x7FD0FF : r == 3 ? 0xC77DFF : 0xFF7A3D;
+	}
+
+	/** the rank and the creatures that drop it, for the description */
+	public static String rankLine( Class<?> c ){
+		return "Power: rank " + ROMAN[Math.max( 1, Math.min( 4, LootTable.rankOf( c ) ) )] + " of IV.\nDropped by: " + LootTable.sourceNames( c ) + ".";
+	}
+
+	/** one legendary, identified, and at the given level where it can take one */
+	public static Item make( Class<?> c, int level ){
+		Item it = (Item) Reflection.newInstance( c );
+		if (it == null) return null;
+		it.cursed = false;
+		it.identify();
+		if (level > 0 && it.isUpgradable()) it.upgrade( level );
+		return it;
+	}
+
 	/** one of the legendaries this creature drops (any, for no creature) that the hero does not have yet, or null if there is none */
 	public static Item roll( int plus, Mob from ){
 		Hero h = Dungeon.hero;
 		ArrayList<Class<?>> pool = new ArrayList<>();
 		if (from == null) for (Class<?> c : ALL) pool.add( c ); else pool.addAll( LootTable.legendariesFor( from ) );
 		ArrayList<Class<?>> fresh = new ArrayList<>();
-		for (Class<?> c : pool) if (!carried( h, c )) fresh.add( c );
+		int total = 0;
+		for (Class<?> c : pool) if (!carried( h, c )) { fresh.add( c ); total += weight( LootTable.rankOf( c ) ); }
 		if (fresh.isEmpty()) return null;
-		Item it = (Item) Reflection.newInstance( fresh.get( Random.Int( fresh.size() ) ) );
-		if (it == null) return null;
-		it.cursed = false;
-		it.identify();
-		if (plus > 0 && it.isUpgradable()) it.upgrade( plus );
-		return it;
+		int r = Random.Int( total );
+		Class<?> pick = fresh.get( 0 );
+		for (Class<?> c : fresh) {
+			r -= weight( LootTable.rankOf( c ) );
+			if (r < 0) { pick = c; break; }
+		}
+		return make( pick, plus >= 0 ? plus : levelFor( LootTable.rankOf( pick ) ) );
 	}
 
 	private static void heal( Hero h, int n ){
@@ -111,29 +146,29 @@ public final class Legendary {
 		if (h == null || h.belongings == null || out <= 0) return out;
 		boolean shot = h.belongings.thrownWeapon != null;
 		if (!shot){
-			if (h.belongings.weapon instanceof Dawnrender && ++dawnHits % 5 == 0){
+			if (h.belongings.weapon instanceof Dawnrender && ++dawnHits % 4 == 0){
 				GunSkills.callOut( "Dawnrender!" );
 				if (Dungeon.level != null){
 					for (Mob m : Dungeon.level.mobs.toArray( new Mob[0] )){
 						if (m != enemy && m.alignment == Char.Alignment.ENEMY && m.isAlive() && Dungeon.level.distance( h.pos, m.pos ) <= 1){
-							m.damage( out, h );
+							m.damage( Math.round( out * 1.5f ), h );
 							if (m.sprite != null) m.sprite.flash();
 						}
 					}
 				}
-				heal( h, Math.max( 1, Math.round( h.HT * 0.05f ) ) );
+				heal( h, Math.max( 1, Math.round( h.HT * 0.08f ) ) );
 			}
-			if (h.belongings.weapon instanceof Soulreaver) heal( h, Math.max( 1, Math.round( out * 0.20f ) ) );
+			if (h.belongings.weapon instanceof Soulreaver) heal( h, Math.max( 1, Math.round( out * 0.30f ) ) );
 			if (h.belongings.weapon instanceof Venomfang && enemy != null && enemy.isAlive()){
-				Buff.affect( enemy, Poison.class ).set( 3f + Dungeon.depth / 3f );
+				Buff.affect( enemy, Poison.class ).set( 5f + Dungeon.depth );
 			}
 		}
 		if (shot && enemy != null && GunSkills.gun() instanceof Widowmaker && enemy.HP * 2 <= enemy.HT){
-			out = Math.max( 1, Math.round( out * 1.4f ) );
+			out = Math.max( 1, Math.round( out * 1.6f ) );
 		}
 		if (charged && worn( h, Thunderband.class )){
 			charged = false;
-			out *= 2;
+			out *= 3;
 			GunSkills.callOut( "Thunderstruck!" );
 		}
 		return out;
@@ -143,23 +178,24 @@ public final class Legendary {
 	public static int incoming( Hero h, int in, Object src ){
 		if (h == null || h.belongings == null || in <= 0) return in;
 		if (h.belongings.armor instanceof CarapaceOfTheDeep){
-			in = Math.max( 1, in - (2 + Dungeon.depth / 4) );
+			in = Math.max( 1, in - (3 + Dungeon.depth / 3) );
 		}
 		if (h.belongings.armor instanceof MantleOfEchoes){
-			if (Random.Float() < 0.15f){
+			if (Random.Float() < 0.20f){
 				GunSkills.callOut( "Echo!" );
 				return 0;
 			}
 			if (src instanceof Char && src != h){
 				Char striker = (Char) src;
 				if (striker.isAlive() && striker.alignment != Char.Alignment.ALLY){
-					striker.damage( Math.max( 1, Math.round( in * 0.30f ) ), h );
+					striker.damage( Math.max( 1, Math.round( in * 0.40f ) ), h );
 				}
 			}
 		}
 		if (carried( h, PhoenixFeather.class ) && phoenixDepth != Dungeon.depth && in >= h.HP + h.shielding()){
 			phoenixDepth = Dungeon.depth;
-			h.HP = Math.max( h.HP, h.HT / 2 );
+			h.HP = Math.max( h.HP, Math.round( h.HT * 0.6f ) );
+			Buff.affect( h, Barrier.class ).incShield( Math.max( 1, Math.round( h.HT * 0.25f ) ) );
 			GunSkills.callOut( "The Phoenix Feather burns!" );
 			return 0;
 		}
@@ -167,20 +203,20 @@ public final class Legendary {
 	}
 
 	public static float speed( Hero h ){
-		return carried( h, GaleBoots.class ) ? 1.3f : 1f;
+		return carried( h, GaleBoots.class ) ? 1.4f : 1f;
 	}
 
 	public static float evasion( Hero h ){
-		return carried( h, GaleBoots.class ) ? 1.2f : 1f;
+		return carried( h, GaleBoots.class ) ? 1.3f : 1f;
 	}
 
 	public static float exp( Hero h ){
-		return carried( h, LodestarCompass.class ) ? 1.3f : 1f;
+		return carried( h, LodestarCompass.class ) ? 1.5f : 1f;
 	}
 
 	/** the Bandolier: one more round in the magazine */
 	public static int magazine(){
-		return carried( Dungeon.hero, BandolierOfPlenty.class ) ? 1 : 0;
+		return carried( Dungeon.hero, BandolierOfPlenty.class ) ? 2 : 0;
 	}
 
 	/** each turn: the Wellspring Flask's trickle of health */
@@ -189,7 +225,7 @@ public final class Legendary {
 			wellspring = 0;
 			return;
 		}
-		if (++wellspring >= 4){
+		if (++wellspring >= 2){
 			wellspring = 0;
 			if (h.isAlive() && h.HP < h.HT) heal( h, 1 );
 		}
@@ -198,7 +234,7 @@ public final class Legendary {
 	/** the hero arrives on a floor: the Aegis wraps them in a barrier */
 	public static void onArrive( Hero h ){
 		if (carried( h, AegisOfArrival.class )){
-			Buff.affect( h, Barrier.class ).incShield( 10 + Dungeon.depth );
+			Buff.affect( h, Barrier.class ).incShield( 15 + 2 * Dungeon.depth );
 		}
 	}
 
@@ -211,14 +247,14 @@ public final class Legendary {
 			g.manualReload( 1, false );
 		}
 		if (worn( h, GildedSignet.class )){
-			Buff.affect( h, Barrier.class ).incShield( 3 + Dungeon.depth / 3 );
+			Buff.affect( h, Barrier.class ).incShield( 5 + Dungeon.depth / 2 );
 		}
 		if (worn( h, Thunderband.class )) charged = true;
-		if (carried( h, BandolierOfPlenty.class ) && Random.Int( 2 ) == 0) Dungeon.bullet += 1 + Random.Int( 3 );
+		if (carried( h, BandolierOfPlenty.class ) && Random.Int( 4 ) != 0) Dungeon.bullet += 1 + Random.Int( 3 );
 	}
 
 	/** the Gilded Signet: gold picked up is a half greater */
 	public static int goldBonus( Hero h, int quantity ){
-		return worn( h, GildedSignet.class ) ? Math.round( quantity * 1.5f ) : quantity;
+		return worn( h, GildedSignet.class ) ? Math.round( quantity * 2f ) : quantity;
 	}
 }

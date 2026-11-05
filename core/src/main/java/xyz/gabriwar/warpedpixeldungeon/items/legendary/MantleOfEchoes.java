@@ -34,7 +34,7 @@ public class MantleOfEchoes extends Armor {
 	}
 
 	public MantleOfEchoes() {
-		super( 4 );
+		super( 5 );
 	}
 
 	//unique: it cannot be sold
@@ -45,6 +45,11 @@ public class MantleOfEchoes extends Armor {
 
 	@Override
 	public ItemSprite.Glowing glowing() {
-		return new ItemSprite.Glowing( 0xFFD24A, 1.6f );
+		return new ItemSprite.Glowing( Legendary.glowFor( getClass() ), 1.6f );
+	}
+
+	@Override
+	public String desc() {
+		return super.desc() + "\n\n" + Legendary.rankLine( getClass() );
 	}
 }

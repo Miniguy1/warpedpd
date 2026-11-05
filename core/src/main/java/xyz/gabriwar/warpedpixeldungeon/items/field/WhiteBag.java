@@ -61,7 +61,7 @@ public class WhiteBag extends Item {
 
 	public static final int NORMAL = 0, ELITE = 1, BOSS = 2;
 
-	public static final float BOSS_CHANCE = 0.07f, ELITE_CHANCE = 0.007f, NORMAL_CHANCE = 0.0008f;
+	public static final float BOSS_CHANCE = 0.10f, ELITE_CHANCE = 0.02f, NORMAL_CHANCE = 0.002f;
 
 	{
 		image = ItemSpriteSheet.WHITE_BAG;
@@ -179,21 +179,24 @@ public class WhiteBag extends Item {
 		Hero h = Dungeon.hero;
 		int cap = EndgameLoot.maxTier();
 		boolean haveClass = h != null && h.heroClass != null;
-		//a white bag holds a legendary (never a tiered piece: those drop the ordinary way); with every legendary owned, shards stand in
-		if (source == BOSS) {
-			Item l = Legendary.roll( 3, from );
-			out.add( l != null ? l : new CycleShard().quantity( 8 + 2 * Cycle.number ) );
-			out.add( new CycleShard().quantity( 3 + Cycle.number ) );
-		} else if (source == ELITE) {
-			Item l = Legendary.roll( 0, from );
-			out.add( l != null ? l : new CycleShard().quantity( 4 + Cycle.number ) );
-			out.add( new CycleShard().quantity( 1 + Cycle.number / 2 ) );
-		} else {
-			//the smallest bag: half the time a legendary, half the time one or two scrolls of upgrade
-			Item l = Random.Int( 2 ) == 0 ? Legendary.roll( 0, from ) : null;
-			out.add( l != null ? l : new xyz.gabriwar.warpedpixeldungeon.items.scrolls.ScrollOfUpgrade().quantity( 1 + Random.Int( 2 ) ) );
-		}
+		//a bag made by hand holds one legendary (never a tiered piece), at its rank's level; with every one owned, shards stand in
+		Item l = Legendary.roll( -1, from );
+		out.add( l != null ? l : new CycleShard().quantity( 4 + Cycle.number ) );
+		if (source == BOSS) out.add( new CycleShard().quantity( 3 + Cycle.number ) );
+		if (source == ELITE) out.add( new CycleShard().quantity( 1 + Cycle.number / 2 ) );
 		for (Item it : out) it.identify();
+		return out;
+	}
+
+	/** the bag a kill really made: the legendaries that rolled their own chance, each at its rank's level, and shards from a boss or an elite */
+	public static ArrayList<Item> contentsForWon( int source, ArrayList<Class<?>> won ) {
+		ArrayList<Item> out = new ArrayList<>();
+		for (Class<?> c : won) {
+			Item it = Legendary.make( c, Legendary.levelFor( LootTable.rankOf( c ) ) );
+			if (it != null) out.add( it );
+		}
+		if (source == BOSS) out.add( new CycleShard().quantity( 3 + Cycle.number ) );
+		if (source == ELITE) out.add( new CycleShard().quantity( 1 + Cycle.number / 2 ) );
 		return out;
 	}
 
@@ -202,8 +205,10 @@ public class WhiteBag extends Item {
 		Hero h = Dungeon.hero;
 		if (h == null || !h.isAlive() || Dungeon.level == null) return;
 		int src = sourceOf( mob );
-		if (src < 0 || !LootTable.isSource( mob ) || !rolls( src )) return;
-		drop( mob.pos, src, mob );
+		if (src < 0) return;
+		ArrayList<Class<?>> won = LootTable.rollDrops( mob );
+		if (won.isEmpty()) return;
+		announceDrop( src, mob.pos, Dungeon.level.drop( new WhiteBag( src, contentsForWon( src, won ) ), mob.pos ) );
 	}
 
 	public static Heap drop( int pos, int source ) {
@@ -212,6 +217,11 @@ public class WhiteBag extends Item {
 
 	public static Heap drop( int pos, int source, Mob from ) {
 		Heap heap = Dungeon.level.drop( new WhiteBag( source, contentsFor( source, from ) ), pos );
+		announceDrop( source, pos, heap );
+		return heap;
+	}
+
+	private static void announceDrop( int source, int pos, Heap heap ) {
 		GLog.p( source == BOSS ? "A WHITE BAG falls from the boss!" : source == ELITE ? "A WHITE BAG falls from the elite!" : "A WHITE BAG! It fell from something small." );
 		if (com.watabou.noosa.Game.scene() instanceof GameScene) {
 			try {
@@ -221,7 +231,6 @@ public class WhiteBag extends Item {
 				//a sound or a spark failing is no reason to lose the bag
 			}
 		}
-		return heap;
 	}
 
 	private static final String SOURCE = "source", CONTENTS = "contents";

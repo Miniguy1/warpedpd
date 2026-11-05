@@ -31,7 +31,7 @@ public class Venomfang extends MeleeWeapon {
 
 	{
 		image = ItemSpriteSheet.VENOMFANG;
-		tier = 2;
+		tier = 3;
 	}
 
 	//unique: it cannot be sold
@@ -42,6 +42,11 @@ public class Venomfang extends MeleeWeapon {
 
 	@Override
 	public ItemSprite.Glowing glowing() {
-		return new ItemSprite.Glowing( 0xFFD24A, 1.6f );
+		return new ItemSprite.Glowing( Legendary.glowFor( getClass() ), 1.6f );
+	}
+
+	@Override
+	public String desc() {
+		return super.desc() + "\n\n" + Legendary.rankLine( getClass() );
 	}
 }

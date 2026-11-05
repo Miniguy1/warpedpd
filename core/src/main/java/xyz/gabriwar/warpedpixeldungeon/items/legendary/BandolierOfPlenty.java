@@ -53,6 +53,11 @@ public class BandolierOfPlenty extends Item {
 
 	@Override
 	public ItemSprite.Glowing glowing() {
-		return new ItemSprite.Glowing( 0xFFD24A, 1.6f );
+		return new ItemSprite.Glowing( Legendary.glowFor( getClass() ), 1.6f );
+	}
+
+	@Override
+	public String desc() {
+		return super.desc() + "\n\n" + Legendary.rankLine( getClass() );
 	}
 }
