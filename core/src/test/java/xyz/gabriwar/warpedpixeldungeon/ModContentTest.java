@@ -4830,6 +4830,53 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void everyBlockHoldsAnEventInEveryCycleAndOnTheClimbOut() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		java.util.HashMap<Integer, Integer> keepRebuilds = new java.util.HashMap<>( Dungeon.ascentRebuilds );
+		StringBuilder missing = new StringBuilder();
+		try {
+			for (int cycle = 0; cycle <= 1; cycle++) {
+				for (int block = 0; block < 5; block++) {
+					//the floor of this block that always holds an event
+					int forcedFloor = -1;
+					for (int d = block == 0 ? 2 : 5 * block + 1; d <= (block == 0 ? 4 : 5 * block + 4); d++) if (xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.forced( Dungeon.seed, d )) forcedFloor = d;
+					assertTrue( "a forced floor in block " + block, forcedFloor > 0 );
+					for (int climbOut = 0; climbOut <= 1; climbOut++) {
+						Cycle.number = cycle; Dungeon.branch = 0; Dungeon.depth = forcedFloor;
+						Dungeon.ascentRebuilds.clear();
+						if (climbOut == 1) Dungeon.ascentRebuilds.put( forcedFloor, 1 );   //the floor is rebuilt as you climb with the charm
+						Dungeon.generatedLevels.clear();
+						Level level = Dungeon.newLevel();
+						boolean has = level.earlyEvent != xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.NONE || level.climbEvent != xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.NONE;
+						if (!has) missing.append( "\n  cycle " ).append( cycle ).append( ", floor " ).append( forcedFloor ).append( climbOut == 1 ? " (climb out)" : " (down)" );
+					}
+				}
+			}
+			assertTrue( "FLOORS WITH NO EVENT:" + missing, missing.length() == 0 );
+			//floor 1: nothing going down, but it can have one on the climb out
+			int down = 0, up = 0;
+			for (int i = 0; i < 50; i++) {
+				Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 1;
+				Dungeon.ascentRebuilds.clear();
+				Dungeon.generatedLevels.clear();
+				if (Dungeon.newLevel().earlyEvent != xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.NONE) down++;
+				Dungeon.ascentRebuilds.put( 1, 1 );
+				Dungeon.generatedLevels.clear();
+				if (Dungeon.newLevel().earlyEvent != xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.NONE) up++;
+			}
+			assertEquals( "floor 1 never has one going down", 0, down );
+			assertTrue( "floor 1 can on the climb out: " + up + "/50", up > 0 );
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.ascentRebuilds.clear();
+			Dungeon.ascentRebuilds.putAll( keepRebuilds );
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}

@@ -128,8 +128,10 @@ public final class EarlyEvents {
 
 	/** a newly built floor: an event (not on a floor the cycle events already hold), and maybe a visitor */
 	public static void roll( Level level ) {
-		if (!eligible( Dungeon.branch, Dungeon.depth )) return;
-		boolean force = forced( Dungeon.seed, Dungeon.depth );
+    //the first floor has no event on the way down, but it is rebuilt on the climb out with the charm, and then it can
+    boolean climbOutFirst = Dungeon.branch == 0 && Dungeon.depth == 1 && Dungeon.rebuildCount( 1 ) > 0;
+    if (!eligible( Dungeon.branch, Dungeon.depth ) && !climbOutFirst) return;
+    boolean force = forced( Dungeon.seed, Dungeon.depth );
 		if (level.climbEvent == ClimbEvents.NONE && (force || Random.Float() < 0.20f)) {
 			apply( level, pickEvent() );
 		}
