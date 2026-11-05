@@ -4081,7 +4081,7 @@ public class ModContentTest {
 			//the rates: a boss most, an elite far less, anything else almost never
 			assertEquals( 0.07f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS ), 0.0001f );
 			assertEquals( 0.007f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ), 0.0001f );
-			assertEquals( 0.0004f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ), 0.00001f );
+			assertEquals( 0.0008f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ), 0.00001f );
 			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS ) > xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ) && xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.ELITE ) > xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL ) );
 			assertEquals( 0f, xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.chanceFor( -1 ), 0f );
 			int boss = 0, el = 0, norm = 0;
@@ -4090,7 +4090,7 @@ public class ModContentTest {
 			for (int i = 0; i < 400000; i++) if (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.rolls( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.NORMAL )) norm++;
 			assertEquals( "bosses: " + boss + "/20000", 1400, boss, 280 );
 			assertEquals( "elites: " + el + "/200000", 1400, el, 280 );
-			assertEquals( "ordinary enemies: " + norm + "/400000", 160, norm, 60 );
+			assertEquals( "ordinary enemies: " + norm + "/400000", 320, norm, 90 );
 
 			//what they hold, with an empty pack so no piece is already owned
 			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MAGE;
@@ -4290,8 +4290,8 @@ public class ModContentTest {
 			//rolling: one you do not have, and none once you have them all
 			h.belongings.backpack.items.clear();
 			java.util.Set<Class<?>> seen = new java.util.HashSet<>();
-			for (int i = 0; i < 300; i++) { Item it = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.roll( 0 ); assertNotNull( it ); seen.add( it.getClass() ); }
-			assertEquals( "all six come up", 6, seen.size() );
+			for (int i = 0; i < 900; i++) { Item it = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.roll( 0 ); assertNotNull( it ); seen.add( it.getClass() ); }
+			assertEquals( "every legendary comes up", xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL.length, seen.size() );
 			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL) h.belongings.backpack.items.add( (Item) com.watabou.utils.Reflection.newInstance( c ) );
 			assertNull( "all owned: none left to give", xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.roll( 0 ) );
 		} finally {
@@ -4300,6 +4300,192 @@ public class ModContentTest {
 			h.belongings.backpack.items.clear();
 			h.belongings.backpack.items.addAll( keepPack );
 			h.HP = keepHP; h.HT = keepHT; h.pos = keepPos;
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
+		}
+	}
+
+	@Test
+	public void theLootTableTiesEachLegendaryToItsOwnMobs() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		try {
+			assertEquals( 14, xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL.length );
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.ALL) {
+				assertTrue( c.getSimpleName() + " has creatures that drop it", xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.sourcesOf( c ).size() >= 4 );
+			}
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Tengu tengu = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Tengu();
+			java.util.ArrayList<Class<?>> forTengu = xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.legendariesFor( tengu );
+			assertTrue( forTengu.contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.Dawnrender.class ) && forTengu.contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.MantleOfEchoes.class ) );
+			assertFalse( "Tengu does not drop the Widowmaker", forTengu.contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.Widowmaker.class ) );
+			java.util.ArrayList<Class<?>> forGoo = xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.legendariesFor( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo() );
+			assertTrue( forGoo.contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.CarapaceOfTheDeep.class ) && forGoo.contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.WellspringFlask.class ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.legendariesFor( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.DM300() ).contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.Thunderband.class ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.legendariesFor( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.YogDzewa() ).contains( xyz.gabriwar.warpedpixeldungeon.items.legendary.PhoenixFeather.class ) );
+			//who can drop a bag at all
+			assertFalse( "a rat is in no row", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo() ) );
+			assertTrue( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat() ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat eliteBat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.make( eliteBat );
+			assertTrue( "an elite of a listed creature", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( eliteBat ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat eliteRat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.make( eliteRat );
+			assertFalse( "an elite of an unlisted one", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( eliteRat ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat ally = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat(); ally.alignment = xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ALLY;
+			assertFalse( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( ally ) );
+			//a bag holds only what its creature drops
+			h.belongings.backpack.items.clear();
+			for (int i = 0; i < 80; i++) {
+				java.util.ArrayList<Item> c = xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS, tengu );
+				assertTrue( "a Tengu bag holds a Tengu legendary: " + c.get( 0 ).getClass().getSimpleName(), forTengu.contains( c.get( 0 ).getClass() ) );
+			}
+			//with all of its legendaries owned, shards stand in (never another creature's)
+			for (Class<?> c : forTengu) h.belongings.backpack.items.add( (Item) com.watabou.utils.Reflection.newInstance( c ) );
+			for (int i = 0; i < 20; i++) assertTrue( "shards", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.contentsFor( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.BOSS, tengu ).get( 0 ) instanceof xyz.gabriwar.warpedpixeldungeon.items.CycleShard );
+			h.belongings.backpack.items.clear();
+			//on a floor: a listed boss drops bags that hold its legendaries, and an unlisted creature never drops one
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			int at = openCell( level );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			rat.pos = at;
+			for (int i = 0; i < 20000; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( rat );
+			assertEquals( "a rat never drops a white bag", 0, level.heaps.size() );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
+			goo.pos = at;
+			for (int i = 0; i < 400 && level.heaps.size() == 0; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( goo );
+			assertTrue( "a listed boss drops one in the end", level.heaps.size() > 0 );
+			xyz.gabriwar.warpedpixeldungeon.items.Heap hp = level.heaps.valueList().get( 0 );
+			assertTrue( hp.peek() instanceof xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag );
+			xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag bag = (xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag) hp.peek();
+			assertTrue( "a Goo bag holds a Goo legendary: " + bag.contents().get( 0 ).getClass().getSimpleName(), forGoo.contains( bag.contents().get( 0 ).getClass() ) );
+		} finally {
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+		}
+	}
+
+	@Test
+	public void theNewLegendariesWorkThroughTheHeroesHooks() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kw = h.belongings.weapon;
+		xyz.gabriwar.warpedpixeldungeon.items.armor.Armor ka = h.belongings.armor;
+		xyz.gabriwar.warpedpixeldungeon.items.artifacts.Artifact kart = h.belongings.artifact;
+		xyz.gabriwar.warpedpixeldungeon.items.KindofMisc kmisc = h.belongings.misc;
+		xyz.gabriwar.warpedpixeldungeon.items.rings.Ring kring = h.belongings.ring;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kthrown = h.belongings.thrownWeapon;
+		java.util.ArrayList<Item> keepPack = new java.util.ArrayList<>( h.belongings.backpack.items );
+		int keepHP = h.HP, keepHT = h.HT, keepPos = h.pos, keepBullets = Dungeon.bullet;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = openCell( level );
+			h.HT = 100; h.HP = 100;
+			h.belongings.weapon = null; h.belongings.armor = null; h.belongings.artifact = null; h.belongings.misc = null; h.belongings.ring = null;
+			h.belongings.thrownWeapon = null;
+			h.belongings.backpack.items.clear();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
+
+			//Carapace of the Deep: flat damage less, more of it the deeper you are
+			h.belongings.armor = new xyz.gabriwar.warpedpixeldungeon.items.legendary.CarapaceOfTheDeep();
+			assertEquals( 18, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+			Dungeon.depth = 23;
+			assertEquals( 13, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+			assertEquals( "never to nothing", 1, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 2, null ) );
+			Dungeon.depth = 3;
+			h.belongings.armor = null;
+			assertEquals( 20, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+
+			//Venomfang: a blow poisons, a shot does not
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Venomfang();
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat r1 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), r2 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			r1.HT = r1.HP = 1000; r2.HT = r2.HP = 1000;
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 ) );
+			assertNotNull( "poisoned", r1.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Poison.class ) );
+			h.belongings.thrownWeapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().knockBullet();
+			xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r2, 100 );
+			assertNull( "a shot does not poison", r2.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Poison.class ) );
+			h.belongings.thrownWeapon = null;
+
+			//Soulreaver: a fifth of the damage heals, in melee only
+			h.belongings.weapon = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Soulreaver();
+			h.HP = 50;
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 ) );
+			assertEquals( "healed 20", 70, h.HP );
+			h.belongings.thrownWeapon = new xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Revolver().knockBullet();
+			xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 );
+			assertEquals( "a shot does not heal", 70, h.HP );
+			h.belongings.thrownWeapon = null;
+			h.belongings.weapon = null;
+
+			//Thunderband: a kill charges the next blow, once
+			h.belongings.ring = new xyz.gabriwar.warpedpixeldungeon.items.legendary.Thunderband();
+			assertEquals( 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 ) );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertEquals( "double after a kill", 200, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 ) );
+			assertEquals( "once only", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r1, 100 ) );
+			h.belongings.ring = null;
+
+			//Wellspring Flask: 1 health every 4 turns
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.WellspringFlask() );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.reset();
+			h.HP = 50;
+			for (int i = 0; i < 3; i++) xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick( h );
+			assertEquals( 50, h.HP );
+			xyz.gabriwar.warpedpixeldungeon.items.GearSets.tick( h );
+			assertEquals( "the fourth turn heals 1", 51, h.HP );
+			h.belongings.backpack.items.clear();
+
+			//Lodestar Compass: +30% experience
+			float ex = xyz.gabriwar.warpedpixeldungeon.items.GearSets.expMultiplier( h );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.LodestarCompass() );
+			assertEquals( ex * 1.3f, xyz.gabriwar.warpedpixeldungeon.items.GearSets.expMultiplier( h ), 0.001f );
+			h.belongings.backpack.items.clear();
+			assertEquals( ex, xyz.gabriwar.warpedpixeldungeon.items.GearSets.expMultiplier( h ), 0.001f );
+
+			//Bandolier of Plenty: a round more, and bullets from kills
+			int mag = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.magazineBonus();
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.BandolierOfPlenty() );
+			assertEquals( "+1 round", mag + 1, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.magazineBonus() );
+			Dungeon.bullet = 0;
+			for (int i = 0; i < 600; i++) xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertTrue( "bullets from kills: " + Dungeon.bullet, Dungeon.bullet > 350 && Dungeon.bullet < 850 );
+			h.belongings.backpack.items.clear();
+			assertEquals( mag, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.magazineBonus() );
+			Dungeon.bullet = 0;
+			for (int i = 0; i < 200; i++) xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertEquals( "none without it", 0, Dungeon.bullet );
+
+			//Aegis of Arrival: a barrier on arriving
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onArrive( h );
+			assertEquals( "no barrier without it", 0, h.shielding() );
+			h.belongings.backpack.items.add( new xyz.gabriwar.warpedpixeldungeon.items.legendary.AegisOfArrival() );
+			xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onArrive( h );
+			assertTrue( "a barrier of 10 plus the floor: " + h.shielding(), h.shielding() >= 13 );
+		} finally {
+			h.belongings.weapon = kw; h.belongings.armor = ka; h.belongings.artifact = kart; h.belongings.misc = kmisc; h.belongings.ring = kring;
+			h.belongings.thrownWeapon = kthrown;
+			h.belongings.backpack.items.clear();
+			h.belongings.backpack.items.addAll( keepPack );
+			h.HP = keepHP; h.HT = keepHT; h.pos = keepPos;
+			Dungeon.bullet = keepBullets;
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
 			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
 			Dungeon.level = lvKeep;

@@ -1138,6 +1138,7 @@ public class Dungeon {
 		xyz.gabriwar.warpedpixeldungeon.levels.ClimbEvents.announce( level );
 		Pacts.onArrive( level );
 		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills.rollStarter( hero );
+		xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.onArrive( hero );   //the aegis of arrival
 		xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.announce( level );
 		//first steps somewhere new write its pages into the Descent Guide
 		xyz.gabriwar.warpedpixeldungeon.journal.GuideGraph.onArrive( depth, branch );

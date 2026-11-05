@@ -81,7 +81,7 @@ public final class GunSkills {
 
 	/** Deep Pockets: rounds added to the magazine */
 	public static int magazineBonus(){
-		return lvl( DeepPockets.class );
+		return lvl( DeepPockets.class ) + xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.magazine();   //and the bandolier
 	}
 
 	/** Quick Hands shortens a reload by 20/35/50%; a Long Barrel makes it 20% slower */

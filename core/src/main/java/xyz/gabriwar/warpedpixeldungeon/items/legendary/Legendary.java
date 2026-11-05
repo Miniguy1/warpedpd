@@ -30,29 +30,37 @@ import xyz.gabriwar.warpedpixeldungeon.Dungeon;
 import xyz.gabriwar.warpedpixeldungeon.actors.Char;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier;
 import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff;
+import xyz.gabriwar.warpedpixeldungeon.actors.buffs.Poison;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero;
 import xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.GunSkills;
 import xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob;
+import xyz.gabriwar.warpedpixeldungeon.effects.Speck;
 import xyz.gabriwar.warpedpixeldungeon.items.Item;
 import xyz.gabriwar.warpedpixeldungeon.items.weapon.melee.gun.Gun;
 import xyz.gabriwar.warpedpixeldungeon.sprites.CharSprite;
-import xyz.gabriwar.warpedpixeldungeon.effects.Speck;
 
 /**
- * The legendary items: unique, strong, and found only in white bags. Their effects ride on the same hooks as the gear
- * sets (damage out, damage in, speed, evasion), plus the kill and the gold pickup.
+ * The legendary items: unique, strong, and found only in white bags from the creatures that drop them (see LootTable).
+ * Their effects ride on the same hooks as the gear sets (damage out, damage in, speed, evasion, experience, the turn),
+ * plus the kill, the gold pickup, the magazine and the arrival on a floor.
  */
 public final class Legendary {
 
 	private Legendary(){}
 
-	public static final Class<?>[] ALL = { Dawnrender.class, Widowmaker.class, MantleOfEchoes.class, GildedSignet.class, PhoenixFeather.class, GaleBoots.class };
+	public static final Class<?>[] ALL = {
+			Dawnrender.class, Widowmaker.class, MantleOfEchoes.class, GildedSignet.class, PhoenixFeather.class, GaleBoots.class,
+			CarapaceOfTheDeep.class, Venomfang.class, Soulreaver.class, Thunderband.class,
+			WellspringFlask.class, LodestarCompass.class, BandolierOfPlenty.class, AegisOfArrival.class };
 
-	private static int dawnHits = 0, phoenixDepth = -1;
+	private static int dawnHits = 0, phoenixDepth = -1, wellspring = 0;
+	private static boolean charged = false;
 
 	public static void reset(){
 		dawnHits = 0;
 		phoenixDepth = -1;
+		wellspring = 0;
+		charged = false;
 	}
 
 	/** is it on the hero (wielded, worn or on a finger)? */
@@ -69,11 +77,18 @@ public final class Legendary {
 		return false;
 	}
 
-	/** one of the legendaries the hero does not have yet (at the given upgrade level where it can take one), or null if they have them all */
+	/** any legendary the hero does not have yet (at the given upgrade level where it can take one), or null if they have them all */
 	public static Item roll( int plus ){
+		return roll( plus, null );
+	}
+
+	/** one of the legendaries this creature drops (any, for no creature) that the hero does not have yet, or null if there is none */
+	public static Item roll( int plus, Mob from ){
 		Hero h = Dungeon.hero;
+		ArrayList<Class<?>> pool = new ArrayList<>();
+		if (from == null) for (Class<?> c : ALL) pool.add( c ); else pool.addAll( LootTable.legendariesFor( from ) );
 		ArrayList<Class<?>> fresh = new ArrayList<>();
-		for (Class<?> c : ALL) if (!carried( h, c )) fresh.add( c );
+		for (Class<?> c : pool) if (!carried( h, c )) fresh.add( c );
 		if (fresh.isEmpty()) return null;
 		Item it = (Item) Reflection.newInstance( fresh.get( Random.Int( fresh.size() ) ) );
 		if (it == null) return null;
@@ -91,12 +106,12 @@ public final class Legendary {
 		}
 	}
 
-	/** a blow about to land: Dawnrender's burst and Widowmaker's finishing power */
+	/** a blow about to land: Dawnrender, Soulreaver, Venomfang, Widowmaker and the Thunderband */
 	public static int outgoing( Hero h, Char enemy, int out ){
 		if (h == null || h.belongings == null || out <= 0) return out;
 		boolean shot = h.belongings.thrownWeapon != null;
-		if (!shot && h.belongings.weapon instanceof Dawnrender){
-			if (++dawnHits % 5 == 0){
+		if (!shot){
+			if (h.belongings.weapon instanceof Dawnrender && ++dawnHits % 5 == 0){
 				GunSkills.callOut( "Dawnrender!" );
 				if (Dungeon.level != null){
 					for (Mob m : Dungeon.level.mobs.toArray( new Mob[0] )){
@@ -108,16 +123,28 @@ public final class Legendary {
 				}
 				heal( h, Math.max( 1, Math.round( h.HT * 0.05f ) ) );
 			}
+			if (h.belongings.weapon instanceof Soulreaver) heal( h, Math.max( 1, Math.round( out * 0.20f ) ) );
+			if (h.belongings.weapon instanceof Venomfang && enemy != null && enemy.isAlive()){
+				Buff.affect( enemy, Poison.class ).set( 3f + Dungeon.depth / 3f );
+			}
 		}
 		if (shot && enemy != null && GunSkills.gun() instanceof Widowmaker && enemy.HP * 2 <= enemy.HT){
 			out = Math.max( 1, Math.round( out * 1.4f ) );
 		}
+		if (charged && worn( h, Thunderband.class )){
+			charged = false;
+			out *= 2;
+			GunSkills.callOut( "Thunderstruck!" );
+		}
 		return out;
 	}
 
-	/** a blow about to land on the hero: the Mantle's echo and the Phoenix's second chance */
+	/** a blow about to land on the hero: the Carapace, the Mantle's echo and the Phoenix's second chance */
 	public static int incoming( Hero h, int in, Object src ){
 		if (h == null || h.belongings == null || in <= 0) return in;
+		if (h.belongings.armor instanceof CarapaceOfTheDeep){
+			in = Math.max( 1, in - (2 + Dungeon.depth / 4) );
+		}
 		if (h.belongings.armor instanceof MantleOfEchoes){
 			if (Random.Float() < 0.15f){
 				GunSkills.callOut( "Echo!" );
@@ -147,7 +174,35 @@ public final class Legendary {
 		return carried( h, GaleBoots.class ) ? 1.2f : 1f;
 	}
 
-	/** a kill: Widowmaker's refund and the Gilded Signet's barrier */
+	public static float exp( Hero h ){
+		return carried( h, LodestarCompass.class ) ? 1.3f : 1f;
+	}
+
+	/** the Bandolier: one more round in the magazine */
+	public static int magazine(){
+		return carried( Dungeon.hero, BandolierOfPlenty.class ) ? 1 : 0;
+	}
+
+	/** each turn: the Wellspring Flask's trickle of health */
+	public static void tick( Hero h ){
+		if (!carried( h, WellspringFlask.class )){
+			wellspring = 0;
+			return;
+		}
+		if (++wellspring >= 4){
+			wellspring = 0;
+			if (h.isAlive() && h.HP < h.HT) heal( h, 1 );
+		}
+	}
+
+	/** the hero arrives on a floor: the Aegis wraps them in a barrier */
+	public static void onArrive( Hero h ){
+		if (carried( h, AegisOfArrival.class )){
+			Buff.affect( h, Barrier.class ).incShield( 10 + Dungeon.depth );
+		}
+	}
+
+	/** a kill: Widowmaker's refund, the Signet's barrier, the Thunderband's charge and the Bandolier's bullets */
 	public static void onKill( Mob mob ){
 		Hero h = Dungeon.hero;
 		if (h == null) return;
@@ -158,6 +213,8 @@ public final class Legendary {
 		if (worn( h, GildedSignet.class )){
 			Buff.affect( h, Barrier.class ).incShield( 3 + Dungeon.depth / 3 );
 		}
+		if (worn( h, Thunderband.class )) charged = true;
+		if (carried( h, BandolierOfPlenty.class ) && Random.Int( 2 ) == 0) Dungeon.bullet += 1 + Random.Int( 3 );
 	}
 
 	/** the Gilded Signet: gold picked up is a half greater */

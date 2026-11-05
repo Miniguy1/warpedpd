@@ -2271,4 +2271,24 @@ public class ItemSpriteSheet {
     assignItemRect(PHOENIX_FEATHER, 13, 16);
     assignItemRect(GALE_BOOTS, 15, 14);
   }
+
+  private static final int OW_LEGEND2   =                            xy(1, 77);   //16 slots: more legendaries (drawn by script)
+  public static final int CARAPACE_OF_THE_DEEP  = OW_LEGEND2+0;
+  public static final int VENOMFANG             = OW_LEGEND2+1;
+  public static final int SOULREAVER            = OW_LEGEND2+2;
+  public static final int THUNDERBAND           = OW_LEGEND2+3;
+  public static final int WELLSPRING_FLASK      = OW_LEGEND2+4;
+  public static final int LODESTAR_COMPASS      = OW_LEGEND2+5;
+  public static final int BANDOLIER_OF_PLENTY   = OW_LEGEND2+6;
+  public static final int AEGIS_OF_ARRIVAL      = OW_LEGEND2+7;
+  static {
+    assignItemRect(CARAPACE_OF_THE_DEEP, 16, 14);
+    assignItemRect(VENOMFANG, 14, 16);
+    assignItemRect(SOULREAVER, 15, 16);
+    assignItemRect(THUNDERBAND, 15, 16);
+    assignItemRect(WELLSPRING_FLASK, 13, 16);
+    assignItemRect(LODESTAR_COMPASS, 16, 16);
+    assignItemRect(BANDOLIER_OF_PLENTY, 15, 15);
+    assignItemRect(AEGIS_OF_ARRIVAL, 15, 15);
+  }
 }

@@ -42,6 +42,7 @@ import xyz.gabriwar.warpedpixeldungeon.items.EndgameLoot;
 import xyz.gabriwar.warpedpixeldungeon.items.Heap;
 import xyz.gabriwar.warpedpixeldungeon.items.Item;
 import xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary;
+import xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable;
 import xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents;
 import xyz.gabriwar.warpedpixeldungeon.messages.Messages;
 import xyz.gabriwar.warpedpixeldungeon.scenes.GameScene;
@@ -60,7 +61,7 @@ public class WhiteBag extends Item {
 
 	public static final int NORMAL = 0, ELITE = 1, BOSS = 2;
 
-	public static final float BOSS_CHANCE = 0.07f, ELITE_CHANCE = 0.007f, NORMAL_CHANCE = 0.0004f;
+	public static final float BOSS_CHANCE = 0.07f, ELITE_CHANCE = 0.007f, NORMAL_CHANCE = 0.0008f;
 
 	{
 		image = ItemSpriteSheet.WHITE_BAG;
@@ -162,24 +163,34 @@ public class WhiteBag extends Item {
 		return Random.Float() < chanceFor( source );
 	}
 
-	/** what a bag from this source holds */
+	/** can this creature drop a white bag at all? Only the creatures in the legendaries' loot table (and not summons or decoys) */
+	public static boolean eligible( Mob mob ) {
+		return sourceOf( mob ) >= 0 && LootTable.isSource( mob );
+	}
+
+	/** a bag made by hand (the debug menu): any legendary */
 	public static ArrayList<Item> contentsFor( int source ) {
+		return contentsFor( source, null );
+	}
+
+	/** what a bag from this source holds, with only the legendaries the creature drops (shards stand in when the hero has them all) */
+	public static ArrayList<Item> contentsFor( int source, Mob from ) {
 		ArrayList<Item> out = new ArrayList<>();
 		Hero h = Dungeon.hero;
 		int cap = EndgameLoot.maxTier();
 		boolean haveClass = h != null && h.heroClass != null;
 		//a white bag holds a legendary (never a tiered piece: those drop the ordinary way); with every legendary owned, shards stand in
 		if (source == BOSS) {
-			Item l = Legendary.roll( 3 );
+			Item l = Legendary.roll( 3, from );
 			out.add( l != null ? l : new CycleShard().quantity( 8 + 2 * Cycle.number ) );
 			out.add( new CycleShard().quantity( 3 + Cycle.number ) );
 		} else if (source == ELITE) {
-			Item l = Legendary.roll( 0 );
+			Item l = Legendary.roll( 0, from );
 			out.add( l != null ? l : new CycleShard().quantity( 4 + Cycle.number ) );
 			out.add( new CycleShard().quantity( 1 + Cycle.number / 2 ) );
 		} else {
 			//the smallest bag: half the time a legendary, half the time one or two scrolls of upgrade
-			Item l = Random.Int( 2 ) == 0 ? Legendary.roll( 0 ) : null;
+			Item l = Random.Int( 2 ) == 0 ? Legendary.roll( 0, from ) : null;
 			out.add( l != null ? l : new xyz.gabriwar.warpedpixeldungeon.items.scrolls.ScrollOfUpgrade().quantity( 1 + Random.Int( 2 ) ) );
 		}
 		for (Item it : out) it.identify();
@@ -191,12 +202,16 @@ public class WhiteBag extends Item {
 		Hero h = Dungeon.hero;
 		if (h == null || !h.isAlive() || Dungeon.level == null) return;
 		int src = sourceOf( mob );
-		if (src < 0 || !rolls( src )) return;
-		drop( mob.pos, src );
+		if (src < 0 || !LootTable.isSource( mob ) || !rolls( src )) return;
+		drop( mob.pos, src, mob );
 	}
 
 	public static Heap drop( int pos, int source ) {
-		Heap heap = Dungeon.level.drop( new WhiteBag( source, contentsFor( source ) ), pos );
+		return drop( pos, source, null );
+	}
+
+	public static Heap drop( int pos, int source, Mob from ) {
+		Heap heap = Dungeon.level.drop( new WhiteBag( source, contentsFor( source, from ) ), pos );
 		GLog.p( source == BOSS ? "A WHITE BAG falls from the boss!" : source == ELITE ? "A WHITE BAG falls from the elite!" : "A WHITE BAG! It fell from something small." );
 		if (com.watabou.noosa.Game.scene() instanceof GameScene) {
 			try {

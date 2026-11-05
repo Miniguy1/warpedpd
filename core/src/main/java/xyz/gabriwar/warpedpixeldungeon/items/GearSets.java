@@ -437,7 +437,7 @@ public class GearSets {
 	public static float evasionMultiplier( Hero h ) { return of( h ).evasion * xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.evasion( h ); }
 	public static float accuracyMultiplier( Hero h ) { return of( h ).accuracy; }
 	public static float speedMultiplier( Hero h ) { return of( h ).speed * xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.speed( h ); }
-	public static float expMultiplier( Hero h ) { return of( h ).exp; }
+	public static float expMultiplier( Hero h ) { return of( h ).exp * xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.exp( h ); }
 
 	// ---- the Mage set's wands ----
 	public static float wandDamageMultiplier() {
@@ -467,6 +467,7 @@ public class GearSets {
 
 	/** once per hero turn: the regenerating sets and the barrier-making ones */
 	public static void tick( Hero h ) {
+    xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.tick( h );   //the wellspring flask
 		Effects e = of( h );
 		if (e.regenEvery <= 0) {
 			regen = 0;
