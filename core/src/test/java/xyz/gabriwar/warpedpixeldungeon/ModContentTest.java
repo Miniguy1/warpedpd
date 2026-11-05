@@ -4336,9 +4336,9 @@ public class ModContentTest {
 			assertTrue( "an elite of a listed creature", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( eliteBat ) );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat eliteRat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
 			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Elite.make( eliteRat );
-			assertTrue( "any elite can drop the rank I legendaries", '+WB+'.eligible( eliteRat ) );
-			for (Class<?> c : '+LG+'LootTable.legendariesFor( eliteRat )) {
-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+			assertTrue( "any elite can drop the rank I legendaries", xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( eliteRat ) );
+			for (Class<?> c : xyz.gabriwar.warpedpixeldungeon.items.legendary.LootTable.legendariesFor( eliteRat )) {
+				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == xyz.gabriwar.warpedpixeldungeon.items.legendary.WellspringFlask.class || c == xyz.gabriwar.warpedpixeldungeon.items.legendary.LodestarCompass.class || c == xyz.gabriwar.warpedpixeldungeon.items.legendary.GaleBoots.class );
 			}
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat ally = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Bat(); ally.alignment = xyz.gabriwar.warpedpixeldungeon.actors.Char.Alignment.ALLY;
 			assertFalse( xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.eligible( ally ) );
