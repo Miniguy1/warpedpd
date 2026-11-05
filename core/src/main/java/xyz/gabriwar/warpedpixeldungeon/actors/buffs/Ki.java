@@ -30,8 +30,9 @@ import xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.*;
 import xyz.gabriwar.warpedpixeldungeon.ui.BuffIndicator;
 
 /**
- * The Monk's ki: a stack of up to ten (more with training). It builds from every fist that lands and from standing still,
- * and fades when nothing feeds it. Every stack is passive damage and passive protection, and the auras read it.
+ * The Monk's ki: a stack of up to ten (more with training). It builds from every fist that lands and from moving in on a
+ * fight (a stack every few steps taken with an enemy in view), and fades when nothing feeds it. Every stack is passive
+ * damage and passive protection, and the auras read it.
  */
 public class Ki extends Buff {
 
@@ -42,7 +43,7 @@ public class Ki extends Buff {
 
 	private int stacks = 0;
 	private int idle = 0;
-	private int still = 0;
+	private int steps = 0;
 	private int lastPos = -1;
 	public int renew = 0;
 
@@ -54,6 +55,11 @@ public class Ki extends Buff {
 	public int max() {
 		Hero h = target instanceof Hero ? (Hero) target : null;
 		return 10 + 2 * Monk.lvl( h, KiFlowing.class ) + 3 * Monk.lvl( h, KiMastery.class );
+	}
+
+	/** how many steps with an enemy in view feed one stack: 4, then 3, 2 and every step with Flowing Water */
+	public static int stepsPerKi( Hero h ) {
+		return Math.max( 1, 4 - Monk.lvl( h, KiFlowingWater.class ) );
 	}
 
 	public void gain( int n ) {
@@ -71,15 +77,14 @@ public class Ki extends Buff {
 	public boolean act() {
 		if (target instanceof Hero) {
 			Hero h = (Hero) target;
-			//standing still is meditation: a stack every two turns (every turn with still water)
-			if (h.pos == lastPos) {
-				if (++still >= 2) {
-					still = 0;
-					gain( 1 + (Monk.lvl( h, KiStillWater.class ) >= 2 ? 1 : 0) );
-				}
-			} else {
-				still = 0;
+			//moving in on a fight feeds ki: a stack for every few steps taken with an enemy in view
+			if (lastPos == -1) lastPos = h.pos;
+			if (h.pos != lastPos) {
 				lastPos = h.pos;
+				if (Monk.enemyInView( h ) && ++steps >= stepsPerKi( h )) {
+					steps = 0;
+					gain( 1 );
+				}
 			}
 			//ki fades when nothing feeds it
 			int hold = 10 + 5 * Monk.lvl( h, KiMastery.class );
@@ -91,11 +96,6 @@ public class Ki extends Buff {
 		}
 		spend( TICK );
 		return true;
-	}
-
-	/** has the hero held their ground this turn? */
-	public boolean holdingGround() {
-		return still > 0 || (target != null && target.pos == lastPos && idle > 0);
 	}
 
 	@Override
@@ -118,17 +118,17 @@ public class Ki extends Buff {
 		return xyz.gabriwar.warpedpixeldungeon.messages.Messages.get( this, "desc", stacks, max() );
 	}
 
-	private static final String STACKS = "stacks", IDLE = "idle", STILL = "still", LASTPOS = "lastpos", RENEW = "renew";
+	private static final String STACKS = "stacks", IDLE = "idle", STEPS = "steps", LASTPOS = "lastpos", RENEW = "renew";
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
-		bundle.put( STACKS, stacks ); bundle.put( IDLE, idle ); bundle.put( STILL, still ); bundle.put( LASTPOS, lastPos ); bundle.put( RENEW, renew );
+		bundle.put( STACKS, stacks ); bundle.put( IDLE, idle ); bundle.put( STEPS, steps ); bundle.put( LASTPOS, lastPos ); bundle.put( RENEW, renew );
 	}
 
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle( bundle );
-		stacks = bundle.getInt( STACKS ); idle = bundle.getInt( IDLE ); still = bundle.getInt( STILL ); lastPos = bundle.getInt( LASTPOS ); renew = bundle.getInt( RENEW );
+		stacks = bundle.getInt( STACKS ); idle = bundle.getInt( IDLE ); steps = bundle.getInt( STEPS ); lastPos = bundle.getInt( LASTPOS ); renew = bundle.getInt( RENEW );
 	}
 }

@@ -71,6 +71,26 @@ public final class Monk {
 		return b;
 	}
 
+	/** is an enemy in the hero's view? */
+	public static boolean enemyInView( Hero h ) {
+		Level level = Dungeon.level;
+		if (level == null || h == null) return false;
+		for (Mob m : level.mobs.toArray( new Mob[0] )) {
+			if (m.alignment == Char.Alignment.ENEMY && m.isAlive() && level.heroFOV[m.pos]) return true;
+		}
+		return false;
+	}
+
+	/** is an enemy right beside the hero? */
+	public static boolean enemyAdjacent( Hero h ) {
+		Level level = Dungeon.level;
+		if (level == null || h == null) return false;
+		for (Mob m : level.mobs.toArray( new Mob[0] )) {
+			if (m.alignment == Char.Alignment.ENEMY && m.isAlive() && level.distance( h.pos, m.pos ) <= 1) return true;
+		}
+		return false;
+	}
+
 	public static boolean full( Hero h ) {
 		Ki k = h == null ? null : h.buff( Ki.class );
 		return k != null && k.stacks() >= k.max();

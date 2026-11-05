@@ -21,17 +21,11 @@
 
 package xyz.gabriwar.warpedpixeldungeon.actors.hero.skills;
 
-import xyz.gabriwar.warpedpixeldungeon.Dungeon;
-import xyz.gabriwar.warpedpixeldungeon.actors.Char;
-import xyz.gabriwar.warpedpixeldungeon.actors.hero.Hero;
-import xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk;
-import xyz.gabriwar.warpedpixeldungeon.actors.mobs.Mob;
-
-/** Still Water (a Monk's passive aura) */
-public class KiStillWater extends Skill {
+/** Flowing Water (a Monk's passive aura): regeneration, and moving in on a fight feeds ki faster (Ki.stepsPerKi reads this level) */
+public class KiFlowingWater extends Skill {
 
 	{
-		name = "Still Water";
+		name = "Flowing Water";
 		image = 22;
 		tier = 3;
 		tag = "PA3";
@@ -40,11 +34,6 @@ public class KiStillWater extends Skill {
 	@Override
 	protected boolean upgrade(){ return true; }
 
-	private static Hero h(){ return Dungeon.hero; }
-	private static int ki(){ return Monk.stacks( Dungeon.hero ); }
-	private static float boost(){ return Monk.boost( Dungeon.hero ); }
-
-	//stillness heals a little; from level 2, meditation builds ki every turn
 	@Override
 	public int healthRegenerationBonus(){
 		return level;

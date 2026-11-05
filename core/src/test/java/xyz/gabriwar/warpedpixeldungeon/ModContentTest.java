@@ -4753,6 +4753,83 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void theMonkBuildsKiByMovingInOnAFightNotByStandingStill() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass keepSub = h.subClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		int keepPos = h.pos;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			level.mobs.clear();
+			h.pos = openCell( level );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.NONE;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			h.heroSkills = sk;
+			Buff_detach( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki k = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.ki( h );
+			int a = h.pos, b = h.pos + (level.passable[h.pos + 1] ? 1 : -1);
+			//an enemy in view, a little way off
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			rat.HT = rat.HP = 1000;
+			rat.pos = a;
+			level.mobs.add( rat );
+			level.heroFOV[rat.pos] = true;
+			k.act();   //sets the starting place
+			assertEquals( 4, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.stepsPerKi( h ) );
+			for (int i = 1; i <= 3; i++) { h.pos = (i % 2 == 1) ? b : a; k.act(); }
+			assertEquals( "three steps are not enough", 0, k.stacks() );
+			h.pos = b; k.act();   //the fourth step (from a to b to a to b to...)
+			h.pos = a; k.act();
+			assertTrue( "four steps with an enemy in view feed a stack: " + k.stacks(), k.stacks() >= 1 );
+			//Flowing Water: every step
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiFlowingWater.class ).level = 3;
+			assertEquals( 1, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.stepsPerKi( h ) );
+			k.spend( 100 );
+			for (int i = 0; i < 4; i++) { h.pos = (h.pos == a) ? b : a; k.act(); }
+			assertEquals( "a stack with every step", 4, k.stacks() );
+			monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiFlowingWater.class ).level = 0;
+			//no enemy in view: walking feeds nothing
+			k.spend( 100 );
+			level.heroFOV[rat.pos] = false;
+			for (int i = 0; i < 12; i++) { h.pos = (h.pos == a) ? b : a; k.act(); }
+			assertEquals( "walking about with nobody in view", 0, k.stacks() );
+			//and standing still never fed it
+			level.heroFOV[rat.pos] = true;
+			k.gain( 2 );
+			for (int i = 0; i < 8; i++) k.act();
+			assertEquals( "standing still builds nothing", 2, k.stacks() );
+			//Bedrock: against whoever is beside you
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY;
+			sk.initSubclassBranch( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill bedrock = monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBedrock.class );
+			bedrock.level = 3;
+			h.pos = a;
+			rat.pos = b;
+			assertEquals( "an enemy beside you: 9 off", 9, bedrock.incomingDamageReduction( 100 ) );
+			int far = a;
+			for (int tries = 0; tries < 300 && level.distance( far, a ) <= 1; tries++) far = xyz.gabriwar.warpedpixeldungeon.levels.EarlyEvents.freeCell( level );
+			rat.pos = far;
+			assertEquals( "nobody beside you: nothing", 0, bedrock.incomingDamageReduction( 100 ) );
+			bedrock.level = 0;
+		} finally {
+			h.heroClass = keepClass; h.subClass = keepSub; h.heroSkills = keepSkills;
+			h.pos = keepPos;
+			Buff_detach( h );
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}

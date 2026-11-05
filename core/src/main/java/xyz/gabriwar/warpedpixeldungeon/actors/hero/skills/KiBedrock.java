@@ -44,13 +44,10 @@ public class KiBedrock extends Skill {
 	private static int ki(){ return Monk.stacks( Dungeon.hero ); }
 	private static float boost(){ return Monk.boost( Dungeon.hero ); }
 
-	//holding your ground: 3 points off every blow a level
+	//while an enemy is beside you: 3 points off every blow a level
 	@Override
 	public int incomingDamageReduction( int damage ){
-		if (level <= 0 || Dungeon.hero == null) return 0;
-		com.watabou.utils.Bundle unused = null;
-		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki k = Dungeon.hero.buff( xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
-		if (k == null || !k.holdingGround()) return 0;
+		if (level <= 0 || !Monk.enemyAdjacent( Dungeon.hero )) return 0;
 		return Math.round( 3 * level * boost() );
 	}
 }

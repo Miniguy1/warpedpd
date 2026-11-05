@@ -256,7 +256,7 @@ public class CurrentSkills {
 
 			case MONK: {
 				branchPA = new MonkPassiveA();
-				setBranch(passiveASkills, new KiIronSkin(), new KiBurningPalm(), new KiStillWater(), new KiMountain());
+				setBranch(passiveASkills, new KiIronSkin(), new KiBurningPalm(), new KiFlowingWater(), new KiMountain());
 				branchPB = new MonkPassiveB();
 				setBranch(passiveBSkills, new KiFlowing(), new KiStonefist(), new KiQuietMind(), new KiInnerFire());
 				branchA = new MonkActive();
