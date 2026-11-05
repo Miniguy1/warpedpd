@@ -4052,7 +4052,7 @@ public class ModContentTest {
 			assertNotNull( rubbleStash );
 			int items = 0; boolean sg = false;
 			for (Item it : rubbleStash.items) { items++; if (it instanceof xyz.gabriwar.warpedpixeldungeon.items.Gold) sg = true; }
-			assertTrue( "a bigger stash down here: " + items, sg && items >= 3 );
+			assertTrue( "a bigger stash down here: " + items, sg && items >= 2 );   //(random finds can merge into the gold or the bandages)
 		} finally {
 			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
 			Dungeon.level = lvKeep;
