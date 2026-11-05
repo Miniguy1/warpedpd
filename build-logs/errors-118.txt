@@ -1,0 +1,102 @@
+> Task :core:compileTestJava FAILED
+-----
+24-
+25-> Task :core:compileTestJava
+26:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4339: error: unclosed character literal
+27-			assertTrue( "any elite can drop the rank I legendaries", '+WB+'.eligible( eliteRat ) );
+28-			                                                         ^
+29:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4339: error: unclosed character literal
+30-			assertTrue( "any elite can drop the rank I legendaries", '+WB+'.eligible( eliteRat ) );
+31-			                                                              ^
+32:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4339: error: not a statement
+33-			assertTrue( "any elite can drop the rank I legendaries", '+WB+'.eligible( eliteRat ) );
+34-			                                                             ^
+35:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4339: error: ';' expected
+36-			assertTrue( "any elite can drop the rank I legendaries", '+WB+'.eligible( eliteRat ) );
+37-			                                                                                    ^
+38:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4340: error: unclosed character literal
+39-			for (Class<?> c : '+LG+'LootTable.legendariesFor( eliteRat )) {
+40-			                  ^
+41:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4340: error: unclosed character literal
+42-			for (Class<?> c : '+LG+'LootTable.legendariesFor( eliteRat )) {
+43-			                       ^
+44:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4340: error: not a statement
+45-			for (Class<?> c : '+LG+'LootTable.legendariesFor( eliteRat )) {
+46-			                      ^
+47:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4340: error: ';' expected
+48-			for (Class<?> c : '+LG+'LootTable.legendariesFor( eliteRat )) {
+49-			                                                            ^
+50:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+51-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+52-				                                                                                     ^
+53:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+54-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+55-				                                                                                          ^
+56:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+57-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+58-				                                                                                         ^
+59:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+60-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+61-				                                                                                                                         ^
+62:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+63-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+64-				                                                                                                                 ^
+65:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+66-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+67-				                                                                                                                              ^
+68:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+69-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+70-				                                                                                                                             ^
+71:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+72-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+73-				                                                                                                                                                             ^
+74:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+75-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+76-				                                                                                                                                                     ^
+77:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: unclosed character literal
+78-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+79-				                                                                                                                                                                  ^
+80:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+81-				assertTrue( "an elite rat drops only the any-elite ones: " + c.getSimpleName(), c == '+LG+'WellspringFlask.class || c == '+LG+'LodestarCompass.class || c == '+LG+'GaleBoots.class );
+82-				                                                                                                                                                                 ^
+83:/home/runner/work/warpedpd/warpedpd/core/src/test/java/xyz/gabriwar/warpedpixeldungeon/ModContentTest.java:4341: error: not a statement
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 30 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 45s
+6 actionable tasks: 6 executed
