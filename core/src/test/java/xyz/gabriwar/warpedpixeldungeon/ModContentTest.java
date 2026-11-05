@@ -4357,6 +4357,7 @@ public class ModContentTest {
 			int at = openCell( level );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
 			rat.pos = at;
+			level.heaps.clear();   //a floor already has item piles of its own
 			for (int i = 0; i < 20000; i++) xyz.gabriwar.warpedpixeldungeon.items.field.WhiteBag.onKill( rat );
 			assertEquals( "a rat never drops a white bag", 0, level.heaps.valueList().size() );
 			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo goo = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Goo();
