@@ -2281,7 +2281,7 @@ public class ModContentTest {
 	@Test
 	public void theGunslingerClassIsWiredIn() {
 		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass g = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.GUNSLINGER;
-		assertEquals( "the seventh class", 7, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values().length );
+		assertEquals( "the eighth class: the Monk joined the Gunslinger", 8, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.values().length );
 		assertEquals( "sprites/gunslinger.png", g.spritesheet() );
 		assertEquals( "splashes/gunslinger.jpg", g.splashArt() );
 		assertTrue( "open from the start", g.isUnlocked() );
