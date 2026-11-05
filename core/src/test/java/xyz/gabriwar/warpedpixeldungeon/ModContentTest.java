@@ -4949,6 +4949,211 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void theMonkHasItsOwnTalentsAndArmor() {
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		try {
+			java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> tiers = new java.util.ArrayList<>();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK, tiers );
+			java.util.Set<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent> all = new java.util.HashSet<>();
+			for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> tier : tiers) all.addAll( tier.keySet() );
+			assertEquals( "four first-tier talents", 4, tiers.get( 0 ).size() );
+			assertEquals( "five second-tier", 5, tiers.get( 1 ).size() );
+			assertEquals( "two third-tier", 2, tiers.get( 2 ).size() );
+			assertTrue( all.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MEAL ) && all.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MASTERS_ECHO ) && all.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_MASTERY ) );
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent w : new xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HEARTY_MEAL, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.IRON_STOMACH, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.HOLD_FAST, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.STRONGMAN, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.VETERANS_INTUITION, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.IRONCLAD }) {
+				assertFalse( "no Warrior talents for the Monk: " + w, all.contains( w ) );
+			}
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent tl : all) {
+				if (!tl.name().startsWith( "KI_" )) continue;
+				assertFalse( tl + " title", tl.title().contains( "!!!" ) );
+				assertFalse( tl + " desc", tl.desc().contains( "!!!" ) );
+			}
+			//the subclasses' talents
+			for (xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass sub : new xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass[]{ xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY, xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.STORM_FIST }) {
+				h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+				h.subClass = sub;
+				h.talents.clear();
+				xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( h );
+				xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initSubclassTalents( h );
+				java.util.Set<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent> mine = new java.util.HashSet<>();
+				for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> tier : h.talents) mine.addAll( tier.keySet() );
+				if (sub == xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.IRON_BODY) assertTrue( mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_UNSHAKABLE ) && mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STONE_BREATH ) && !mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.ENDLESS_RAGE ) );
+				else assertTrue( mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STORM_SURGE ) && mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_FLURRY ) && !mine.contains( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.ENDLESS_RAGE ) );
+			}
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.MonkArmor().name().contains( "!!!" ) );
+			assertFalse( new xyz.gabriwar.warpedpixeldungeon.items.armor.MonkArmor().desc().contains( "!!!" ) );
+		} finally {
+			h.heroClass = keepClass;
+			h.subClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroSubClass.NONE;
+			h.talents.clear();
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.initClassTalents( h );
+		}
+	}
+
+	@Test
+	public void theMonksTalentsWorkThroughTheHooks() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass keepClass = h.heroClass;
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills keepSkills = h.heroSkills;
+		xyz.gabriwar.warpedpixeldungeon.items.KindOfWeapon kw = h.belongings.weapon;
+		int keepLvl = h.lvl, keepHP = h.HP, keepHT = h.HT, keepPos = h.pos, keepMP = h.MP, keepMT = h.MT;
+		java.util.ArrayList<java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer>> keepTalents = new java.util.ArrayList<>();
+		for (java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> m : h.talents) keepTalents.add( new java.util.LinkedHashMap<>( m ) );
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			level.mobs.clear();
+			h.pos = openCell( level );
+			h.heroClass = xyz.gabriwar.warpedpixeldungeon.actors.hero.HeroClass.MONK;
+			h.lvl = 10; h.HT = 100; h.HP = 100; h.MT = 30; h.MP = 30;
+			h.belongings.weapon = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills sk = xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.CurrentSkills.forHero( h );
+			sk.init( h );
+			h.heroSkills = sk;
+			Buff_detach( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.reset();
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki k = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.ki( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat r = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), r2 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			r.HT = r.HP = 1000000; r2.HT = r2.HP = 1000000;
+			r.pos = h.pos + 2; r2.pos = h.pos + 3;
+			level.mobs.add( r ); level.mobs.add( r2 );
+			java.util.LinkedHashMap<xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent, Integer> slot = h.talents.get( 0 );
+			//thick skin and unshakable: flat damage off every blow
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_THICK_SKIN, 2 );
+			assertEquals( "thick skin: 2 off", 18, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+			k.gain( 5 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_UNSHAKABLE, 3 );
+			assertEquals( "five ki (1), thick skin (2), unshakable (6)", 11, xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 20, null ) );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_UNSHAKABLE ); slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_THICK_SKIN );
+			//ki reserve and mountain heart: more to hold
+			k.spend( 100 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_RESERVE, 2 );
+			assertEquals( 14, k.max() );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MOUNTAIN_HEART, 3 );
+			assertEquals( 17, k.max() );
+			k.gain( 100 );
+			assertEquals( "mountain heart: auras 15% stronger at five ki", 1.15f, xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.boost( h ), 0.001f );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_RESERVE ); slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MOUNTAIN_HEART );
+			//opening palm: the first fist on each enemy
+			k.spend( 100 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_OPENING_PALM, 2 );
+			assertEquals( "the first fist on a fresh enemy: +50%", 150, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			k.spend( 100 );
+			assertEquals( "the second on the same one: nothing extra", 100, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			k.spend( 100 );
+			assertEquals( "a different enemy is fresh", 150, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r2, 100 ) );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_OPENING_PALM );
+			//diamond fists and storm surge
+			k.spend( 100 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_DIAMOND_FISTS, 3 );
+			assertEquals( "diamond fists: +24%", 124, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_DIAMOND_FISTS );
+			k.spend( 100 ); k.gain( 10 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STORM_SURGE, 3 );
+			assertEquals( "ten ki (+30%) and storm surge (+30%)", 160, xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 ) );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STORM_SURGE );
+			//the storm of palms: every fifth fist
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STORM_OF_PALMS, 2 );
+			r2.pos = h.pos + 1;
+			int beside = r2.HP, last = 0;
+			k.spend( 100 );
+			for (int i = 1; i <= 5; i++) {
+				k.spend( 100 );
+				last = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 );
+				if (i < 5) assertEquals( "no storm before the fifth fist", beside, r2.HP );
+			}
+			assertEquals( "the fifth fist: half its damage to the enemy beside", Math.round( last * 0.25f * 2 ), beside - r2.HP );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STORM_OF_PALMS );
+			//flurry: sometimes a second fist for half
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_FLURRY, 3 );
+			int flurries = 0;
+			for (int i = 0; i < 400; i++) {
+				k.spend( 100 );
+				int before = r.HP;
+				int dmg = xyz.gabriwar.warpedpixeldungeon.items.GearSets.outgoing( h, r, 100 );
+				if (before - r.HP > 0) { flurries++; assertEquals( "half of the fist", Math.round( dmg * 0.5f ), before - r.HP ); }
+			}
+			assertTrue( "flurry at 30%: " + flurries + "/400", flurries > 80 && flurries < 170 );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_FLURRY );
+			//pain focus and counter palm
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_PAIN_FOCUS, 2 );
+			int fed = 0;
+			for (int i = 0; i < 400; i++) { k.spend( 100 ); xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 10, null ); if (k.stacks() > 0) fed++; }
+			assertTrue( "pain focus at 60%: " + fed + "/400", fed > 190 && fed < 290 );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_PAIN_FOCUS );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_COUNTER_PALM, 2 );
+			r.pos = h.pos + 1;
+			int counters = 0;
+			for (int i = 0; i < 400; i++) {
+				k.spend( 100 );
+				int before = r.HP;
+				xyz.gabriwar.warpedpixeldungeon.items.GearSets.incoming( h, 10, r );
+				if (before - r.HP > 0) { counters++; assertTrue( "half a punch: " + (before - r.HP), before - r.HP >= 4 && before - r.HP <= 9 ); }
+			}
+			assertTrue( "counter palm at 30%: " + counters + "/400", counters > 80 && counters < 170 );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_COUNTER_PALM );
+			//relentless and stone breath: a kill
+			k.spend( 100 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_RELENTLESS, 2 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STONE_BREATH, 2 );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.onKill( new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat() );
+			assertEquals( "relentless: 4 ki", 4, k.stacks() );
+			assertTrue( "stone breath: a barrier of 4 plus " + h.shielding(), h.shielding() >= 4 );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_RELENTLESS ); slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_STONE_BREATH );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			//focused meal
+			k.spend( 100 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MEAL, 2 );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.onFood( h );
+			assertEquals( "a meal: 5 ki", 5, k.stacks() );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MEAL );
+			//Ki Bolt and its talents
+			k.spend( 100 );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt bolt = (xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt) monkSkill( sk, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.class );
+			bolt.level = 1;
+			assertEquals( "a tier one skill: one point a level", 1, bolt.upgradeCost() );
+			assertEquals( 14, bolt.getManaCost() );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_DEEP_WELL, 2 );
+			assertEquals( "deep well: 4 less", 10, bolt.getManaCost() );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_DEEP_WELL );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_MASTERY, 3 );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MASTERS_ECHO, 3 );
+			assertEquals( "mastery (+45%) and echo (+30%)", 1.2f * 1.45f * 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.power( h, 1 ), 0.001f );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_MASTERY ); slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MASTERS_ECHO );
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_ECHO, 2 );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat weak = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			weak.HT = weak.HP = 1;
+			weak.pos = h.pos + 2;
+			level.mobs.add( weak );
+			h.MP = 10;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.KiBolt.land( h, 1, weak );
+			assertEquals( "a bolt that kills gives back 6 mana", 16, h.MP );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_ECHO );
+			//enduring ki: it fades later (the hold is read each turn)
+			slot.put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_ENDURING, 3 );
+			assertEquals( 3, xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_ENDURING ) );
+			slot.remove( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_ENDURING );
+		} finally {
+			h.heroClass = keepClass; h.heroSkills = keepSkills; h.belongings.weapon = kw;
+			h.lvl = keepLvl; h.HP = keepHP; h.HT = keepHT; h.pos = keepPos; h.MP = keepMP; h.MT = keepMT;
+			h.talents.clear();
+			h.talents.addAll( keepTalents );
+			Buff_detach( h );
+			xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Barrier.class );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.reset();
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}

@@ -2291,4 +2291,10 @@ public class ItemSpriteSheet {
     assignItemRect(BANDOLIER_OF_PLENTY, 15, 15);
     assignItemRect(AEGIS_OF_ARRIVAL, 15, 15);
   }
+
+  private static final int OW_MONK      =                            xy(1, 78);   //16 slots: the Monk (drawn by script)
+  public static final int MONK_ROBE           = OW_MONK+0;
+  static {
+    assignItemRect(MONK_ROBE, 15, 15);
+  }
 }

@@ -153,7 +153,7 @@ abstract public class ClassArmor extends Armor {
 				classArmor = new GunslingerArmor();
 				break;
 			case MONK:
-				classArmor = new WarriorArmor();
+				classArmor = new MonkArmor();
 				break;
 		}
 		

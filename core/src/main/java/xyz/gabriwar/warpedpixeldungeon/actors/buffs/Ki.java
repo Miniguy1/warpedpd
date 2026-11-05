@@ -54,7 +54,8 @@ public class Ki extends Buff {
 	/** the most ki the hero can hold */
 	public int max() {
 		Hero h = target instanceof Hero ? (Hero) target : null;
-		return 10 + 2 * Monk.lvl( h, KiFlowing.class ) + 3 * Monk.lvl( h, KiMastery.class );
+		return 10 + 2 * Monk.lvl( h, KiFlowing.class ) + 3 * Monk.lvl( h, KiMastery.class )
+				+ 2 * Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_RESERVE ) + Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MOUNTAIN_HEART );
 	}
 
 	/** how many steps with an enemy in view feed one stack: 4, then 3, 2 and every step with Flowing Water */
@@ -87,7 +88,7 @@ public class Ki extends Buff {
 				}
 			}
 			//ki fades when nothing feeds it
-			int hold = 10 + 5 * Monk.lvl( h, KiMastery.class );
+			int hold = 10 + 5 * Monk.lvl( h, KiMastery.class ) + 3 * Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_ENDURING );
 			if (++idle > hold) {
 				idle = hold - 4;
 				if (stacks > 0) spend( 1 );

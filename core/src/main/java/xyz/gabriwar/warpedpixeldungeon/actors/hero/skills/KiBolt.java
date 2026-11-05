@@ -50,7 +50,7 @@ public class KiBolt extends Skill {
 		castText = "Ki bolt!";
 		image = 44;
 		mana = 14;
-		tier = 2;
+		tier = 1;
 		tag = "A4";
 	}
 
@@ -68,7 +68,7 @@ public class KiBolt extends Skill {
 	/** 14, 12, 10: a third to a half of the thirty-point pool */
 	@Override
 	public int getManaCost(){
-		return 14 - 2 * Math.max( 0, level - 1 );
+		return Math.max( 4, 14 - 2 * Math.max( 0, level - 1 ) - 2 * Monk.tal( Dungeon.hero, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_DEEP_WELL ) );
 	}
 
 	/** how far the bolt reaches: 6, 7, 8 */
@@ -78,7 +78,9 @@ public class KiBolt extends Skill {
 
 	/** the bolt's strength over a punch: 12% for each ki, 20% for each level, and the aura boost */
 	public static float power( Hero h, int level ){
-		return (1f + 0.12f * Monk.stacks( h )) * (1f + 0.20f * level) * Monk.boost( h );
+		return (1f + 0.12f * Monk.stacks( h )) * (1f + 0.20f * level) * Monk.boost( h )
+				* (1f + 0.15f * Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_MASTERY ))
+				* (1f + 0.10f * Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_MASTERS_ECHO ));
 	}
 
 	public static int damage( Hero h, int level ){
@@ -90,6 +92,8 @@ public class KiBolt extends Skill {
 		if (h == null || target == null || !target.isAlive()) return 0;
 		int dmg = damage( h, level );
 		target.damage( dmg, h );
+		//a bolt that kills gives some mana back
+		if (!target.isAlive()) h.MP = Math.min( h.MT, h.MP + 3 * Monk.tal( h, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_ECHO ) );
 		if (level >= MAX_LEVEL && Dungeon.level != null) {
 			int splash = Math.max( 1, Math.round( dmg * 0.5f ) );
 			for (Mob m : Dungeon.level.mobs.toArray( new Mob[0] )) {
@@ -110,7 +114,7 @@ public class KiBolt extends Skill {
 		if (!AC_CAST.equals( action ) || level <= 0 || hero.MP < getManaCost()) return;
 		if (confirmTarget( hero )) return;
 		GunSkills.pickEnemy( this, Messages.get( this, "prompt" ), e -> {
-			if (Dungeon.level.distance( hero.pos, e.pos ) > range( level )) {
+			if (Dungeon.level.distance( hero.pos, e.pos ) > range( level ) + Monk.tal( hero, xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.KI_BOLT_MASTERY )) {
 				GLog.w( Messages.get( KiBolt.this, "too_far" ) );
 				return;
 			}

@@ -225,6 +225,13 @@ public enum Talent {
 	THICK_SMOKE(148, 4), DECOY_SWARM(149, 4), GHOST_STEP(150, 4),
 	STEADY_STREAM(151, 4), HOT_BARRELS(152, 4), COVERING_FIRE(153, 4),
 
+	//the Monk
+	KI_MEAL(2, 2), KI_OPENING_PALM(6, 2), KI_THICK_SKIN(7, 2), KI_RESERVE(8, 2),
+	KI_PAIN_FOCUS(9, 2), KI_COUNTER_PALM(11, 2), KI_DEEP_WELL(12, 2), KI_RELENTLESS(13, 2),
+	KI_BOLT_ECHO(14, 2), KI_STORM_OF_PALMS(15, 3), KI_BOLT_MASTERY(16, 3), KI_MOUNTAIN_HEART(17, 3),
+	KI_DIAMOND_FISTS(19, 3), KI_ENDURING(20, 3), KI_MASTERS_ECHO(21, 3), KI_UNSHAKABLE(22, 3),
+	KI_STONE_BREATH(23, 3), KI_STORM_SURGE(24, 3), KI_FLURRY(25, 3),
+
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
 	//Ratmogrify T4
@@ -637,6 +644,7 @@ public enum Talent {
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
 		xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.onFood( hero );   //Ammo Belt
+		xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.onFood( hero );   //Focused Meal
 		if (hero.hasTalent(HEARTY_MEAL)){
 			//15/20/25% of max HP healed (at least 4/6/8), when hero is below 33% health
 			if (hero.HP/(float)hero.HT < 0.334f) {
@@ -1069,6 +1077,9 @@ public enum Talent {
 
 		//tier 1
 		switch (cls){
+			case MONK:
+				Collections.addAll(tierTalents, KI_MEAL, KI_OPENING_PALM, KI_THICK_SKIN, KI_RESERVE);
+				break;
 			case WARRIOR: default:
 				Collections.addAll(tierTalents, HEARTY_MEAL, VETERANS_INTUITION, PROVOKED_ANGER, IRON_WILL);
 				break;
@@ -1101,6 +1112,9 @@ public enum Talent {
 
 		//tier 2
 		switch (cls){
+			case MONK:
+				Collections.addAll(tierTalents, KI_PAIN_FOCUS, KI_COUNTER_PALM, KI_DEEP_WELL, KI_RELENTLESS, KI_BOLT_ECHO);
+				break;
 			case WARRIOR: default:
 				Collections.addAll(tierTalents, IRON_STOMACH, LIQUID_WILLPOWER, RUNIC_TRANSFERENCE, LETHAL_MOMENTUM, IMPROVISED_PROJECTILES);
 				break;
@@ -1133,6 +1147,9 @@ public enum Talent {
 
 		//tier 3
 		switch (cls){
+			case MONK:
+				Collections.addAll(tierTalents, KI_STORM_OF_PALMS, KI_BOLT_MASTERY);
+				break;
 			case WARRIOR: default:
 				Collections.addAll(tierTalents, HOLD_FAST, STRONGMAN);
 				break;
@@ -1168,6 +1185,9 @@ public enum Talent {
 
 		//tiers 5 and 6: the level 40 and level 60 talents, the same for every calling of a class
 		switch (cls){
+			case MONK:
+				Collections.addAll(tierTalents, KI_MOUNTAIN_HEART, KI_DIAMOND_FISTS, KI_ENDURING, KI_MASTERS_ECHO);
+				break;
 			case WARRIOR: default:
 				Collections.addAll(tierTalents, IRONCLAD, BLOODIED_RESOLVE, WARLORDS_FURY, UNBROKEN);
 				break;
@@ -1211,6 +1231,12 @@ public enum Talent {
 
 		//tier 3
 		switch (cls){
+			case IRON_BODY:
+				Collections.addAll(tierTalents, KI_UNSHAKABLE, KI_STONE_BREATH);
+				break;
+			case STORM_FIST:
+				Collections.addAll(tierTalents, KI_STORM_SURGE, KI_FLURRY);
+				break;
 			case BERSERKER: default:
 				Collections.addAll(tierTalents, ENDLESS_RAGE, DEATHLESS_FURY, ENRAGED_CATALYST);
 				break;

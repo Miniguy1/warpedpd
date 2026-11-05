@@ -432,7 +432,7 @@ public class GearSets {
 			}
 		}
 		in = xyz.gabriwar.warpedpixeldungeon.items.legendary.Legendary.incoming( h, in, src );   //the legendaries
-    in = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.incoming( h, in );   //the monk's ki
+    in = xyz.gabriwar.warpedpixeldungeon.actors.hero.Monk.incoming( h, in, src );   //the monk's ki
     return in;
 	}
 
