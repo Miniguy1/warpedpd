@@ -2367,16 +2367,23 @@ public class ModContentTest {
 			assertEquals( "a long barrel reloads 20% slower", 1.2f, r.reloadTime( h ), 0.001f );
 			sk.passiveBSkills.get( 5 ).level = 0;
 
-			//Dead Calm: only the first shot after a full reload
+			//Dead Calm: the first shot you land on each enemy, reload or no reload
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill calm = sk.passiveASkills.get( 3 );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DeadCalm.reset();
 			calm.level = 3;
-			r.quickReload();
-			assertTrue( r.round() >= r.maxRound() );
-			assertEquals( 1.9f, calm.rangedDamageModifier(), 0.001f );
-			assertTrue( calm.sureHit( null ) );
-			r.useRound();
-			assertEquals( 1f, calm.rangedDamageModifier(), 0.001f );
-			assertFalse( calm.sureHit( null ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat t1 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), t2 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat(), t3 = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			r.useRound();   //not a fresh magazine: it never mattered
+			assertTrue( "a fresh enemy cannot be missed", calm.sureHit( t1 ) );
+			assertEquals( "+90% on the first shot", 190, calm.onHitProc( t1, 100, true ) );
+			assertFalse( "no longer fresh", calm.sureHit( t1 ) );
+			assertEquals( "only the first", 100, calm.onHitProc( t1, 100, true ) );
+			assertTrue( "the next enemy is fresh", calm.sureHit( t2 ) );
+			assertEquals( "a blow is not a shot", 100, calm.onHitProc( t3, 100, false ) );
+			assertTrue( "and does not spend it", calm.sureHit( t3 ) );
+			calm.level = 1;
+			assertFalse( "no sure hit before the top level", calm.sureHit( t3 ) );
+			assertEquals( "+30% at level 1", 130, calm.onHitProc( t3, 100, true ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.DeadCalm.reset();
 
 			//Last Round: only when one round is left
 			xyz.gabriwar.warpedpixeldungeon.actors.hero.skills.Skill last = sk.fourthSkills.get( 4 );
@@ -2491,6 +2498,10 @@ public class ModContentTest {
 			h.HP = 40;
 			h.talents.get( 5 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.DESPERADO, 3 );
 			assertEquals( "desperado below half health", 1.3f * 1.45f * 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.HP = 51;
+			assertEquals( "desperado above half health", 1.3f * 1.45f * 1.36f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
+			h.HP = 50;
+			assertEquals( "and at exactly half it is the hurt bonus", 1.3f * 1.45f * 1.3f, xyz.gabriwar.warpedpixeldungeon.actors.hero.GunTalents.damageMod( true ), 0.001f );
 			h.HP = 100;
 
 			h.talents.get( 2 ).put( xyz.gabriwar.warpedpixeldungeon.actors.hero.Talent.CALLED_SHOTS, 3 );

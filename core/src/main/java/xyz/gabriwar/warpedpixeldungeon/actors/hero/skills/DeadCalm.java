@@ -55,14 +55,35 @@ public class DeadCalm extends Skill {
 	protected boolean upgrade(){ return true; }
 
 
-	//the first shot after a full reload: +30/60/90% damage, and at level 3 it cannot miss
-	@Override
-	public float rangedDamageModifier(){
-		return level > 0 && GunSkills.full( GunSkills.gun() ) ? 1f + 0.30f * level : 1f;
+	//the first shot you land on each enemy: +30/60/90% damage, and at level 3 that shot cannot miss. Reloading is beside the point.
+	private static final java.util.HashSet<Integer> opened = new java.util.HashSet<>();
+	private static int openedDepth = -1;
+
+	public static void reset(){
+		opened.clear();
+		openedDepth = -1;
+	}
+
+	/** has this enemy not been shot by you yet on this floor? */
+	private static boolean fresh( Char target ){
+		if (target == null) return false;
+		if (openedDepth != Dungeon.depth){
+			opened.clear();
+			openedDepth = Dungeon.depth;
+		}
+		return !opened.contains( target.id() );
 	}
 
 	@Override
 	public boolean sureHit( Char target ){
-		return level >= MAX_LEVEL && GunSkills.full( GunSkills.gun() );
+		return level >= MAX_LEVEL && GunSkills.gun() != null && fresh( target );
+	}
+
+	@Override
+	public int onHitProc( Char enemy, int damage, boolean ranged ){
+		if (level <= 0 || !ranged || GunSkills.gun() == null || !fresh( enemy )) return damage;
+		opened.add( enemy.id() );
+		GunSkills.callOut( "Dead calm!" );
+		return Math.round( damage * (1f + 0.30f * level) );
 	}
 }

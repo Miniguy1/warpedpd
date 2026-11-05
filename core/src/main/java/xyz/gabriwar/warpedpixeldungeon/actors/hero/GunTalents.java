@@ -63,7 +63,8 @@ public final class GunTalents {
 		if (!ranged || g == null) return 1f;
 		Hero h = Dungeon.hero;
 		float m = 1f + 0.10f * pts( Talent.LEGEND_OF_THE_WEST );
-		if (h.HP * 2 <= h.HT) m *= 1f + 0.10f * pts( Talent.DESPERADO );
+		//desperado: cocksure while above half health (12% a point), and still a little stronger than nothing when hurt (10% a point)
+		m *= 1f + (h.HP * 2 > h.HT ? 0.12f : 0.10f) * pts( Talent.DESPERADO );
 		if (g.round() * 2 > g.maxRound()) m *= 1f + 0.08f * pts( Talent.COOL_BARREL );
 		if (g.round() == 1) m *= 1f + 0.15f * pts( Talent.OVERCHARGE_ROUNDS );
 		return m;
