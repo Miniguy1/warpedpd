@@ -3484,7 +3484,10 @@ public class Hero extends Char {
 		sightedEnemies = sighted;
 		if (this != Dungeon.hero || heroSkills == null) return;
 		for (Mob m : sighted) {
-			if (!before.contains( m )) heroSkills.onEnemySpotted( m );
+			if (!before.contains( m )) {
+				heroSkills.onEnemySpotted( m );
+				StealthReadout.onSpotted( this, m );   //what hides the hero from a sleeper
+			}
 		}
 	}
 

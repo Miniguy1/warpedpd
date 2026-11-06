@@ -5200,6 +5200,55 @@ public class ModContentTest {
 		}
 	}
 
+	@Test
+	public void theHeroCanSeeWhatHidesThemFromSleepers() {
+		int keepCycle = Cycle.number, bk = Dungeon.branch, dk = Dungeon.depth;
+		Level lvKeep = Dungeon.level;
+		Hero h = Dungeon.hero;
+		int keepPos = h.pos;
+		try {
+			Cycle.number = 0; Dungeon.branch = 0; Dungeon.depth = 3;
+			Dungeon.generatedLevels.clear();
+			Level level = Dungeon.newLevel();
+			Dungeon.level = level;
+			h.pos = openCell( level );
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.reset();
+			//night and a new moon: the readout names both, and adds up to the hero's real stealth
+			xyz.gabriwar.warpedpixeldungeon.actors.DayNightCycle.debugPhaseOverride = xyz.gabriwar.warpedpixeldungeon.actors.DayNightCycle.Phase.NIGHT;
+			xyz.gabriwar.warpedpixeldungeon.actors.GameCalendar.debugMoonOverride = xyz.gabriwar.warpedpixeldungeon.actors.GameCalendar.MoonPhase.NEW_MOON;
+			String b = xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.breakdown( h );
+			assertTrue( b, b.contains( "night +2" ) && b.contains( "new moon +1" ) );
+			assertFalse( "the parts account for all of it: " + b, b.contains( "other" ) );
+			xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat rat = new xyz.gabriwar.warpedpixeldungeon.actors.mobs.Rat();
+			rat.pos = h.pos + 3;
+			int total = Math.round( h.stealth() );
+			assertTrue( "night and a new moon give at least +3: " + total, total >= 3 );
+			String msg = xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.describe( h, rat );
+			assertTrue( msg, msg.contains( "Your stealth is +" + total ) && msg.contains( "at distance 3" ) && msg.contains( "1 turn in " + (3 + total) ) );
+			assertTrue( msg, msg.contains( "sleeping" ) );
+			//by day with a full moon: neither is named, and the numbers still add up
+			xyz.gabriwar.warpedpixeldungeon.actors.DayNightCycle.debugPhaseOverride = xyz.gabriwar.warpedpixeldungeon.actors.DayNightCycle.Phase.DAY;
+			xyz.gabriwar.warpedpixeldungeon.actors.GameCalendar.debugMoonOverride = xyz.gabriwar.warpedpixeldungeon.actors.GameCalendar.MoonPhase.FULL_MOON;
+			String day = xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.breakdown( h );
+			assertFalse( day, day.contains( "night" ) || day.contains( "new moon" ) || day.contains( "other" ) );
+			//it speaks on a new floor, and again only when the stealth changes (and not too often)
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.reset();
+			assertTrue( "the first sleeper on a floor", xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.shouldSay( 3, 5, 100 ) );
+			assertFalse( "the same again", xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.shouldSay( 3, 5, 101 ) );
+			assertFalse( "changed, but only ten turns on", xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.shouldSay( 3, 6, 110 ) );
+			assertTrue( "changed, and thirty turns on", xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.shouldSay( 3, 6, 140 ) );
+			assertTrue( "a new floor", xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.shouldSay( 4, 6, 141 ) );
+		} finally {
+			xyz.gabriwar.warpedpixeldungeon.actors.DayNightCycle.debugPhaseOverride = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.GameCalendar.debugMoonOverride = null;
+			xyz.gabriwar.warpedpixeldungeon.actors.hero.StealthReadout.reset();
+			h.pos = keepPos;
+			Cycle.number = keepCycle; Dungeon.branch = bk; Dungeon.depth = dk;
+			Dungeon.level = lvKeep;
+			Dungeon.generatedLevels.clear();
+		}
+	}
+
 	private static void Buff_detach( Hero h ) {
 		xyz.gabriwar.warpedpixeldungeon.actors.buffs.Buff.detach( h, xyz.gabriwar.warpedpixeldungeon.actors.buffs.Ki.class );
 	}
